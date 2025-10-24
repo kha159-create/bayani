@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getDataFromFirebase } from '../../services/firebaseService';
+import { firebaseService } from '../../services/firebaseService';
 
 interface BackupSelectorProps {
     isOpen: boolean;
@@ -29,19 +29,16 @@ const BackupSelector: React.FC<BackupSelectorProps> = ({ isOpen, onClose, onSele
     }, [isOpen]);
 
     const loadBackups = async () => {
-        if (!currentUser) return;
-        
         setLoading(true);
         try {
             // جلب قائمة النسخ الاحتياطية من Firebase
-            const backupsData = await getDataFromFirebase(currentUser.uid, 'backups');
-            
-            if (backupsData && Array.isArray(backupsData)) {
-                const formattedBackups = backupsData.map((backup: any, index: number) => {
+            const res = await firebaseService.listBackups();
+            if (res.success && Array.isArray(res.data)) {
+                const formattedBackups = res.data.map((backup: any, index: number) => {
                     const date = new Date(backup.timestamp || backup.date || Date.now());
                     return {
                         id: backup.id || `backup-${index}`,
-                        timestamp: backup.timestamp || backup.date || Date.now().toString(),
+                        timestamp: backup.backupTimestamp || backup.timestamp || backup.date || Date.now().toString(),
                         date: date.toLocaleDateString('ar-SA', {
                             year: 'numeric',
                             month: 'long',
@@ -55,7 +52,7 @@ const BackupSelector: React.FC<BackupSelectorProps> = ({ isOpen, onClose, onSele
                         description: backup.description || `نسخة احتياطية ${index + 1}`
                     };
                 }).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-                
+
                 setBackups(formattedBackups);
             }
         } catch (error) {
@@ -75,11 +72,13 @@ const BackupSelector: React.FC<BackupSelectorProps> = ({ isOpen, onClose, onSele
 
     const handleSelectBackup = async () => {
         if (!selectedBackup) return;
-        
+
         try {
-            const backupData = await getDataFromFirebase(currentUser.uid, `backups/${selectedBackup}`);
-            onSelectBackup(backupData);
-            onClose();
+            const res = await firebaseService.getBackupById(selectedBackup);
+            if (res.success) {
+                onSelectBackup(res.data);
+                onClose();
+            }
         } catch (error) {
             console.error('خطأ في جلب النسخة الاحتياطية:', error);
         }

@@ -18,8 +18,10 @@ export default defineConfig(({ mode }) => {
         geminiApiKey: env.VITE_GEMINI_API_KEY ? '✅ موجود' : '❌ مفقود'
     });
     
+    const repoBase = env.VITE_BASE_PATH || env.BASE_PATH || '/bayani/';
+
     return {
-        base: '/fd/', // المسار الأساسي لمشروعك على GitHub Pages
+        base: repoBase, // المسار الأساسي لمشروعك على GitHub Pages
         
         plugins: [
             react(),
@@ -50,8 +52,8 @@ export default defineConfig(({ mode }) => {
                     name: 'MASROF - لوحة التحكم المالية',
                     short_name: 'MASROF',
                     description: 'تطبيق إدارة المالية الشخصية مع الذكاء الاصطناعي',
-                    start_url: '/fd/',
-                    scope: '/fd/',
+                    start_url: repoBase,
+                    scope: repoBase,
                     theme_color: '#3b82f6',
                     background_color: '#ffffff',
                     display: 'standalone',

@@ -2,15 +2,16 @@
 import localforage from 'localforage';
 import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { config } from '../../config';
 
-// إعداد Firebase
+// إعداد Firebase عبر متغيرات البيئة
 const firebaseConfig = {
-  apiKey: "AIzaSyC7QzF9xZzJ8K9L0M1N2O3P4Q5R6S7T8U9V",
-  authDomain: "financial-dashboard-fd.firebaseapp.com",
-  projectId: "financial-dashboard-fd",
-  storageBucket: "financial-dashboard-fd.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abcdef1234567890abcdef"
+  apiKey: config.firebase.apiKey,
+  authDomain: config.firebase.authDomain,
+  projectId: config.firebase.projectId,
+  storageBucket: config.firebase.storageBucket,
+  messagingSenderId: config.firebase.messagingSenderId,
+  appId: config.firebase.appId,
 };
 
 // تهيئة Firebase مع فحص التطبيقات الموجودة
