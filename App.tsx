@@ -1128,7 +1128,7 @@ const App: React.FC = () => {
                 <div className="w-full max-w-md px-4">
                     <div className="text-center mb-8">
                         <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl mx-auto mb-4">
-                            <img src="/fd/logo.jpg" alt="Bayani Logo" className="w-full h-full object-cover" />
+                            <img src="/bayani/logo.jpg" alt="Bayani Logo" className="w-full h-full object-cover" />
                         </div>
                         <h1 className="text-2xl font-bold text-white">بياني</h1>
                         <p className="text-blue-200 mt-2">كل شيء عن مالي… في بياني</p>

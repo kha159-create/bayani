@@ -180,7 +180,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
             {/* بطاقة "حول التطبيق" */}
             <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl text-center">
                 <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl mx-auto mb-4">
-                    <img src="/fd/logo.jpg" alt="Bayani Logo" className="w-full h-full object-cover" />
+                    <img src="/bayani/logo.jpg" alt="Bayani Logo" className="w-full h-full object-cover" />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2">بياني</h3>
                 <p className="text-blue-200 mb-4">Developed by K.A Team</p>

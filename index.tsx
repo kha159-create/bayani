@@ -16,8 +16,9 @@ root.render(
 // تسجيل Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
+    const basePath = import.meta.env.VITE_BASE_PATH || '/bayani/';
     navigator.serviceWorker
-      .register('./fd/sw.js')
+      .register(`${basePath.replace(/\/$/, '')}/sw.js`)
       .then(reg => {
         console.log('✅ Service Worker registered successfully:', reg);
         

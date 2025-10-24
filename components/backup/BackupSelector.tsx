@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getDataFromFirebase } from '../../services/firebaseService';
+import { firebaseService } from '../../services/firebaseService';
 
 interface BackupSelectorProps {
     isOpen: boolean;
@@ -30,33 +30,37 @@ const BackupSelector: React.FC<BackupSelectorProps> = ({ isOpen, onClose, onSele
 
     const loadBackups = async () => {
         if (!currentUser) return;
-        
+
         setLoading(true);
         try {
-            // جلب قائمة النسخ الاحتياطية من Firebase
-            const backupsData = await getDataFromFirebase(currentUser.uid, 'backups');
-            
-            if (backupsData && Array.isArray(backupsData)) {
-                const formattedBackups = backupsData.map((backup: any, index: number) => {
-                    const date = new Date(backup.timestamp || backup.date || Date.now());
-                    return {
-                        id: backup.id || `backup-${index}`,
-                        timestamp: backup.timestamp || backup.date || Date.now().toString(),
-                        date: date.toLocaleDateString('ar-SA', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                        }),
-                        time: date.toLocaleTimeString('ar-SA', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        }),
-                        size: formatBackupSize(backup.size || 0),
-                        description: backup.description || `نسخة احتياطية ${index + 1}`
-                    };
-                }).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-                
+            const result = await firebaseService.getAllDocuments('backups');
+
+            if (result.success && Array.isArray(result.data)) {
+                const formattedBackups = result.data
+                    .map((backup: any, index: number) => {
+                        const timestamp = backup.timestamp || backup.date || Date.now();
+                        const date = new Date(timestamp);
+                        return {
+                            id: backup.id || `backup-${index}`,
+                            timestamp: String(timestamp),
+                            date: date.toLocaleDateString('ar-SA', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            }),
+                            time: date.toLocaleTimeString('ar-SA', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            }),
+                            size: formatBackupSize(backup.size || 0),
+                            description: backup.description || `نسخة احتياطية ${index + 1}`
+                        };
+                    })
+                    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
                 setBackups(formattedBackups);
+            } else {
+                setBackups([]);
             }
         } catch (error) {
             console.error('خطأ في جلب النسخ الاحتياطية:', error);
@@ -75,11 +79,15 @@ const BackupSelector: React.FC<BackupSelectorProps> = ({ isOpen, onClose, onSele
 
     const handleSelectBackup = async () => {
         if (!selectedBackup) return;
-        
+
         try {
-            const backupData = await getDataFromFirebase(currentUser.uid, `backups/${selectedBackup}`);
-            onSelectBackup(backupData);
-            onClose();
+            const result = await firebaseService.getData('backups', selectedBackup);
+            if (result.success) {
+                onSelectBackup(result.data);
+                onClose();
+            } else {
+                console.error('خطأ في جلب النسخة الاحتياطية:', result.error);
+            }
         } catch (error) {
             console.error('خطأ في جلب النسخة الاحتياطية:', error);
         }

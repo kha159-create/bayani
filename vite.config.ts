@@ -18,8 +18,9 @@ export default defineConfig(({ mode }) => {
         geminiApiKey: env.VITE_GEMINI_API_KEY ? '✅ موجود' : '❌ مفقود'
     });
     
+    const basePath = env.VITE_BASE_PATH || '/bayani/';
     return {
-        base: '/fd/', // المسار الأساسي لمشروعك على GitHub Pages
+        base: basePath, // المسار الأساسي لمشروعك على GitHub Pages
         
         plugins: [
             react(),
@@ -50,8 +51,8 @@ export default defineConfig(({ mode }) => {
                     name: 'MASROF - لوحة التحكم المالية',
                     short_name: 'MASROF',
                     description: 'تطبيق إدارة المالية الشخصية مع الذكاء الاصطناعي',
-                    start_url: '/fd/',
-                    scope: '/fd/',
+                    start_url: basePath,
+                    scope: basePath,
                     theme_color: '#3b82f6',
                     background_color: '#ffffff',
                     display: 'standalone',
@@ -83,9 +84,7 @@ export default defineConfig(({ mode }) => {
         },
         
         define: {
-            // Gemini API Keys
-            'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-            'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+            // Gemini API Keys (use only VITE_ variables)
             'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY),
             
             // Firebase Configuration
