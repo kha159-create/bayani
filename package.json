@@ -1,0 +1,38 @@
+{
+  "name": "bayani-dashboard",
+  "version": "1.0.0",
+  "description": "Bayani - لوحة التحكم المالية مع الذكاء الاصطناعي",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@google/genai": "^1.25.0",
+    "@google/generative-ai": "^0.21.0",
+    "chart.js": "^4.4.0",
+    "firebase": "^10.14.1",
+    "localforage": "^1.10.0",
+    "react": "^18.2.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^5.0.8",
+    "vite-plugin-pwa": "^1.1.0"
+  },
+  "keywords": [
+    "financial",
+    "dashboard",
+    "react",
+    "pwa",
+    "ai",
+    "firebase"
+  ],
+  "author": "K.A Team",
+  "license": "MIT"
+}
