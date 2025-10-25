@@ -87,7 +87,7 @@ const Header: React.FC<HeaderProps> = ({
                 <div className="flex flex-col sm:flex-row justify-between items-center text-center sm:text-right gap-4">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg overflow-hidden shadow-lg">
-                            <img src="./logo.jpg" alt="Bayani Logo" className="w-full h-full object-cover" />
+                            <img src="/bayani/logo.jpg" alt="Bayani Logo" className="w-full h-full object-cover" />
                         </div>
                         <div>
                             <h1 className="text-xl font-bold text-white tracking-wide">بياني</h1>

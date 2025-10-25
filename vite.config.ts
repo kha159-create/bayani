@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
     });
     
     return {
-        base: './', // المسار النسبي للعمل محلياً ومع GitHub Pages
+        base: '/bayani/', // المسار الأساسي للعمل مع GitHub Pages
         
         plugins: [
             react(),
@@ -50,8 +50,8 @@ export default defineConfig(({ mode }) => {
                     name: 'MASROF - لوحة التحكم المالية',
                     short_name: 'MASROF',
                     description: 'تطبيق إدارة المالية الشخصية مع الذكاء الاصطناعي',
-                    start_url: repoBase,
-                    scope: repoBase,
+                    start_url: '/bayani/',
+                    scope: '/bayani/',
                     theme_color: '#3b82f6',
                     background_color: '#ffffff',
                     display: 'standalone',
