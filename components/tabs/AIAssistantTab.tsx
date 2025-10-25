@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FinancialCalculations, Transaction, AppState } from '../../types';
-import { analyzeCompleteFinancialData } from '../../services/geminiService';
+import { FinancialCalculations, Transaction, AppState, Message } from '../../types';
+import { analyzeCompleteFinancialData, smartSearchAssistant, analyzeFinancialPatterns } from '../../services/geminiService';
+import { detectUserLocation, LocationInfo } from '../../services/geolocationService';
+import { SendIcon } from '../common/Icons';
+import { t } from '../../translations';
 
 interface AIAssistantTabProps {
     calculations: FinancialCalculations;
@@ -11,175 +14,192 @@ interface AIAssistantTabProps {
     language?: 'ar' | 'en';
 }
 
-interface Message {
-    id: string;
-    text: string;
-    isUser: boolean;
-    timestamp: Date;
-}
+const TypingIndicator: React.FC = () => (
+  <div className="ai-bubble chat-bubble typing-indicator flex items-center space-x-1 p-3 self-start">
+    <span className="block w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
+    <span className="block w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
+    <span className="block w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span>
+  </div>
+);
 
-const AIAssistantTab: React.FC<AIAssistantTabProps> = ({ 
-    calculations, 
-    filteredTransactions, 
-    allTransactions, 
-    state, 
-    darkMode = false, 
-    language = 'ar' 
-}) => {
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            id: '1',
-            text: 'مرحباً! أنا المحلل الذكي لبياني. كيف يمكنني مساعدتك اليوم؟',
-            isUser: false,
-            timestamp: new Date()
-        }
-    ]);
-    const [inputText, setInputText] = useState('');
+const AIAssistantTab: React.FC<AIAssistantTabProps> = ({ calculations, filteredTransactions, allTransactions, state, darkMode = false, language = 'ar' }) => {
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [userInput, setUserInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
+    const [userLocation, setUserLocation] = useState<LocationInfo | null>(null);
+    const [locationDetected, setLocationDetected] = useState(false);
+    const chatBoxRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+        chatBoxRef.current?.scrollTo(0, chatBoxRef.current.scrollHeight);
+    }, [messages, isLoading]);
 
-    const handleSendMessage = async () => {
-        if (!inputText.trim() || isLoading) return;
+    // كشف الموقع الجغرافي عند تحميل المكون
+    useEffect(() => {
+        const detectLocation = async () => {
+            if (!locationDetected) {
+                console.log('🌍 بدء كشف الموقع الجغرافي...');
+                const locationResult = await detectUserLocation();
+                
+                if (locationResult.success && locationResult.location) {
+                    setUserLocation(locationResult.location);
+                    console.log('✅ تم كشف الموقع:', locationResult.location);
+                    
+                    // إرسال رسالة ترحيب مخصصة حسب الموقع
+                    const welcomeMessage = createLocationBasedWelcome(locationResult.location);
+                    setMessages([welcomeMessage]);
+                } else {
+                    console.log('⚠️ فشل في كشف الموقع، استخدام الافتراضي');
+                    // رسالة ترحيب افتراضية
+                    const defaultMessage = createLocationBasedWelcome();
+                    setMessages([defaultMessage]);
+                }
+                
+                setLocationDetected(true);
+            }
+        };
 
-        const userMessage: Message = {
-            id: Date.now().toString(),
-            text: inputText,
+        detectLocation();
+    }, [locationDetected]);
+
+    // إنشاء رسالة ترحيب مخصصة حسب الموقع
+    const createLocationBasedWelcome = (location?: LocationInfo): Message => {
+        const locationText = location ? 
+            `📍 **تم كشف موقعك:** ${location.city}, ${location.region}` :
+            '📍 **الموقع:** لم يتم كشف الموقع (استخدام الافتراضي)';
+        
+        const cityName = location?.city || 'الرياض';
+        const countryName = location?.country || 'السعودية';
+        
+        return {
+            id: '1',
+            text: `مرحباً! أنا مساعدك الذكي 🤖✨
+
+${locationText}
+
+🔍 **يمكنني مساعدتك في:**
+• تحليل بياناتك المالية عبر جميع الأشهر
+• البحث عن أفضل العروض والأسعار في ${cityName} و${countryName}
+• مقارنة الأسعار والمطاعم في منطقتك
+
+💬 **اسألني مثلاً:**
+• "كم صرفت هذا الشهر؟"
+• "أين أفضل عروض في ${cityName}؟"
+• "كم سعر الهاتف في سوق اليوم؟"
+• "أفضل مطاعم في منطقتي"
+
+ماذا تريد أن تعرف؟ 😊`,
+            isUser: false,
+            timestamp: new Date()
+        };
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const query = userInput.trim();
+        if (!query || isLoading) return;
+
+        const newUserMessage: Message = { 
+            id: Date.now().toString(), 
+            text: query, 
             isUser: true,
             timestamp: new Date()
         };
-
-        setMessages(prev => [...prev, userMessage]);
-        setInputText('');
+        setMessages(prev => [...prev, newUserMessage]);
+        setUserInput('');
         setIsLoading(true);
 
         try {
+            let aiResponseText = '';
+            
+            // تحديد نوع الاستعلام والاستجابة المناسبة بطريقة ذكية
+            const searchKeywords = ['أين', 'كم سعر', 'عروض', 'محل', 'مطعم', 'بنده', 'تميمي', 'كارفور', 'عروض', 'سعر', 'أفضل', 'تقييم', 'مطاعم', 'متاجر', 'عرض', 'أرخص', 'غالي', 'السوق', 'متجر', 'مطعم', 'مقهى', 'كوفي', 'برجر', 'بيتزا', 'شاورما', 'دجاج', 'لحم', 'سمك', 'أكل', 'طعام', 'شراب', 'مشروب', 'قهوة', 'شاي'];
+            const financialKeywords = ['مصروف', 'دخل', 'ديون', 'بطاقة', 'شهر', 'تحليل', 'نمط', 'إنفاق', 'رصيد', 'قرض', 'قسط', 'استثمار', 'مالي', 'حساب', 'صرفت', 'وصل', 'تحويل', 'دفع', 'قسط', 'باقي', 'متوسط', 'إجمالي', 'شهر', 'أسبوع', 'سنة', 'مقارنة', 'تغير', 'زيادة', 'نقص', 'أعلى', 'أقل'];
+            
+            const isSearchQuery = searchKeywords.some(keyword => query.toLowerCase().includes(keyword.toLowerCase()));
+            const isFinancialQuery = financialKeywords.some(keyword => query.toLowerCase().includes(keyword.toLowerCase()));
+            
+            if (isSearchQuery) {
+                // استخدام البحث الذكي للمنتجات والعروض مع الموقع الجغرافي
+                aiResponseText = await smartSearchAssistant(query, userLocation || undefined);
+            } else if (isFinancialQuery) {
+                // استخدام التحليل الشامل للبيانات المالية مع الموقع الجغرافي
                 const completeData = {
-                calculations,
-                transactions: allTransactions,
+                    currentPeriod: {
+                        calculations: calculations,
+                        transactions: filteredTransactions
+                    },
+                    allHistoricalData: {
+                        allTransactions: allTransactions,
                         categories: state.categories,
                         cards: state.cards,
                         bankAccounts: state.bankAccounts,
+                        loans: state.loans,
+                        installments: state.installments,
                         investments: state.investments
-            };
-
-            const response = await analyzeCompleteFinancialData(inputText, completeData);
+                    },
+                    state: state
+                };
+                aiResponseText = await analyzeCompleteFinancialData(query, completeData, userLocation || undefined);
+            } else {
+                // استخدام التحليل المتقدم للأنماط مع الموقع الجغرافي
+                aiResponseText = await analyzeFinancialPatterns(query, allTransactions, calculations, userLocation || undefined);
+            }
             
-            const aiMessage: Message = {
-                id: (Date.now() + 1).toString(),
-                text: response,
+            const newAiMessage: Message = { 
+                id: (Date.now() + 1).toString(), 
+                text: aiResponseText, 
                 isUser: false,
                 timestamp: new Date()
             };
-
-            setMessages(prev => [...prev, aiMessage]);
+            setMessages(prev => [...prev, newAiMessage]);
         } catch (error) {
-            const errorMessage: Message = {
-                id: (Date.now() + 1).toString(),
-                text: 'عذراً، حدث خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.',
+            const errorMessage: Message = { 
+                id: (Date.now() + 1).toString(), 
+                text: error instanceof Error ? error.message : 'عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.', 
                 isUser: false,
                 timestamp: new Date()
             };
-
             setMessages(prev => [...prev, errorMessage]);
         } finally {
             setIsLoading(false);
         }
     };
-
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleSendMessage();
-        }
-    };
     
     return (
-        <div className="h-screen flex flex-col bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
-            {/* العنوان */}
-            <div className="bg-gradient-to-r from-slate-800/50 to-blue-900/50 backdrop-blur-lg border-b border-blue-400/20 p-4">
-                <h2 className="text-2xl font-bold text-white text-center">المحلل الذكي — مدعوم بذكاء بياني</h2>
+        <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl shadow-xl overflow-hidden flex flex-col" style={{ height: '70vh' }}>
+            <div className="p-4 text-center flex-shrink-0">
+                <h3 className="text-xl font-bold text-white">🤖 المحلل الذكي</h3>
+                <p className="text-sm text-blue-200">تحليل بياناتك المالية + البحث عن أفضل العروض في السعودية</p>
             </div>
-
-            {/* منطقة المحادثة */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map((message) => (
-                    <div
-                        key={message.id}
-                        className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-                    >
-                        <div className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl ${
-                            message.isUser 
-                                ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white' 
-                                : 'bg-slate-700/50 text-blue-200 border border-blue-400/20'
-                        } rounded-2xl p-4 shadow-lg`}>
-                            {!message.isUser && (
-                                <div className="flex items-center gap-2 mb-2">
-                                    <div className="w-6 h-6 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center text-sm">
-                                        🤖
-                                    </div>
-                                    <span className="text-xs font-semibold">المحلل الذكي</span>
-                                </div>
-                            )}
-                            <p className="text-sm leading-relaxed">{message.text}</p>
-                            <div className="text-xs opacity-70 mt-2">
-                                {message.timestamp.toLocaleTimeString('ar-SA', { 
-                                    hour: '2-digit', 
-                                    minute: '2-digit' 
-                                })}
-                            </div>
-                        </div>
+            <div ref={chatBoxRef} className="p-4 flex-grow overflow-y-auto flex flex-col gap-4">
+                {messages.map(msg => (
+                    <div key={msg.id} className={`chat-bubble ${msg.isUser ? 'user-bubble' : 'ai-bubble'}`}>
+                       <p dangerouslySetInnerHTML={{ __html: msg.text.replace(/\n/g, '<br />') }} />
                     </div>
                 ))}
-                
-                {isLoading && (
-                    <div className="flex justify-start">
-                        <div className="bg-slate-700/50 text-blue-200 border border-blue-400/20 rounded-2xl p-4 shadow-lg">
-                            <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center text-sm">
-                                    🤖
-                                </div>
-                                <span className="text-xs font-semibold">المحلل الذكي</span>
-                            </div>
-                            <div className="flex items-center gap-1 mt-2">
-                                <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
-                                <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-                
-                <div ref={messagesEndRef} />
+                {isLoading && <TypingIndicator />}
             </div>
-
-            {/* شريط إدخال النص */}
-            <div className="bg-gradient-to-r from-slate-800/50 to-blue-900/50 backdrop-blur-lg border-t border-blue-400/20 p-4">
-                <div className="flex gap-3">
-                    <input
-                        type="text"
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        placeholder="اكتب سؤالك هنا..."
-                        className="flex-1 p-3 bg-slate-700/50 border border-blue-400/30 rounded-xl text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        disabled={isLoading}
+            <div className="p-4 border-t border-blue-400/20 flex-shrink-0">
+                <form onSubmit={handleSubmit} className="flex gap-2">
+                    <input 
+                        type="text" 
+                        value={userInput} 
+                        onChange={e => setUserInput(e.target.value)} 
+                        className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white placeholder-blue-300 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400" 
+                        placeholder="اكتب سؤالك هنا..." 
+                        required 
+                        autoComplete="off" 
+                        disabled={isLoading} 
                     />
-                    <button
-                        onClick={handleSendMessage}
-                        disabled={!inputText.trim() || isLoading}
-                        className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white p-3 rounded-xl hover:from-cyan-500 hover:to-blue-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                    <button 
+                        type="submit" 
+                        disabled={isLoading} 
+                        className="p-3 bg-gradient-to-r from-cyan-400 to-blue-500 text-white rounded-lg flex-shrink-0 disabled:opacity-50 hover:from-cyan-500 hover:to-blue-600 transition-all duration-300 shadow-lg"
                     >
-                        <span className="text-xl">✈️</span>
+                       <SendIcon />
                     </button>
-                </div>
+                </form>
             </div>
         </div>
     );

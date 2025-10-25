@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
-import { AppState, FinancialCalculations } from '../../types';
+import React, { useState, useRef, useEffect } from 'react';
+import { AppState, FinancialCalculations, Message, Transaction, TransactionType, BankAccountConfig } from '../../types';
+import { advancedInvestmentAdvice, analyzeMarketAndPortfolio } from '../../services/geminiService';
+import { detectUserLocation, LocationInfo } from '../../services/geolocationService';
+import { SendIcon } from '../common/Icons';
 import { formatCurrency } from '../../utils/formatting';
 import { t } from '../../translations';
 
@@ -12,12 +15,80 @@ interface InvestmentTabProps {
     language?: 'ar' | 'en';
 }
 
+const TypingIndicator: React.FC = () => (
+  <div className="ai-bubble chat-bubble typing-indicator flex items-center space-x-1 p-3 self-start">
+    <span className="block w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
+    <span className="block w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
+    <span className="block w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span>
+  </div>
+);
+
 const InvestmentTab: React.FC<InvestmentTabProps> = ({ state, setState, calculations, setModal, darkMode = false, language = 'ar' }) => {
     const [newInvestment, setNewInvestment] = useState({
         amount: '',
         type: '',
         account: ''
     });
+
+    // حالة المحادثة مع المستشار المالي
+    const [messages, setMessages] = useState<Message[]>([
+        { 
+            id: '1', 
+            text: `مرحباً! أنا مستشارك الاستثماري الذكي 🎯📈
+
+💼 **خبرتي تشمل:**
+• تحليل شامل لسوق تداول السعودي
+• استراتيجيات استثمارية متقدمة
+• إدارة المخاطر وتحسين المحافظ
+• توصيات أسهم محددة مع تحليل عميق
+
+📊 **يمكنني مساعدتك في:**
+• تحليل محفظتك الحالية وتحسينها
+• توصيات أسهم مع أهداف سعرية واضحة
+• قراءة السوق وتوقعات الاتجاهات
+• استراتيجيات دخول وخروج محددة
+
+💡 **اسألني مثلاً:**
+• "ما رأيك في أسهم أرامكو الآن؟"
+• "كيف أحسن محفظتي الاستثمارية؟"
+• "ما هي أفضل القطاعات للاستثمار؟"
+• "أريد تحليل شامل لسوق اليوم"
+
+أخبرني عن محفظتك وأهدافك الاستثمارية! 🚀`, 
+            isUser: false,
+            timestamp: new Date()
+        }
+    ]);
+    const [userInput, setUserInput] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [userLocation, setUserLocation] = useState<LocationInfo | null>(null);
+    const [locationDetected, setLocationDetected] = useState(false);
+    const chatBoxRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        chatBoxRef.current?.scrollTo(0, chatBoxRef.current.scrollHeight);
+    }, [messages, isLoading]);
+
+    // كشف الموقع الجغرافي عند تحميل المكون
+    useEffect(() => {
+        const detectLocation = async () => {
+            if (!locationDetected) {
+                console.log('🌍 بدء كشف الموقع الجغرافي...');
+                const locationResult = await detectUserLocation();
+                
+                if (locationResult.success && locationResult.location) {
+                    setUserLocation(locationResult.location);
+                    console.log('✅ تم كشف الموقع:', locationResult.location);
+                } else {
+                    console.log('⚠️ فشل في كشف الموقع، استخدام الافتراضي');
+                }
+                
+                setLocationDetected(true);
+            }
+        };
+
+        detectLocation();
+    }, [locationDetected]);
 
     const currentValue = state.investments?.currentValue || 0;
     const profitLoss = currentValue - 1000; // مثال: القيمة الأولية 1000
@@ -28,36 +99,105 @@ const InvestmentTab: React.FC<InvestmentTabProps> = ({ state, setState, calculat
             setModal({
                 title: 'خطأ',
                 body: '<p>يرجى ملء جميع الحقول المطلوبة.</p>',
-                hideCancel: true,
-                confirmText: 'موافق'
+                show: true,
+                onConfirm: () => setModal({ show: false })
             });
             return;
         }
-        
-        setModal({
-            title: 'تم إضافة الاستثمار',
-            body: '<p>تم إضافة الاستثمار بنجاح!</p>',
-            hideCancel: true,
-            confirmText: 'موافق'
-        });
+
+        const investment: Transaction = {
+            id: Date.now().toString(),
+            amount: parseFloat(newInvestment.amount),
+            date: new Date().toISOString().split('T')[0],
+            description: `استثمار ${newInvestment.type}`,
+            paymentMethod: newInvestment.account,
+            type: 'investment' as TransactionType,
+            categoryId: 'investment'
+        };
+
+        setState(prev => ({
+            ...prev,
+            transactions: [...prev.transactions, investment],
+            investments: {
+                ...prev.investments,
+                currentValue: prev.investments?.currentValue || 0 + parseFloat(newInvestment.amount)
+            }
+        }));
 
         setNewInvestment({ amount: '', type: '', account: '' });
+        setModal({
+            title: 'تم بنجاح',
+            body: '<p>تم إضافة الاستثمار بنجاح!</p>',
+            show: true,
+            onConfirm: () => setModal({ show: false })
+        });
     };
+
+    const handleInvestmentSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const query = userInput.trim();
+        if (!query || isLoading) return;
+
+        const newUserMessage: Message = { 
+            id: Date.now().toString(), 
+            text: query, 
+            isUser: true,
+            timestamp: new Date()
+        };
+        setMessages(prev => [...prev, newUserMessage]);
+        setUserInput('');
+        setIsLoading(true);
+
+        try {
+            // استخدام المستشار المالي المتقدم
+            const portfolioData = {
+                currentValue: currentValue,
+                profitLoss: profitLoss,
+                profitPercentage: profitPercentage,
+                investments: state.investments,
+                transactions: state.transactions.filter(t => t.type === 'investment')
+            };
+
+            const marketContext = {
+                userLocation: userLocation,
+                currentDate: new Date().toLocaleDateString('en-CA'),
+                marketConditions: 'Current market analysis requested'
+            };
+
+            const aiResponseText = await advancedInvestmentAdvice(query, portfolioData, marketContext, userLocation || undefined);
+            
+            const newAiMessage: Message = { 
+                id: (Date.now() + 1).toString(), 
+                text: aiResponseText, 
+                isUser: false,
+                timestamp: new Date()
+            };
+            setMessages(prev => [...prev, newAiMessage]);
+        } catch (error) {
+            const errorMessage: Message = { 
+                id: (Date.now() + 1).toString(), 
+                text: error instanceof Error ? error.message : 'عذراً، حدث خطأ ما. يرجى المحاولة مرة أخرى.', 
+                isUser: false,
+                timestamp: new Date()
+            };
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const bankAccounts = Object.values(state.bankAccounts || {});
 
     return (
         <div className="space-y-6">
-            {/* العنوان */}
-            <div className="text-center">
-                <h2 className="text-3xl font-bold text-white mb-2">الاستثمار</h2>
-                <p className="text-blue-200">إدارة محفظتك الاستثمارية</p>
-                </div>
-
-            {/* القيمة الحالية للمحفظة */}
-            <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-8 shadow-xl text-center">
-                <h3 className="text-2xl font-bold text-white mb-4">القيمة الحالية للمحفظة</h3>
-                <div className="text-5xl font-bold text-white mb-2">{formatCurrency(currentValue)}</div>
-                <div className={`text-lg font-semibold ${profitLoss >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {profitLoss >= 0 ? '+' : ''}{profitPercentage}% ({profitLoss >= 0 ? '+' : ''}{formatCurrency(profitLoss)})
+            {/* بطاقة القيمة الحالية للمحفظة */}
+            <div className="bg-gradient-to-br from-cyan-400 to-blue-500 rounded-3xl p-8 shadow-2xl">
+                <div className="text-center text-white">
+                    <h2 className="text-2xl font-bold mb-2">القيمة الحالية للمحفظة</h2>
+                    <div className="text-5xl font-bold mb-4">{formatCurrency(currentValue)}</div>
+                    <div className={`text-2xl font-bold ${profitLoss >= 0 ? 'text-green-200' : 'text-red-200'}`}>
+                        {profitLoss >= 0 ? '+' : ''}{formatCurrency(profitLoss)} ({profitPercentage}%)
+                    </div>
                 </div>
             </div>
 
@@ -71,7 +211,7 @@ const InvestmentTab: React.FC<InvestmentTabProps> = ({ state, setState, calculat
                             type="number"
                             value={newInvestment.amount}
                             onChange={(e) => setNewInvestment(prev => ({ ...prev, amount: e.target.value }))}
-                            className="w-full p-3 bg-slate-700/50 border border-blue-400/30 rounded-xl text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white placeholder-blue-300 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                             placeholder="0.00"
                         />
                     </div>
@@ -80,80 +220,89 @@ const InvestmentTab: React.FC<InvestmentTabProps> = ({ state, setState, calculat
                         <select
                             value={newInvestment.type}
                             onChange={(e) => setNewInvestment(prev => ({ ...prev, type: e.target.value }))}
-                            className="w-full p-3 bg-slate-700/50 border border-blue-400/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                         >
-                            <option value="">اختر النوع</option>
-                            <option value="stocks">أسهم</option>
-                            <option value="bonds">سندات</option>
-                            <option value="funds">صناديق</option>
-                            <option value="crypto">عملات رقمية</option>
+                            <option value="" className="bg-slate-800 text-white">اختر النوع</option>
+                            <option value="أسهم" className="bg-slate-800 text-white">أسهم</option>
+                            <option value="صندوق استثماري" className="bg-slate-800 text-white">صندوق استثماري</option>
+                            <option value="سندات" className="bg-slate-800 text-white">سندات</option>
+                            <option value="ذهب" className="bg-slate-800 text-white">ذهب</option>
+                            <option value="عملات رقمية" className="bg-slate-800 text-white">عملات رقمية</option>
                         </select>
-                </div>
+                    </div>
                     <div>
                         <label className="block text-sm font-medium text-blue-200 mb-2">الحساب البنكي</label>
                         <select
                             value={newInvestment.account}
                             onChange={(e) => setNewInvestment(prev => ({ ...prev, account: e.target.value }))}
-                            className="w-full p-3 bg-slate-700/50 border border-blue-400/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                         >
-                            <option value="">اختر الحساب</option>
-                            {Object.values(state.bankAccounts).map(account => (
-                                <option key={account.id} value={account.id}>{account.name}</option>
+                            <option value="" className="bg-slate-800 text-white">اختر الحساب</option>
+                            {bankAccounts.map(account => (
+                                <option key={account.id} value={account.id} className="bg-slate-800 text-white">
+                                    {account.name}
+                                </option>
                             ))}
                         </select>
                     </div>
                 </div>
                 <button
                     onClick={handleAddInvestment}
-                    className="mt-4 w-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-bold py-3 px-6 rounded-xl hover:from-cyan-500 hover:to-blue-600 transition-all duration-300 shadow-lg"
+                    className="w-full mt-4 py-3 bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold rounded-lg hover:from-cyan-500 hover:to-blue-600 transition-all duration-300 shadow-lg"
                 >
                     إضافة الاستثمار
                 </button>
             </div>
 
             {/* المستشار الاستثماري */}
-            <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl">
-                <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center text-2xl shadow-lg">
-                        🤖
-                    </div>
-                    <div className="flex-1">
-                        <h3 className="text-xl font-bold text-white mb-2">المستشار الاستثماري</h3>
-                        <div className="space-y-3">
-                            <div className="bg-green-500/20 rounded-xl p-4 border border-green-400/30">
-                                <p className="text-green-200">
-                                    <span className="font-semibold">أسهم STC:</span> تُظهر نمواً إيجابياً بنسبة 8٪ هذا الشهر. فرصة جيدة للشراء.
-                                </p>
-                            </div>
-                            <div className="bg-blue-500/20 rounded-xl p-4 border border-blue-400/30">
-                                <p className="text-blue-200">
-                                    <span className="font-semibold">السندات:</span> معدلات الفائدة الحالية مناسبة للاستثمار في السندات الحكومية.
-                                </p>
-                            </div>
-                            <div className="bg-yellow-500/20 rounded-xl p-4 border border-yellow-400/30">
-                                <p className="text-yellow-200">
-                                    <span className="font-semibold">التنويع:</span> ننصح بتوزيع الاستثمار على 60٪ أسهم، 30٪ سندات، 10٪ عملات رقمية.
-                                </p>
-                            </div>
+            <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl shadow-xl overflow-hidden flex flex-col" style={{ height: '60vh' }}>
+                <div className="p-4 text-center flex-shrink-0">
+                    <h3 className="text-xl font-bold text-white">🎯 المستشار الاستثماري الذكي</h3>
+                    <p className="text-sm text-blue-200">تحليل السوق وتوصيات استثمارية متقدمة</p>
+                </div>
+                <div ref={chatBoxRef} className="p-4 flex-grow overflow-y-auto flex flex-col gap-4">
+                    {messages.map(msg => (
+                        <div key={msg.id} className={`chat-bubble ${msg.isUser ? 'user-bubble' : 'ai-bubble'}`}>
+                           <p dangerouslySetInnerHTML={{ __html: msg.text.replace(/\n/g, '<br />') }} />
                         </div>
-                    </div>
+                    ))}
+                    {isLoading && <TypingIndicator />}
+                </div>
+                <div className="p-4 border-t border-blue-400/20 flex-shrink-0">
+                    <form onSubmit={handleInvestmentSubmit} className="flex gap-2">
+                        <input 
+                            type="text" 
+                            value={userInput} 
+                            onChange={e => setUserInput(e.target.value)} 
+                            className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white placeholder-blue-300 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400" 
+                            placeholder="اسأل عن الاستثمارات والسوق..." 
+                            required 
+                            autoComplete="off" 
+                            disabled={isLoading} 
+                        />
+                        <button 
+                            type="submit" 
+                            disabled={isLoading} 
+                            className="p-3 bg-gradient-to-r from-cyan-400 to-blue-500 text-white rounded-lg flex-shrink-0 disabled:opacity-50 hover:from-cyan-500 hover:to-blue-600 transition-all duration-300 shadow-lg"
+                        >
+                           <SendIcon />
+                        </button>
+                    </form>
                 </div>
             </div>
 
-            {/* الزر العائم للاستشارة السريعة */}
-            <div className="fixed bottom-24 right-4 z-50">
-                <button 
-                    onClick={() => {
-                        // الانتقال إلى صفحة المحلل الذكي
-                        const event = new CustomEvent('navigateToTab', { detail: 'ai-assistant' });
-                        window.dispatchEvent(event);
-                    }}
-                    className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-bold py-4 px-6 rounded-full shadow-2xl hover:from-cyan-500 hover:to-blue-600 transition-all duration-300 flex items-center gap-2"
-                >
-                    <span className="text-2xl">💡</span>
-                    <span>ابدأ استشارة سريعة</span>
-                </button>
-            </div>
+            {/* زر الاستشارة السريعة العائم */}
+            <button
+                onClick={() => {
+                    // إرسال حدث للانتقال إلى تبويب المستشار الذكي
+                    const event = new CustomEvent('navigateToTab', { detail: 'ai-assistant' });
+                    window.dispatchEvent(event);
+                }}
+                className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-cyan-400 to-blue-500 text-white rounded-full shadow-2xl hover:from-cyan-500 hover:to-blue-600 transition-all duration-300 flex items-center justify-center text-2xl z-50"
+                title="ابدأ استشارة سريعة"
+            >
+                💡
+            </button>
         </div>
     );
 };
