@@ -1124,14 +1124,22 @@ const App: React.FC = () => {
     // إذا لم يكن المستخدم مسجل دخول، اعرض نموذج المصادقة فقط
     if (!currentUser) {
         return (
-            <div className="bg-gradient-to-br from-[#031A2E] to-[#052E4D] min-h-screen font-sans flex items-center justify-center">
-                <div className="w-full max-w-md px-4">
+            <div className="bg-gradient-to-br from-[#031A2E] to-[#052E4D] min-h-screen font-sans flex items-center justify-center relative overflow-hidden">
+                {/* خلفية متحركة */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[#031A2E] via-[#052E4D] to-[#0A192F]"></div>
+                <div className="absolute inset-0 opacity-20">
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/10 to-blue-500/10"></div>
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[length:20px_20px]"></div>
+                </div>
+                
+                <div className="w-full max-w-md px-4 relative z-10">
                     <div className="text-center mb-8">
-                        <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl mx-auto mb-4">
-                            <img src="/bayani/logo.jpg" alt="Bayani Logo" className="w-full h-full object-cover" />
+                        <div className="w-24 h-24 rounded-3xl overflow-hidden shadow-2xl mx-auto mb-6 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 p-1">
+                            <img src="/bayani/logo.jpg" alt="Bayani Logo" className="w-full h-full object-cover rounded-2xl" />
                         </div>
-                        <h1 className="text-2xl font-bold text-white">بياني</h1>
-                        <p className="text-blue-200 mt-2">كل شيء عن مالي… في بياني</p>
+                        <h1 className="text-4xl font-bold text-white mb-2 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">بياني</h1>
+                        <p className="text-blue-200 text-lg font-medium">كل شيء عن مالي… في بياني</p>
+                        <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-blue-500 mx-auto mt-4 rounded-full"></div>
                     </div>
                     
                     <AuthForm 
@@ -1163,8 +1171,8 @@ const App: React.FC = () => {
         }
     };
 
-    return (
-        <div className="min-h-screen font-sans bg-gradient-to-br from-[#031A2E] to-[#052E4D]">
+        return (
+            <div className="min-h-screen font-sans bg-gradient-to-br from-[#031A2E] to-[#052E4D] relative">
             <Header
                 selectedYear={selectedYear}
                 selectedMonth={selectedMonth}

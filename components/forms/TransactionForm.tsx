@@ -210,11 +210,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose, onSave, init
             </div>
         )}
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-lg animate-fade-in max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="bg-gradient-to-br from-slate-800/95 to-blue-900/95 backdrop-blur-lg border border-blue-400/20 rounded-2xl shadow-2xl w-full max-w-lg animate-fade-in max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                 <div className="p-6">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-slate-800">{initialData ? 'تعديل الحركة' : 'إضافة حركة جديدة'}</h2>
-                        <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><XMarkIcon /></button>
+                        <h2 className="text-2xl font-bold text-white">{initialData ? 'تعديل الحركة' : 'إضافة حركة جديدة'}</h2>
+                        <button onClick={onClose} className="text-blue-200 hover:text-white"><XMarkIcon /></button>
                     </div>
 
                     <button

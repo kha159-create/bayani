@@ -82,25 +82,26 @@ const Header: React.FC<HeaderProps> = ({
     };
 
     return (
-        <header className="bg-gradient-to-r from-[#031A2E]/80 to-[#052E4D]/80 backdrop-blur-lg border-b border-blue-400/20 py-3 shadow-lg relative z-30">
+        <header className="bg-gradient-to-r from-[#031A2E]/90 to-[#052E4D]/90 backdrop-blur-xl border-b border-blue-400/30 py-4 shadow-2xl relative z-30">
             <div className="container mx-auto px-4">
                 <div className="flex flex-col sm:flex-row justify-between items-center text-center sm:text-right gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden shadow-lg">
-                            <img src="/bayani/logo.jpg" alt="Bayani Logo" className="w-full h-full object-cover" />
+                    <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-cyan-400/20 to-blue-500/20 p-1">
+                            <img src="/bayani/logo.jpg" alt="Bayani Logo" className="w-full h-full object-cover rounded-xl" />
                         </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-white tracking-wide">بياني</h1>
-                            <p className="text-xs text-blue-200">كل شيء عن مالي… في بياني</p>
+                        <div className="text-center sm:text-right">
+                            <h1 className="text-2xl font-bold text-white tracking-wide bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">بياني</h1>
+                            <p className="text-sm text-blue-200 font-medium">كل شيء عن مالي… في بياني</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 bg-slate-200 dark:bg-slate-700 p-1.5 rounded-lg">
-                            <select value={selectedYear} onChange={(e) => onYearChange(parseInt(e.target.value))} className="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold border-0 focus:ring-0 appearance-none p-2 rounded-md">
-                                {years.map(y => <option key={y} value={y}>{y}</option>)}
+                        <div className="flex items-center gap-3 bg-gradient-to-r from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 p-2 rounded-xl shadow-lg">
+                            <select value={selectedYear} onChange={(e) => onYearChange(parseInt(e.target.value))} className="bg-transparent text-white font-bold border-0 focus:ring-0 appearance-none p-2 rounded-lg text-center min-w-[80px]">
+                                {years.map(y => <option key={y} value={y} className="bg-slate-800 text-white">{y}</option>)}
                             </select>
-                            <select value={selectedMonth} onChange={(e) => onMonthChange(e.target.value === 'all' ? 'all' : parseInt(e.target.value))} className="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold border-0 focus:ring-0 appearance-none p-2 rounded-md">
-                                {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                            <div className="w-px h-6 bg-blue-400/30"></div>
+                            <select value={selectedMonth} onChange={(e) => onMonthChange(e.target.value === 'all' ? 'all' : parseInt(e.target.value))} className="bg-transparent text-white font-bold border-0 focus:ring-0 appearance-none p-2 rounded-lg text-center min-w-[120px]">
+                                {months.map(m => <option key={m.value} value={m.value} className="bg-slate-800 text-white">{m.label}</option>)}
                             </select>
                         </div>
                         
