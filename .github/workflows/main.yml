@@ -40,6 +40,3 @@ jobs:
     needs: build
     steps:
       - uses: actions/deploy-pages@v4
-6. اضغط "Start commit"
-7. اكتب رسالة: "Add custom deploy workflow"
-8. اضغط "Commit new file"
