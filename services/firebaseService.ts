@@ -252,7 +252,7 @@ export const firebaseService = {
     }
   },
 
-  // جلب البيانات من Firebase
+  // جلب بيانات المستخدم من Firebase
   async getDataFromFirebase(userId: string) {
     try {
       const result = await this.getData('users', userId);
@@ -262,6 +262,46 @@ export const firebaseService = {
       return { success: false, error: 'لا توجد بيانات محفوظة' };
     } catch (error) {
       console.error('خطأ في جلب البيانات من Firebase:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
+    }
+  },
+
+  // جلب قائمة النسخ الاحتياطية من مجموعة عامة "backups"
+  async listBackups() {
+    if (!db) {
+      return { success: false, error: 'Firebase غير مهيأ' };
+    }
+    try {
+      const { collection: col, getDocs, query, orderBy } = await import('firebase/firestore');
+      const q = query(col(db, 'backups'), orderBy('backupTimestamp', 'desc'));
+      const snapshot = await getDocs(q);
+      const items: any[] = [];
+      snapshot.forEach((docItem) => {
+        const data = docItem.data();
+        items.push({ id: docItem.id, ...data });
+      });
+      return { success: true, data: items };
+    } catch (error) {
+      console.error('خطأ في جلب قائمة النسخ الاحتياطية:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
+    }
+  },
+
+  // جلب نسخة احتياطية مفردة من المسار "backups/{backupId}"
+  async getBackupById(backupId: string) {
+    if (!db) {
+      return { success: false, error: 'Firebase غير مهيأ' };
+    }
+    try {
+      const { doc, getDoc } = await import('firebase/firestore');
+      const ref = doc(db, 'backups', backupId);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        return { success: true, data: snap.data() };
+      }
+      return { success: false, error: 'النسخة غير موجودة' };
+    } catch (error) {
+      console.error('خطأ في جلب النسخة الاحتياطية:', error);
       return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
     }
   }
