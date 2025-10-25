@@ -272,5 +272,36 @@ export const initializeFirebase = () => {
   return initResult;
 };
 
+// دالة لجلب البيانات من Firebase
+export const getDataFromFirebase = async (userId: string) => {
+  try {
+    if (!db) {
+      throw new Error('Firebase غير مهيأ');
+    }
+    
+    const { collection, getDocs, query, where } = await import('firebase/firestore');
+    
+    // جلب جميع البيانات للمستخدم
+    const transactionsQuery = query(collection(db, 'transactions'), where('userId', '==', userId));
+    const cardsQuery = query(collection(db, 'cards'), where('userId', '==', userId));
+    const accountsQuery = query(collection(db, 'accounts'), where('userId', '==', userId));
+    
+    const [transactionsSnapshot, cardsSnapshot, accountsSnapshot] = await Promise.all([
+      getDocs(transactionsQuery),
+      getDocs(cardsQuery),
+      getDocs(accountsQuery)
+    ]);
+    
+    return {
+      transactions: transactionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })),
+      cards: cardsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })),
+      accounts: accountsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    };
+  } catch (error) {
+    console.error('خطأ في جلب البيانات من Firebase:', error);
+    throw error;
+  }
+};
+
 // تصدير التطبيق للاستخدام الخارجي إذا لزم الأمر
 export default app;

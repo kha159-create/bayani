@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
     });
     
     return {
-        base: '/fd/', // المسار الأساسي لمشروعك على GitHub Pages
+        base: './', // المسار النسبي للعمل محلياً ومع GitHub Pages
         
         plugins: [
             react(),

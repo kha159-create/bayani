@@ -22,7 +22,7 @@ const CardsTab: React.FC<CardsTabProps> = ({ state, calculations, openCardFormMo
             <div className="text-center">
                 <h2 className="text-3xl font-bold text-white mb-2">البطاقات الائتمانية</h2>
                 <p className="text-blue-200">إدارة بطاقاتك الائتمانية</p>
-            </div>
+                    </div>
 
             {/* إضافة بطاقة جديدة */}
             <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl">
@@ -58,8 +58,8 @@ const CardsTab: React.FC<CardsTabProps> = ({ state, calculations, openCardFormMo
                                 >
                                     🗑️
                                 </button>
-                            </div>
                         </div>
+                    </div>
 
                         <div className="space-y-4">
                             {/* الرصيد المستخدم */}
@@ -74,27 +74,27 @@ const CardsTab: React.FC<CardsTabProps> = ({ state, calculations, openCardFormMo
                                             className="bg-gradient-to-r from-red-400 to-red-500 h-2 rounded-full transition-all duration-300"
                                             style={{ width: `${card.usagePercentage}%` }}
                                         ></div>
-                                    </div>
+                    </div>
                                     <p className="text-xs text-blue-300 mt-1">{card.usagePercentage.toFixed(1)}% مستخدم</p>
-                                </div>
-                            </div>
+                    </div>
+                </div>
 
                             {/* الرصيد المتاح */}
                             <div className="bg-slate-700/30 rounded-xl p-4">
                                 <div className="flex justify-between items-center">
                                     <span className="text-blue-200 text-sm">الرصيد المتاح</span>
                                     <span className="text-green-400 font-bold text-lg">{formatCurrency(card.available)}</span>
-                                </div>
-                            </div>
+                        </div>
+                        </div>
 
                             {/* الحد الائتماني */}
                             <div className="bg-slate-700/30 rounded-xl p-4">
                                 <div className="flex justify-between items-center">
                                     <span className="text-blue-200 text-sm">الحد الائتماني</span>
                                     <span className="text-white font-bold text-lg">{formatCurrency(card.limit)}</span>
-                                </div>
-                            </div>
                         </div>
+                    </div>
+                </div>
 
                         {/* ملخص البطاقة */}
                         <div className="mt-4 pt-4 border-t border-blue-400/20">
@@ -106,10 +106,10 @@ const CardsTab: React.FC<CardsTabProps> = ({ state, calculations, openCardFormMo
                                 <div>
                                     <p className="text-blue-200 text-xs">المتبقي</p>
                                     <p className="text-white font-bold">{formatCurrency(card.balance)}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            </div>
+                </div>
+            </div>
+        </div>
                 ))}
             </div>
 
@@ -144,8 +144,8 @@ const CardsTab: React.FC<CardsTabProps> = ({ state, calculations, openCardFormMo
                                 {formatCurrency(Object.values(cardDetails).reduce((sum, card) => sum + card.limit, 0))}
                             </p>
                             <p className="text-blue-200 text-sm">إجمالي الحدود</p>
-                        </div>
-                    </div>
+            </div>
+            </div>
                 </div>
             )}
         </div>

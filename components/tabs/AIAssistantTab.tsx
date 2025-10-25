@@ -61,13 +61,13 @@ const AIAssistantTab: React.FC<AIAssistantTabProps> = ({
         setIsLoading(true);
 
         try {
-            const completeData = {
+                const completeData = {
                 calculations,
                 transactions: allTransactions,
-                categories: state.categories,
-                cards: state.cards,
-                bankAccounts: state.bankAccounts,
-                investments: state.investments
+                        categories: state.categories,
+                        cards: state.cards,
+                        bankAccounts: state.bankAccounts,
+                        investments: state.investments
             };
 
             const response = await analyzeCompleteFinancialData(inputText, completeData);
@@ -100,7 +100,7 @@ const AIAssistantTab: React.FC<AIAssistantTabProps> = ({
             handleSendMessage();
         }
     };
-
+    
     return (
         <div className="h-screen flex flex-col bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
             {/* العنوان */}

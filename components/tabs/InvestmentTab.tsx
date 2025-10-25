@@ -33,7 +33,7 @@ const InvestmentTab: React.FC<InvestmentTabProps> = ({ state, setState, calculat
             });
             return;
         }
-
+        
         setModal({
             title: 'تم إضافة الاستثمار',
             body: '<p>تم إضافة الاستثمار بنجاح!</p>',
@@ -50,7 +50,7 @@ const InvestmentTab: React.FC<InvestmentTabProps> = ({ state, setState, calculat
             <div className="text-center">
                 <h2 className="text-3xl font-bold text-white mb-2">الاستثمار</h2>
                 <p className="text-blue-200">إدارة محفظتك الاستثمارية</p>
-            </div>
+                </div>
 
             {/* القيمة الحالية للمحفظة */}
             <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-8 shadow-xl text-center">
@@ -88,7 +88,7 @@ const InvestmentTab: React.FC<InvestmentTabProps> = ({ state, setState, calculat
                             <option value="funds">صناديق</option>
                             <option value="crypto">عملات رقمية</option>
                         </select>
-                    </div>
+                </div>
                     <div>
                         <label className="block text-sm font-medium text-blue-200 mb-2">الحساب البنكي</label>
                         <select
