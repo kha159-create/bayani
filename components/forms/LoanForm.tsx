@@ -161,28 +161,28 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" onClick={onClose}>
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl animate-fade-in max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="bg-gradient-to-br from-slate-800/95 to-blue-900/95 backdrop-blur-lg border border-blue-400/20 rounded-2xl shadow-2xl w-full max-w-2xl animate-fade-in max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                 <div className="p-6">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-slate-800">{initialData ? 'تعديل القرض' : 'إضافة قرض جديد'}</h2>
-                        <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><XMarkIcon /></button>
+                        <h2 className="text-2xl font-bold text-white">{initialData ? 'تعديل القرض' : 'إضافة قرض جديد'}</h2>
+                        <button onClick={onClose} className="text-blue-200 hover:text-white"><XMarkIcon /></button>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* نوع القرض واسم القرض */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="type" className="block text-sm font-medium text-slate-600 mb-2">نوع القرض</label>
+                                <label htmlFor="type" className="block text-sm font-medium text-blue-200 mb-2">نوع القرض</label>
                                 <select
                                     id="type"
                                     name="type"
                                     value={loan.type}
                                     onChange={handleChange}
-                                    className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                     required
                                 >
                                     {loanTypes.map(type => (
-                                        <option key={type.value} value={type.value}>
+                                        <option key={type.value} value={type.value} className="bg-slate-800 text-white">
                                             {type.icon} {type.label}
                                         </option>
                                     ))}
@@ -190,14 +190,14 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
                             </div>
 
                             <div>
-                                <label htmlFor="name" className="block text-sm font-medium text-slate-600 mb-2">اسم القرض</label>
+                                <label htmlFor="name" className="block text-sm font-medium text-blue-200 mb-2">اسم القرض</label>
                                 <input
                                     type="text"
                                     id="name"
                                     name="name"
                                     value={loan.name}
                                     onChange={handleChange}
-                                    className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                     placeholder="مثل: قرض سيارة تويوتا"
                                     required
                                 />
@@ -208,14 +208,14 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
                         {/* المبالغ */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="totalAmount" className="block text-sm font-medium text-slate-600 mb-2">المبلغ الإجمالي</label>
+                                <label htmlFor="totalAmount" className="block text-sm font-medium text-blue-200 mb-2">المبلغ الإجمالي</label>
                                 <input
                                     type="number"
                                     id="totalAmount"
                                     name="totalAmount"
                                     value={loan.totalAmount}
                                     onChange={handleChange}
-                                    className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                     step="0.01"
                                     min="0"
                                     required
@@ -224,14 +224,14 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
                             </div>
 
                             <div>
-                                <label htmlFor="downPayment" className="block text-sm font-medium text-slate-600 mb-2">الدفعة الأولى</label>
+                                <label htmlFor="downPayment" className="block text-sm font-medium text-blue-200 mb-2">الدفعة الأولى</label>
                                 <input
                                     type="number"
                                     id="downPayment"
                                     name="downPayment"
                                     value={loan.downPayment}
                                     onChange={handleChange}
-                                    className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                     step="0.01"
                                     min="0"
                                     required
@@ -242,14 +242,14 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="finalPayment" className="block text-sm font-medium text-slate-600 mb-2">الدفعة الأخيرة</label>
+                                <label htmlFor="finalPayment" className="block text-sm font-medium text-blue-200 mb-2">الدفعة الأخيرة</label>
                                 <input
                                     type="number"
                                     id="finalPayment"
                                     name="finalPayment"
                                     value={loan.finalPayment}
                                     onChange={handleChange}
-                                    className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                     step="0.01"
                                     min="0"
                                     required
@@ -258,14 +258,14 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
                             </div>
 
                             <div>
-                                <label htmlFor="monthlyPayment" className="block text-sm font-medium text-slate-600 mb-2">القسط الشهري</label>
+                                <label htmlFor="monthlyPayment" className="block text-sm font-medium text-blue-200 mb-2">القسط الشهري</label>
                                 <input
                                     type="number"
                                     id="monthlyPayment"
                                     name="monthlyPayment"
                                     value={loan.monthlyPayment}
                                     onChange={handleChange}
-                                    className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                     step="0.01"
                                     min="0"
                                     required
@@ -276,14 +276,14 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
 
                         {/* المبلغ المدفوع مسبقاً */}
                         <div>
-                            <label htmlFor="prepaidAmount" className="block text-sm font-medium text-slate-600 mb-2">المبلغ المدفوع مسبقاً (اختياري)</label>
+                            <label htmlFor="prepaidAmount" className="block text-sm font-medium text-blue-200 mb-2">المبلغ المدفوع مسبقاً (اختياري)</label>
                             <input
                                 type="number"
                                 id="prepaidAmount"
                                 name="prepaidAmount"
                                 value={loan.prepaidAmount || 0}
                                 onChange={handleChange}
-                                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                 step="0.01"
                                 min="0"
                                 placeholder="0"
@@ -304,27 +304,27 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
                         {/* التواريخ */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="startDate" className="block text-sm font-medium text-slate-600 mb-2">تاريخ بداية القرض</label>
+                                <label htmlFor="startDate" className="block text-sm font-medium text-blue-200 mb-2">تاريخ بداية القرض</label>
                                 <input
                                     type="date"
                                     id="startDate"
                                     name="startDate"
                                     value={loan.startDate}
                                     onChange={handleChange}
-                                    className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                     required
                                 />
                                 {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate}</p>}
                             </div>
 
                             <div>
-                                <label htmlFor="endDate" className="block text-sm font-medium text-slate-600 mb-2">تاريخ انتهاء القرض (محسوب تلقائياً)</label>
+                                <label htmlFor="endDate" className="block text-sm font-medium text-blue-200 mb-2">تاريخ انتهاء القرض (محسوب تلقائياً)</label>
                                 <input
                                     type="date"
                                     id="endDate"
                                     name="endDate"
                                     value={loan.endDate || ''}
-                                    className="w-full p-3 border border-slate-300 rounded-lg bg-gray-50"
+                                    className="w-full p-3 border border-blue-400/20 rounded-lg bg-gray-50"
                                     disabled
                                 />
                             </div>
@@ -333,14 +333,14 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
                         {/* معلومات إضافية */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="lender" className="block text-sm font-medium text-slate-600 mb-2">البنك أو المؤسسة</label>
+                                <label htmlFor="lender" className="block text-sm font-medium text-blue-200 mb-2">البنك أو المؤسسة</label>
                                 <input
                                     type="text"
                                     id="lender"
                                     name="lender"
                                     value={loan.lender}
                                     onChange={handleChange}
-                                    className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                     placeholder="مثل: البنك الأهلي التجاري"
                                     required
                                 />
@@ -348,13 +348,13 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
                             </div>
 
                             <div>
-                                <label htmlFor="linkedAccount" className="block text-sm font-medium text-slate-600 mb-2">ربط بالحساب البنكي (اختياري)</label>
+                                <label htmlFor="linkedAccount" className="block text-sm font-medium text-blue-200 mb-2">ربط بالحساب البنكي (اختياري)</label>
                                 <select
                                     id="linkedAccount"
                                     name="linkedAccount"
                                     value={loan.linkedAccount}
                                     onChange={handleChange}
-                                    className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                 >
                                     <option value="">اختر حساب بنكي</option>
                                     {bankAccountOptions.map(account => (

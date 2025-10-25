@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { FinancialCalculations, Category, CardDetails, BankAccountDetails, AppState, CardConfig } from '../../types';
 import { formatCurrency } from '../../utils/formatting';
 import { t } from '../../translations';
+import AzkarCard from '../common/AzkarCard';
 
 interface DashboardTabProps {
     calculations: FinancialCalculations;
@@ -42,32 +43,19 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                     <div className="text-5xl font-bold mb-4">{formatCurrency(totalBankBalance)}</div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="bg-white/20 rounded-xl p-3">
-                            <div className="text-2xl font-bold">14%</div>
-                            <div className="text-white/80">نمو الادخار</div>
+                            <div className="text-2xl font-bold">{formatCurrency(totalIncome)}</div>
+                            <div className="text-white/80">إجمالي الدخل</div>
                         </div>
                         <div className="bg-white/20 rounded-xl p-3">
                             <div className="text-2xl font-bold">{formatCurrency(totalExpenses)}</div>
-                            <div className="text-white/80">المصاريف الشهرية</div>
+                            <div className="text-white/80">إجمالي المصاريف</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* المحلل الذكي */}
-            <div className="bg-gradient-to-r from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center text-2xl shadow-lg">
-                        🤖
-                    </div>
-                    <div className="flex-1">
-                        <h3 className="text-lg font-bold text-white mb-2">المحلل الذكي</h3>
-                        <p className="text-blue-200 text-sm">
-                            لاحظت ارتفاعًا في مصروف الكافيهات بنسبة 10٪ هذا الشهر. 
-                            اقترح تقليل عدد مرات الذهاب للكافيه لتوفير المال.
-                        </p>
-                    </div>
-                </div>
-            </div>
+            {/* بطاقة الأذكار */}
+            <AzkarCard darkMode={darkMode} />
 
             {/* فئات المصاريف الرئيسية */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -83,7 +71,7 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
             </div>
 
             {/* بطاقات إضافية للمعلومات المالية */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-lg">
                     <div className="text-center text-white">
                         <div className="text-3xl mb-2">💰</div>
@@ -99,12 +87,25 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                         <div className="text-2xl font-bold text-red-400">{formatCurrency(totalExpenses)}</div>
                     </div>
                 </div>
+            </div>
+
+            {/* بطاقات الرصيد المستحق والمتبقي للبطاقات */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-lg">
+                    <div className="text-center text-white">
+                        <div className="text-3xl mb-2">💳</div>
+                        <div className="text-sm font-semibold mb-1">الرصيد المستحق</div>
+                        <div className="text-2xl font-bold text-orange-400">{formatCurrency(calculations.totalCardDebt || 0)}</div>
+                        <div className="text-xs text-blue-200 mt-1">إجمالي المبالغ المستحقة على البطاقات</div>
+                    </div>
+                </div>
 
                 <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-lg">
                     <div className="text-center text-white">
-                        <div className="text-3xl mb-2">{netResult >= 0 ? '📈' : '📉'}</div>
-                        <div className="text-sm font-semibold mb-1">النتيجة الصافية</div>
-                        <div className={`text-2xl font-bold ${netResult >= 0 ? 'text-green-400' : 'text-red-400'}`}>{formatCurrency(netResult)}</div>
+                        <div className="text-3xl mb-2">💎</div>
+                        <div className="text-sm font-semibold mb-1">الرصيد المتبقي</div>
+                        <div className="text-2xl font-bold text-cyan-400">{formatCurrency(calculations.totalCardBalance || 0)}</div>
+                        <div className="text-xs text-blue-200 mt-1">إجمالي الرصيد المتبقي في البطاقات</div>
                     </div>
                 </div>
             </div>

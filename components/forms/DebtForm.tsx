@@ -81,13 +81,13 @@ const DebtForm: React.FC<DebtFormProps> = ({ onClose, onSave, initialData, type,
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" onClick={onClose}>
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg animate-fade-in max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="bg-gradient-to-br from-slate-800/95 to-blue-900/95 backdrop-blur-lg border border-blue-400/20 rounded-2xl shadow-2xl w-full max-w-lg animate-fade-in max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                 <div className="p-6">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-slate-800">
+                        <h2 className="text-2xl font-bold text-white">
                             {isToMe ? 'إضافة دين لي' : 'إضافة دين علي'}
                         </h2>
-                        <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+                        <button onClick={onClose} className="text-blue-200 hover:text-white">
                             <XMarkIcon />
                         </button>
                     </div>
@@ -95,7 +95,7 @@ const DebtForm: React.FC<DebtFormProps> = ({ onClose, onSave, initialData, type,
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* اسم المدين/الدائن */}
                         <div>
-                            <label htmlFor={isToMe ? 'debtor' : 'creditor'} className="block text-sm font-medium text-slate-600 mb-2">
+                            <label htmlFor={isToMe ? 'debtor' : 'creditor'} className="block text-sm font-medium text-blue-200 mb-2">
                                 {isToMe ? 'اسم المدين' : 'اسم الدائن'}
                             </label>
                             <input
@@ -104,7 +104,7 @@ const DebtForm: React.FC<DebtFormProps> = ({ onClose, onSave, initialData, type,
                                 name={isToMe ? 'debtor' : 'creditor'}
                                 value={debt[isToMe ? 'debtor' : 'creditor']}
                                 onChange={handleChange}
-                                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                 placeholder={isToMe ? 'اسم الشخص الذي يدين لي' : 'اسم الشخص الذي أدين له'}
                                 required
                             />
@@ -115,14 +115,14 @@ const DebtForm: React.FC<DebtFormProps> = ({ onClose, onSave, initialData, type,
 
                         {/* المبلغ */}
                         <div>
-                            <label htmlFor="amount" className="block text-sm font-medium text-slate-600 mb-2">المبلغ</label>
+                            <label htmlFor="amount" className="block text-sm font-medium text-blue-200 mb-2">المبلغ</label>
                             <input
                                 type="number"
                                 id="amount"
                                 name="amount"
                                 value={debt.amount}
                                 onChange={handleChange}
-                                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                 step="0.01"
                                 min="0"
                                 placeholder="0.00"
@@ -133,7 +133,7 @@ const DebtForm: React.FC<DebtFormProps> = ({ onClose, onSave, initialData, type,
 
                         {/* مصدر الدين */}
                         <div>
-                            <label htmlFor="source" className="block text-sm font-medium text-slate-600 mb-2">
+                            <label htmlFor="source" className="block text-sm font-medium text-blue-200 mb-2">
                                 {isToMe ? 'من أين دينني' : 'أين أضفت الدين'}
                             </label>
                             <input
@@ -142,20 +142,20 @@ const DebtForm: React.FC<DebtFormProps> = ({ onClose, onSave, initialData, type,
                                 name="source"
                                 value={debt.source}
                                 onChange={handleChange}
-                                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                 placeholder={isToMe ? 'مثال: بنك الراجحي، تطبيق ستور' : 'مثال: بنك الأهلي، تطبيق تابي'}
                             />
                         </div>
 
                         {/* السبب */}
                         <div>
-                            <label htmlFor="reason" className="block text-sm font-medium text-slate-600 mb-2">السبب (اختياري)</label>
+                            <label htmlFor="reason" className="block text-sm font-medium text-blue-200 mb-2">السبب (اختياري)</label>
                             <textarea
                                 id="reason"
                                 name="reason"
                                 value={debt.reason}
                                 onChange={handleChange}
-                                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                 rows={3}
                                 placeholder="سبب الدين أو تفاصيل إضافية..."
                             />
@@ -163,14 +163,14 @@ const DebtForm: React.FC<DebtFormProps> = ({ onClose, onSave, initialData, type,
 
                         {/* الوصف */}
                         <div>
-                            <label htmlFor="description" className="block text-sm font-medium text-slate-600 mb-2">وصف الدين</label>
+                            <label htmlFor="description" className="block text-sm font-medium text-blue-200 mb-2">وصف الدين</label>
                             <input
                                 type="text"
                                 id="description"
                                 name="description"
                                 value={debt.description}
                                 onChange={handleChange}
-                                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                 placeholder="وصف مختصر للدين"
                                 required
                             />
@@ -179,14 +179,14 @@ const DebtForm: React.FC<DebtFormProps> = ({ onClose, onSave, initialData, type,
 
                         {/* التاريخ */}
                         <div>
-                            <label htmlFor="date" className="block text-sm font-medium text-slate-600 mb-2">تاريخ الدين</label>
+                            <label htmlFor="date" className="block text-sm font-medium text-blue-200 mb-2">تاريخ الدين</label>
                             <input
                                 type="date"
                                 id="date"
                                 name="date"
                                 value={debt.date}
                                 onChange={handleChange}
-                                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                 required
                             />
                             {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
@@ -194,13 +194,13 @@ const DebtForm: React.FC<DebtFormProps> = ({ onClose, onSave, initialData, type,
 
                         {/* الحالة */}
                         <div>
-                            <label htmlFor="status" className="block text-sm font-medium text-slate-600 mb-2">الحالة</label>
+                            <label htmlFor="status" className="block text-sm font-medium text-blue-200 mb-2">الحالة</label>
                             <select
                                 id="status"
                                 name="status"
                                 value={debt.status}
                                 onChange={handleChange}
-                                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                             >
                                 <option value="pending">معلق</option>
                                 <option value="partial">جزئي</option>
