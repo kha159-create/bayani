@@ -35,33 +35,37 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
         return { type: 'Credit Card', logo: '●●', color: 'from-gray-600 to-gray-800' };
     };
 
-    // حساب ملخص البطاقات الائتمانية
+    // حساب ملخص البطاقات الائتمانية - نفس منطق صفحة إدارة البطاقات
     const creditCardsSummary = useMemo(() => {
         return Object.values(state.cards || {}).map(card => {
+            // استخدام نفس منطق الحساب من calculations.cardDetails
             const cardTransactions = state.transactions.filter(t => t.paymentMethod === card.id);
-            let currentBalance = 0;
-            let usedAmount = 0;
+            let balance = 0;
             
+            // حساب الرصيد المستخدم من جميع المعاملات
             cardTransactions.forEach(t => {
-                if (t.type === 'expense') {
-                    currentBalance += t.amount;
-                    usedAmount += t.amount;
+                if (t.type === 'expense' || t.type === 'bnpl-payment') {
+                    balance += t.amount;
                 } else if (t.type === 'income' && t.description?.includes('سداد')) {
-                    currentBalance -= t.amount;
+                    balance -= t.amount;
+                } else if (t.type.endsWith('-payment') && t.type === `${card.id}-payment`) {
+                    balance -= t.amount;
                 }
             });
             
-            const availableAmount = card.limit - currentBalance;
+            const available = card.limit - balance;
+            const usagePercentage = (balance / card.limit) * 100;
             
             return {
                 id: card.id,
                 name: card.name,
                 type: getCardTypeAndLogo(card.name).type,
                 logo: getCardTypeAndLogo(card.name).logo,
-                currentBalance,
-                usedAmount,
-                availableAmount,
-                limit: card.limit
+                currentBalance: balance,
+                usedAmount: balance,
+                availableAmount: available,
+                limit: card.limit,
+                usagePercentage: usagePercentage
             };
         });
     }, [state.cards, state.transactions]);
@@ -105,80 +109,76 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                         <div className="bg-white/20 rounded-xl p-3">
                             <div className="text-2xl font-bold">{formatCurrency(totalIncome)}</div>
                             <div className="text-white/80">إجمالي الدخل</div>
-                        </div>
+                                </div>
                         <div className="bg-white/20 rounded-xl p-3">
                             <div className="text-2xl font-bold">{formatCurrency(totalExpenses)}</div>
                             <div className="text-white/80">إجمالي المصاريف</div>
                             </div>
-                    </div>
-                </div>
-
+                            </div>
+                        </div>
+                        
                 {/* ملخص البطاقات الائتمانية */}
                 {creditCardsSummary.length > 0 && (
                     <div className="mt-6">
                         <h3 className="text-lg font-bold text-white mb-4 text-center">ملخص البطاقات الائتمانية</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {creditCardsSummary.map((card) => {
                                 const cardInfo = getCardTypeAndLogo(card.name);
-                                const usagePercentage = (card.currentBalance / card.limit) * 100;
-                                const available = card.limit - card.currentBalance;
-                        
-                        return (
-                                    <div key={card.id} className={`bg-gradient-to-br ${cardInfo.color} rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 text-white`}>
+                                
+                                return (
+                                    <div key={card.id} className={`bg-gradient-to-br ${cardInfo.color} rounded-2xl p-4 shadow-xl hover:shadow-2xl transition-all duration-300 text-white`}>
                                         {/* Header */}
-                                        <div className="flex justify-between items-start mb-6">
+                                        <div className="flex justify-between items-center mb-4">
                                             <div className="flex items-center gap-3">
-                                                <span className="text-2xl font-bold">{cardInfo.logo}</span>
+                                                <span className="text-xl font-bold">{cardInfo.logo}</span>
                                                 <div>
-                                                    <h3 className="text-xl font-bold">{card.name}</h3>
+                                                    <h3 className="text-lg font-bold">{card.name}</h3>
                                                     <p className="text-white/80 text-sm">{cardInfo.type}</p>
-                                    </div>
+                                                </div>
                                             </div>
                                             <span className="text-white/70 text-xs">**** {card.id.slice(-4)}</span>
-                                </div>
-                                
-                                        {/* Card Content */}
-                                        <div className="space-y-4">
+                                        </div>
+
+                                        {/* Card Content - Layout أفقي */}
+                                        <div className="grid grid-cols-2 gap-4">
                                             {/* الرصيد المستخدم */}
-                                            <div className="bg-white/10 rounded-xl p-4">
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <span className="text-white/80 text-sm">الرصيد المستخدم</span>
-                                                    <span className="text-white font-bold text-lg">{formatCurrency(card.currentBalance)}</span>
-                                                </div>
-                                                <div className="w-full bg-white/20 rounded-full h-2">
+                                            <div className="bg-white/10 rounded-xl p-3">
+                                                <div className="text-white/80 text-xs mb-1">الرصيد المستخدم</div>
+                                                <div className="text-white font-bold text-lg">{formatCurrency(card.currentBalance)}</div>
+                                                <div className="w-full bg-white/20 rounded-full h-1.5 mt-2">
                                                     <div 
-                                                        className="bg-white h-2 rounded-full transition-all duration-300"
-                                                        style={{ width: `${Math.min(usagePercentage, 100)}%` }}
+                                                        className="bg-white h-1.5 rounded-full transition-all duration-300"
+                                                        style={{ width: `${Math.min(card.usagePercentage, 100)}%` }}
                                                     ></div>
                                                 </div>
-                                                <div className="text-white/60 text-xs mt-1">{usagePercentage.toFixed(1)}% مستخدم</div>
-                                </div>
-                                
+                                                <div className="text-white/60 text-xs mt-1">{card.usagePercentage.toFixed(1)}% مستخدم</div>
+                                            </div>
+
                                             {/* معلومات إضافية */}
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div className="bg-white/10 rounded-lg p-3">
-                                                    <div className="text-white/80 text-xs mb-1">الرصيد المتاح</div>
-                                                    <div className="text-white font-bold">{formatCurrency(available)}</div>
-                                                </div>
-                                                <div className="bg-white/10 rounded-lg p-3">
+                                            <div className="space-y-2">
+                                                <div className="bg-white/10 rounded-lg p-2">
                                                     <div className="text-white/80 text-xs mb-1">الحد الائتماني</div>
-                                                    <div className="text-white font-bold">{formatCurrency(card.limit)}</div>
+                                                    <div className="text-white font-bold text-sm">{formatCurrency(card.limit)}</div>
                                                 </div>
-                                                <div className="bg-white/10 rounded-lg p-3">
+                                                <div className="bg-white/10 rounded-lg p-2">
+                                                    <div className="text-white/80 text-xs mb-1">الرصيد المتاح</div>
+                                                    <div className="text-white font-bold text-sm">{formatCurrency(card.availableAmount)}</div>
+                                                </div>
+                                                <div className="bg-white/10 rounded-lg p-2">
                                                     <div className="text-white/80 text-xs mb-1">المتبقي</div>
-                                                    <div className="text-white font-bold">{formatCurrency(card.currentBalance)}</div>
+                                                    <div className="text-white font-bold text-sm">{formatCurrency(card.currentBalance)}</div>
                                                 </div>
-                                                <div className="bg-white/10 rounded-lg p-3">
+                                                <div className="bg-white/10 rounded-lg p-2">
                                                     <div className="text-white/80 text-xs mb-1">المدفوع</div>
-                                                    <div className="text-white font-bold">{formatCurrency(available)}</div>
-                                    </div>
-                                    </div>
-                                </div>
+                                                    <div className="text-white font-bold text-sm">{formatCurrency(card.availableAmount)}</div>
                             </div>
-                        );
-                    })}
-                </div>
-            </div>
+                        </div>
+                            </div>
+                    </div>
+                );
+            })}
+                        </div>
+                    </div>
                 )}
             </div>
 
@@ -187,11 +187,77 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
 
             {/* الرسم البياني الدائري للفئات */}
             {pieChartData.length > 0 && (
-                <PieChart 
-                    data={pieChartData} 
-                    total={totalExpenses}
-                    onCategoryClick={onNavigateToTransactions}
-                />
+                <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl">
+                    <h3 className="text-xl font-bold text-white mb-6 text-center">توزيع المصاريف حسب الفئات</h3>
+                    
+                    <div className="flex flex-col lg:flex-row items-center gap-8">
+                        {/* الرسم البياني الدائري - أكبر حجماً */}
+                        <div className="flex-shrink-0">
+                            <svg width="300" height="300" viewBox="0 0 200 200" className="transform -rotate-90">
+                                {pieChartData.map((item, index) => {
+                                    let cumulativePercentage = 0;
+                                    for (let i = 0; i < index; i++) {
+                                        cumulativePercentage += pieChartData[i].percentage;
+                                    }
+                                    
+                                    const radius = 80;
+                                    const centerX = 100;
+                                    const centerY = 100;
+                                    
+                                    const startAngle = (cumulativePercentage * 360) / 100;
+                                    const endAngle = ((cumulativePercentage + item.percentage) * 360) / 100;
+                                    
+                                    const startAngleRad = (startAngle * Math.PI) / 180;
+                                    const endAngleRad = (endAngle * Math.PI) / 180;
+                                    
+                                    const x1 = centerX + radius * Math.cos(startAngleRad);
+                                    const y1 = centerY + radius * Math.sin(startAngleRad);
+                                    const x2 = centerX + radius * Math.cos(endAngleRad);
+                                    const y2 = centerY + radius * Math.sin(endAngleRad);
+                                    
+                                    const largeArcFlag = item.percentage > 50 ? 1 : 0;
+                                    
+                                    const pathData = `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
+                        
+                        return (
+                                        <path
+                                            key={item.id}
+                                            d={pathData}
+                                            fill={item.color}
+                                            stroke="rgba(255, 255, 255, 0.1)"
+                                            strokeWidth="1"
+                                            className="hover:opacity-80 transition-opacity duration-300"
+                                        />
+                                    );
+                                })}
+                            </svg>
+                                </div>
+                                
+                        {/* مفتاح الألوان - متناسق حول الرسم البياني */}
+                        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {pieChartData.map((item) => (
+                                <div 
+                                    key={item.id} 
+                                    className="flex items-center gap-3 p-3 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                                    onClick={() => onNavigateToTransactions?.(item.id)}
+                                >
+                                    <div 
+                                        className="w-4 h-4 rounded-full flex-shrink-0"
+                                        style={{ backgroundColor: item.color }}
+                                    />
+                                    <span className="text-2xl">{item.icon}</span>
+                                    <div className="flex-1">
+                                        <div className="text-white font-semibold">{item.name}</div>
+                                        <div className="text-blue-200 text-sm">{item.percentage.toFixed(1)}%</div>
+                                    </div>
+                                    <div className="text-white font-bold">
+                                        {item.value.toLocaleString()} ريال
+                                    </div>
+                                </div>
+                            ))}
+                </div>
+            </div>
+                </div>
             )}
         </div>
     );
