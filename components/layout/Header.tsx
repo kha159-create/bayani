@@ -106,9 +106,12 @@ const Header: React.FC<HeaderProps> = ({
 
                     {/* اليمين: صورة المستخدم واسمه */}
                     <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-                        <div className="text-right hidden sm:block">
-                            <p className="text-white font-semibold text-sm md:text-lg">{greeting}، {getUserDisplayName().split(' ')[0]}</p>
-                        </div>
+                        <button 
+                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                            className="text-right hidden sm:block text-white font-semibold text-sm md:text-lg hover:text-cyan-400 transition-colors"
+                        >
+                            {greeting}، {getUserDisplayName().split(' ')[0]}
+                        </button>
                         <div className="relative" ref={dropdownRef}>
                             <button
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}

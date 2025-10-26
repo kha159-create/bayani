@@ -20,15 +20,30 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
     const netResult = totalIncome - totalExpenses;
 
     // تحديد نوع البطاقة وشعارها
-    const getCardTypeAndLogo = (cardName: string) => {
-        const name = cardName.toLowerCase();
-        if (name.includes('visa') || name.includes('فيزا')) {
+    const getCardTypeAndLogo = (card: any) => {
+        // استخدام cardType المباشر إذا كان موجوداً
+        if (card.cardType) {
+            switch (card.cardType) {
+                case 'visa':
+                    return { type: 'Visa', logo: 'VISA', color: 'from-blue-600 to-blue-800' };
+                case 'mastercard':
+                    return { type: 'Mastercard', logo: '●●', color: 'from-red-500 to-orange-500' };
+                case 'amex':
+                    return { type: 'American Express', logo: '●●', color: 'from-green-600 to-blue-600' };
+                default:
+                    return { type: 'Credit Card', logo: '●●', color: 'from-gray-600 to-gray-800' };
+            }
+        }
+        
+        // Fallback للبطاقات القديمة بدون cardType
+        const cardName = (typeof card === 'string' ? card : card.name || card.id || '').toLowerCase();
+        if (cardName.includes('visa') || cardName.includes('فيزا')) {
             return { type: 'Visa', logo: 'VISA', color: 'from-blue-600 to-blue-800' };
         }
-        if (name.includes('mastercard') || name.includes('ماستر')) {
+        if (cardName.includes('mastercard') || cardName.includes('ماستر')) {
             return { type: 'Mastercard', logo: '●●', color: 'from-red-500 to-orange-500' };
         }
-        if (name.includes('amex') || name.includes('أمريكان')) {
+        if (cardName.includes('amex') || cardName.includes('أمريكان')) {
             return { type: 'American Express', logo: '●●', color: 'from-green-600 to-blue-600' };
         }
         return { type: 'Credit Card', logo: '●●', color: 'from-gray-600 to-gray-800' };
@@ -37,7 +52,7 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
     // حساب ملخص البطاقات الائتمانية - باستخدام calculations.cardDetails مباشرة
     const creditCardsSummary = useMemo(() => {
         return Object.values(calculations.cardDetails || {}).map(card => {
-            const cardInfo = getCardTypeAndLogo(card.name);
+            const cardInfo = getCardTypeAndLogo(card); // تمرير كائن البطاقة الكامل بدلاً من card.name فقط
             const usagePercentage = (card.balance / card.limit) * 100;
             const available = card.limit - card.balance;
             

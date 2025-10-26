@@ -66,32 +66,32 @@ const CardsTab: React.FC<CardsTabProps> = ({ state, calculations, openCardFormMo
             </div>
 
             {/* قائمة البطاقات */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.values(cardDetails).map((card, index) => {
                     const cardInfo = getCardTypeAndLogo(card);
                     const usagePercentage = (card.balance / card.limit) * 100;
                     const available = card.limit - card.balance;
                     
                     return (
-                        <div key={card.id} className={`bg-gradient-to-br ${cardInfo.color} rounded-2xl p-5 md:p-6 shadow-xl hover:shadow-2xl transition-all duration-300 text-white h-fit w-full`}>
-                            {/* Header - أزرار التعديل والحذف في الأعلى */}
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="text-left">
-                                    <p className="text-4xl font-bold mb-2">{cardInfo.logo}</p>
-                                    <h3 className="text-lg font-bold">{card.name}</h3>
-                                    <p className="text-white/80 text-sm">{cardInfo.type}</p>
+                        <div key={card.id} className={`bg-gradient-to-br ${cardInfo.color} rounded-lg p-3 shadow-lg text-white backdrop-blur-sm`}>
+                            {/* Header */}
+                            <div className="flex justify-between items-start mb-2">
+                                <div>
+                                    <div className="text-2xl font-bold mb-1">{cardInfo.logo}</div>
+                                    <h3 className="text-sm font-bold line-clamp-1">{card.name}</h3>
+                                    <p className="text-white/80 text-xs">{cardInfo.type}</p>
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-1">
                                     <button
                                         onClick={() => openCardFormModal(card.id)}
-                                        className="bg-white/20 backdrop-blur-sm text-white p-2 rounded-lg hover:bg-white/30 transition-colors"
+                                        className="bg-white/20 backdrop-blur-sm text-white p-1 rounded text-xs hover:bg-white/30 transition-colors"
                                         title="تعديل البطاقة"
                                     >
                                         ✏️
                                     </button>
                                     <button
                                         onClick={() => deleteCard(card.id)}
-                                        className="bg-red-500/20 backdrop-blur-sm text-white p-2 rounded-lg hover:bg-red-500/30 transition-colors"
+                                        className="bg-red-500/20 backdrop-blur-sm text-white p-1 rounded text-xs hover:bg-red-500/30 transition-colors"
                                         title="حذف البطاقة"
                                     >
                                         🗑️
@@ -99,40 +99,26 @@ const CardsTab: React.FC<CardsTabProps> = ({ state, calculations, openCardFormMo
                                 </div>
                             </div>
 
-                            {/* المحتوى الرئيسي */}
-                            <div className="space-y-3">
-                                {/* الرصيد المستخدم - كبير وواضح */}
-                                <div className="bg-white/10 backdrop-blur-md rounded-xl p-4">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-white/80 text-sm">الرصيد المستخدم</span>
-                                    </div>
-                                    <div className="text-2xl font-bold mb-2">{formatCurrency(card.balance)}</div>
-                                    <div className="w-full bg-white/20 rounded-full h-2">
+                            {/* المحتوى */}
+                            <div className="space-y-2">
+                                <div className="bg-white/10 backdrop-blur-md rounded-lg p-2">
+                                    <div className="text-white/80 text-xs mb-1">المستخدم</div>
+                                    <div className="text-white font-bold text-sm">{formatCurrency(card.balance)}</div>
+                                    <div className="w-full bg-white/20 rounded-full h-1 mt-1">
                                         <div 
-                                            className="bg-white h-2 rounded-full transition-all duration-300"
+                                            className="bg-white h-1 rounded-full transition-all duration-300"
                                             style={{ width: `${Math.min(usagePercentage, 100)}%` }}
                                         ></div>
                                     </div>
-                                    <div className="text-white/60 text-xs mt-1">{usagePercentage.toFixed(1)}% مستخدم</div>
                                 </div>
-
-                                {/* معلومات إضافية - Grid */}
                                 <div className="grid grid-cols-2 gap-2">
-                                    <div className="bg-white/10 backdrop-blur-md rounded-lg p-3">
-                                        <div className="text-white/80 text-xs mb-1">الرصيد المتاح</div>
-                                        <div className="text-white font-bold text-sm">{formatCurrency(available)}</div>
+                                    <div className="bg-white/10 backdrop-blur-md rounded p-1.5 text-xs">
+                                        <div className="text-white/80 text-xs">الحد</div>
+                                        <div className="text-white font-bold">{formatCurrency(card.limit)}</div>
                                     </div>
-                                    <div className="bg-white/10 backdrop-blur-md rounded-lg p-3">
-                                        <div className="text-white/80 text-xs mb-1">الحد الائتماني</div>
-                                        <div className="text-white font-bold text-sm">{formatCurrency(card.limit)}</div>
-                                    </div>
-                                    <div className="bg-white/10 backdrop-blur-md rounded-lg p-3">
-                                        <div className="text-white/80 text-xs mb-1">المتبقي</div>
-                                        <div className="text-white font-bold text-sm">{formatCurrency(card.balance)}</div>
-                                    </div>
-                                    <div className="bg-white/10 backdrop-blur-md rounded-lg p-3">
-                                        <div className="text-white/80 text-xs mb-1">المدفوع</div>
-                                        <div className="text-white font-bold text-sm">{formatCurrency(available)}</div>
+                                    <div className="bg-white/10 backdrop-blur-md rounded p-1.5 text-xs">
+                                        <div className="text-white/80 text-xs">المتاح</div>
+                                        <div className="text-white font-bold">{formatCurrency(available)}</div>
                                     </div>
                                 </div>
                             </div>
