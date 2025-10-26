@@ -72,11 +72,14 @@ const Header: React.FC<HeaderProps> = ({
             }
         };
 
-        document.addEventListener('mousedown', handleClickOutside);
+        if (isDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, []);
+    }, [isDropdownOpen]);
 
     return (
         <header className="relative z-30">
@@ -117,7 +120,7 @@ const Header: React.FC<HeaderProps> = ({
                         {/* اليسار: شعار التطبيق واسمه */}
                         <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
                             <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden shadow-lg bg-gradient-to-br from-cyan-400 to-blue-500 p-0.5">
-                                <img src="./logo.jpg" alt="Bayani Logo" className="w-full h-full object-cover rounded-lg" />
+                                <img src="./logo.jpg" alt="Bayani Logo" className="w-full h-full object-cover rounded-lg opacity-100" />
                             </div>
                             <div className="text-right hidden sm:block">
                                 <h1 className="text-base md:text-xl font-bold text-white tracking-wide">بياني</h1>
@@ -136,7 +139,7 @@ const Header: React.FC<HeaderProps> = ({
                             <div className="relative" ref={dropdownRef}>
                                 <button
                                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                    className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden shadow-2xl bg-gradient-to-br from-cyan-400/20 to-blue-500/20 p-0.5 md:p-1 hover:scale-105 transition-transform duration-300"
+                                    className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden shadow-2xl bg-gradient-to-br from-cyan-400/20 to-blue-500/20 p-0.5 md:p-1 hover:scale-105 transition-transform duration-300 cursor-pointer"
                                 >
                                     {currentUser?.photoURL ? (
                                         <img 
@@ -155,7 +158,7 @@ const Header: React.FC<HeaderProps> = ({
                                 
                                 {/* قائمة المستخدم المنسدلة */}
                                 {isDropdownOpen && (
-                                    <div className="absolute left-0 mt-2 w-72 bg-gradient-to-br from-slate-800/95 to-blue-900/95 backdrop-blur-lg border border-blue-400/20 rounded-xl shadow-2xl z-[100]">
+                                    <div className="absolute left-0 mt-2 w-72 bg-gradient-to-br from-slate-800/95 to-blue-900/95 backdrop-blur-lg border border-blue-400/20 rounded-xl shadow-2xl z-[100] animate-fade-in">
                                         {/* معلومات المستخدم */}
                                         <div className="p-4 border-b border-blue-400/20">
                                             <div className="flex items-center gap-3">
