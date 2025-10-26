@@ -921,24 +921,39 @@ const App: React.FC = () => {
 
     const handleRestoreFromCloud = async () => {
         try {
+            setLoading(true, 'جار استعادة البيانات من السحابة...');
             const result = await restoreFromCloud();
+            
             if (result.success) {
-                // إعادة تحميل البيانات
-                window.location.reload();
+                // إعادة تحميل البيانات من IndexedDB
+                const restoredData = await loadData('financial_dashboard_state');
+                if (restoredData) {
+                    setState(restoredData);
+                    console.log('✅ تم استعادة البيانات من السحابة بنجاح');
+                } else {
+                    // محاولة إعادة تحميل من Firebase
+                    await loadUserData(currentUser.uid);
+                }
+                
                 setModalConfig({
                     title: '✅ تم بنجاح',
-                    body: `<p>${result.message}</p><p>تم تحديث البيانات بنجاح!</p>`,
+                    body: `<p>${result.message || 'تم تحديث البيانات بنجاح!'}</p>`,
+                    hideCancel: true,
                     confirmText: 'موافق'
                 });
             } else {
-                throw new Error(result.message);
+                throw new Error(result.message || result.error);
             }
-        } catch (error) {
+        } catch (error: any) {
+            console.error('❌ خطأ في الاستعادة من السحابة:', error);
             setModalConfig({
                 title: '❌ خطأ',
-                body: `<p>${error.message}</p>`,
+                body: `<p>${error.message || 'حدث خطأ أثناء استعادة البيانات من السحابة'}</p>`,
+                hideCancel: true,
                 confirmText: 'موافق'
             });
+        } finally {
+            setLoading(false, '');
         }
     };
 
