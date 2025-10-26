@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppState } from '../../types';
+import { firebaseService } from '../../services/firebaseService';
+import { initializeAi } from '../../services/geminiService';
 import { t } from '../../translations';
 import BackupSelector from '../backup/BackupSelector';
 
@@ -35,6 +37,33 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
     const [isFirebaseConnected, setIsFirebaseConnected] = useState(false);
     const [isGeminiConnected, setIsGeminiConnected] = useState(false);
     const [showBackupSelector, setShowBackupSelector] = useState(false);
+
+    // التحقق من حالة الاتصال
+    useEffect(() => {
+        const checkConnections = async () => {
+            // التحقق من Firebase
+            try {
+                const user = await firebaseService.getCurrentUser();
+                setIsFirebaseConnected(!!user);
+                console.log('🔥 Firebase connection status:', !!user);
+            } catch (error) {
+                console.error('❌ Firebase connection error:', error);
+                setIsFirebaseConnected(false);
+            }
+
+            // التحقق من Gemini
+            try {
+                const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+                setIsGeminiConnected(!!geminiApiKey);
+                console.log('🤖 Gemini API key status:', !!geminiApiKey);
+            } catch (error) {
+                console.error('❌ Gemini connection error:', error);
+                setIsGeminiConnected(false);
+            }
+        };
+
+        checkConnections();
+    }, []);
 
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];

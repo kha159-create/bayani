@@ -16,7 +16,6 @@ import SkeletonDashboard from './components/layout/SkeletonDashboard';
 import DashboardTab from './components/tabs/DashboardTab';
 import TransactionsTab from './components/tabs/TransactionsTab';
 import AIAssistantTab from './components/tabs/AIAssistantTab';
-import AnalysisTab from './components/tabs/AnalysisTab';
 import BudgetTab from './components/tabs/BudgetTab';
 import InvestmentTab from './components/tabs/InvestmentTab';
 import CardsTab from './components/tabs/CardsTab';
@@ -1159,7 +1158,6 @@ const App: React.FC = () => {
             case 'summary': return <DashboardTab calculations={calculations} categories={state.categories} state={state} darkMode={false} language={state.settings.language} onNavigateToTransactions={navigateToTransactionsWithFilter} />;
             case 'transactions': return <TransactionsTab transactions={filteredTransactions} allTransactions={allTransactionsSorted} categories={state.categories} deleteTransaction={handleDeleteTransaction} editTransaction={handleEditTransaction} state={state} darkMode={false} language={state.settings.language} initialCategoryFilter={transactionFilters.categoryId} />;
             case 'ai-assistant': return <AIAssistantTab calculations={calculations} filteredTransactions={filteredTransactions} allTransactions={allTransactionsSorted} state={state} darkMode={false} language={state.settings.language} />;
-            case 'analysis': return <AnalysisTab calculations={calculations} categories={state.categories} allTransactions={state.transactions} darkMode={false} language={state.settings.language} />;
             case 'budget': return <BudgetTab state={state} setLoading={setLoading} setModal={setModalConfig} darkMode={false} language={state.settings.language} />;
             case 'investment': return <InvestmentTab state={state} setState={setState} calculations={calculations} setModal={setModalConfig} darkMode={false} language={state.settings.language} />;
             case 'cards': return <CardsTab state={state} calculations={calculations} openCardFormModal={openCardFormModal} deleteCard={handleDeleteCard} darkMode={false} language={state.settings.language} />;
