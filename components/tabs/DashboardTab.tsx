@@ -56,8 +56,8 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
             return {
                 id: card.id,
                 name: card.name,
-                type: getCardType(card.name),
-                logo: getCardLogo(card.name),
+                type: getCardTypeAndLogo(card.name).type,
+                logo: getCardTypeAndLogo(card.name).logo,
                 currentBalance,
                 usedAmount,
                 availableAmount,
@@ -122,8 +122,8 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                                 const cardInfo = getCardTypeAndLogo(card.name);
                                 const usagePercentage = (card.currentBalance / card.limit) * 100;
                                 const available = card.limit - card.currentBalance;
-                                
-                                return (
+                        
+                        return (
                                     <div key={card.id} className={`bg-gradient-to-br ${cardInfo.color} rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 text-white`}>
                                         {/* Header */}
                                         <div className="flex justify-between items-start mb-6">
@@ -132,11 +132,11 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                                                 <div>
                                                     <h3 className="text-xl font-bold">{card.name}</h3>
                                                     <p className="text-white/80 text-sm">{cardInfo.type}</p>
-                                                </div>
+                                    </div>
                                             </div>
                                             <span className="text-white/70 text-xs">**** {card.id.slice(-4)}</span>
-                                        </div>
-
+                                </div>
+                                
                                         {/* Card Content */}
                                         <div className="space-y-4">
                                             {/* الرصيد المستخدم */}
@@ -152,8 +152,8 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                                                     ></div>
                                                 </div>
                                                 <div className="text-white/60 text-xs mt-1">{usagePercentage.toFixed(1)}% مستخدم</div>
-                                            </div>
-
+                                </div>
+                                
                                             {/* معلومات إضافية */}
                                             <div className="grid grid-cols-2 gap-3">
                                                 <div className="bg-white/10 rounded-lg p-3">
@@ -171,14 +171,14 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                                                 <div className="bg-white/10 rounded-lg p-3">
                                                     <div className="text-white/80 text-xs mb-1">المدفوع</div>
                                                     <div className="text-white font-bold">{formatCurrency(available)}</div>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
-                                );
-                            })}
-                        </div>
-                    </div>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
                 )}
             </div>
 
