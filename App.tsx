@@ -44,6 +44,7 @@ const App: React.FC = () => {
     const [bankAccountForm, setBankAccountForm] = useState<{ isOpen: boolean; initialData?: BankAccountConfig | null }>({ isOpen: false });
     const [loanForm, setLoanForm] = useState<{ isOpen: boolean; initialData?: Loan | null }>({ isOpen: false });
     const [transferModal, setTransferModal] = useState<{ isOpen: boolean }>({ isOpen: false });
+    const [profileModal, setProfileModal] = useState<{ isOpen: boolean }>({ isOpen: false });
     const [transferData, setTransferData] = useState({
         fromAccount: '',
         toAccount: '',
@@ -1153,6 +1154,16 @@ const App: React.FC = () => {
 
     const selectedPeriodText = `${selectedYear} - ${selectedMonth === 'all' ? 'كل الشهور' : new Date(selectedYear, selectedMonth - 1).toLocaleString('ar-SA', { month: 'long' })}`;
 
+    const getUserDisplayName = () => {
+        if (currentUser?.displayName) {
+            return currentUser.displayName.split(' ')[0]; // الاسم الأول فقط
+        }
+        if (currentUser?.email) {
+            return currentUser.email.split('@')[0];
+        }
+        return 'المستخدم';
+    };
+
     const renderTabContent = () => {
         switch (activeTab) {
             case 'summary': return <DashboardTab calculations={calculations} categories={state.categories} state={state} darkMode={false} language={state.settings.language} onNavigateToTransactions={navigateToTransactionsWithFilter} />;
@@ -1176,15 +1187,10 @@ const App: React.FC = () => {
                 selectedMonth={selectedMonth}
                 onYearChange={setSelectedYear}
                 onMonthChange={val => setSelectedMonth(val)}
-                onAddTransaction={() => setTransactionForm({ isOpen: true })}
                 currentUser={currentUser}
                 onSignOut={handleSignOut}
-                language={state.settings.language}
-                darkMode={false}
-                notifications={state.settings.notifications}
-                onToggleDarkMode={toggleDarkMode}
-                onToggleNotifications={toggleNotifications}
-                onToggleLanguage={toggleLanguage}
+                onOpenProfile={() => setProfileModal({ isOpen: true })}
+                getUserDisplayName={getUserDisplayName}
             />
             
             <main className="container mx-auto px-2 sm:px-4 max-w-7xl mt-8 mb-20">

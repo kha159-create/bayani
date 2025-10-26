@@ -8,15 +8,10 @@ interface HeaderProps {
     selectedMonth: number | 'all';
     onYearChange: (year: number) => void;
     onMonthChange: (month: number | 'all') => void;
-    onAddTransaction: () => void;
     currentUser: any;
     onSignOut: () => void;
-    language?: 'ar' | 'en';
-    darkMode?: boolean;
-    notifications?: boolean;
-    onToggleDarkMode?: () => void;
-    onToggleNotifications?: () => void;
-    onToggleLanguage?: () => void;
+    onOpenProfile: () => void;
+    getUserDisplayName: () => string;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
@@ -24,15 +19,10 @@ const Header: React.FC<HeaderProps> = ({
     selectedMonth, 
     onYearChange, 
     onMonthChange, 
-    onAddTransaction, 
     currentUser, 
-    onSignOut, 
-    language = 'ar',
-    darkMode = false,
-    notifications = false,
-    onToggleDarkMode,
-    onToggleNotifications,
-    onToggleLanguage
+    onSignOut,
+    onOpenProfile,
+    getUserDisplayName
 }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [greeting, setGreeting] = useState('');
@@ -88,16 +78,6 @@ const Header: React.FC<HeaderProps> = ({
         };
     }, []);
 
-    const getUserDisplayName = () => {
-        if (currentUser?.displayName) {
-            return currentUser.displayName.split(' ')[0]; // الاسم الأول فقط
-        }
-        if (currentUser?.email) {
-            return currentUser.email.split('@')[0];
-        }
-        return 'المستخدم';
-    };
-
     return (
         <header className="bg-gradient-to-r from-[#031A2E]/90 to-[#052E4D]/90 backdrop-blur-xl border-b border-blue-400/30 py-4 shadow-2xl relative z-30">
             <div className="container mx-auto px-4">
@@ -134,42 +114,77 @@ const Header: React.FC<HeaderProps> = ({
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                 className="w-12 h-12 rounded-full overflow-hidden shadow-2xl bg-gradient-to-br from-cyan-400/20 to-blue-500/20 p-1 hover:scale-105 transition-transform duration-300"
                             >
-                                <div className="w-full h-full bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
-                                    <span className="text-white font-bold text-lg">
-                                        {(currentUser.displayName || currentUser.email || 'U').charAt(0).toUpperCase()}
-                                    </span>
-                                </div>
+                                {currentUser?.photoURL ? (
+                                    <img 
+                                        src={currentUser.photoURL} 
+                                        alt="User Avatar" 
+                                        className="w-full h-full object-cover rounded-full" 
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
+                                        <span className="text-white font-bold text-lg">
+                                            {(currentUser?.displayName || currentUser?.email || 'U').charAt(0).toUpperCase()}
+                                        </span>
+                                    </div>
+                                )}
                             </button>
                             
                             {/* قائمة المستخدم المنسدلة */}
                             {isDropdownOpen && (
-                                <div className="absolute left-0 mt-2 w-48 bg-gradient-to-br from-slate-800/95 to-blue-900/95 backdrop-blur-lg border border-blue-400/20 rounded-xl shadow-2xl z-50">
-                                    <div className="p-2">
-                                        <div className="px-3 py-2 text-white font-semibold border-b border-blue-400/20">
-                                            {getUserDisplayName()}
+                                <div className="absolute left-0 mt-2 w-64 bg-gradient-to-br from-slate-800/95 to-blue-900/95 backdrop-blur-lg border border-blue-400/20 rounded-xl shadow-2xl z-50">
+                                    {/* معلومات المستخدم */}
+                                    <div className="p-4 border-b border-blue-400/20">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
+                                                {currentUser?.photoURL ? (
+                                                    <img src={currentUser.photoURL} alt="User Avatar" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <span className="text-white font-bold text-xl">
+                                                        {(currentUser?.displayName || currentUser?.email || 'U').charAt(0).toUpperCase()}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <h3 className="font-semibold text-white">{getUserDisplayName()}</h3>
+                                                <p className="text-sm text-blue-200">{currentUser?.email}</p>
+                                            </div>
                                         </div>
+                                    </div>
+
+                                    {/* خيارات القائمة */}
+                                    <div className="py-2">
                                         <button
                                             onClick={() => {
-                                                onAddTransaction();
+                                                onOpenProfile();
                                                 setIsDropdownOpen(false);
                                             }}
-                                            className="w-full flex items-center gap-3 px-3 py-2 text-blue-200 hover:text-white hover:bg-blue-500/20 rounded-lg transition-colors"
+                                            className="block w-full text-right px-4 py-3 text-blue-200 hover:text-white hover:bg-blue-500/20 transition-colors flex items-center gap-3"
                                         >
-                                            <PlusIcon />
-                                            إضافة حركة
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                onSignOut();
-                                                setIsDropdownOpen(false);
-                                            }}
-                                            className="w-full flex items-center gap-3 px-3 py-2 text-red-300 hover:text-red-200 hover:bg-red-500/20 rounded-lg transition-colors"
-                                        >
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
-                                            تسجيل الخروج
+                                            الملف الشخصي
                                         </button>
+                                        <button className="block w-full text-right px-4 py-3 text-blue-200 hover:text-white hover:bg-blue-500/20 transition-colors flex items-center gap-3">
+                                            <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM9 7H4l5-5v5z" />
+                                            </svg>
+                                            الإشعارات
+                                        </button>
+                                        <div className="border-t border-blue-400/20 mt-2 pt-2">
+                                            <button
+                                                onClick={() => {
+                                                    onSignOut();
+                                                    setIsDropdownOpen(false);
+                                                }}
+                                                className="block w-full text-right px-4 py-3 text-red-300 hover:text-red-200 hover:bg-red-500/20 transition-colors flex items-center gap-3"
+                                            >
+                                                <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                                </svg>
+                                                تسجيل الخروج
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             )}
