@@ -3,7 +3,6 @@ import { FinancialCalculations, Category, CardDetails, BankAccountDetails, AppSt
 import { formatCurrency } from '../../utils/formatting';
 import { t } from '../../translations';
 import AzkarCard from '../common/AzkarCard';
-import PieChart from '../common/PieChart';
 
 interface DashboardTabProps {
     calculations: FinancialCalculations;
@@ -35,40 +34,27 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
         return { type: 'Credit Card', logo: '●●', color: 'from-gray-600 to-gray-800' };
     };
 
-    // حساب ملخص البطاقات الائتمانية - نفس منطق صفحة إدارة البطاقات
+    // حساب ملخص البطاقات الائتمانية - باستخدام calculations.cardDetails مباشرة
     const creditCardsSummary = useMemo(() => {
-        return Object.values(state.cards || {}).map(card => {
-            // استخدام نفس منطق الحساب من calculations.cardDetails
-            const cardTransactions = state.transactions.filter(t => t.paymentMethod === card.id);
-            let balance = 0;
-            
-            // حساب الرصيد المستخدم من جميع المعاملات
-            cardTransactions.forEach(t => {
-                if (t.type === 'expense' || t.type === 'bnpl-payment') {
-                    balance += t.amount;
-                } else if (t.type === 'income' && t.description?.includes('سداد')) {
-                    balance -= t.amount;
-                } else if (t.type.endsWith('-payment') && t.type === `${card.id}-payment`) {
-                    balance -= t.amount;
-                }
-            });
-            
-            const available = card.limit - balance;
-            const usagePercentage = (balance / card.limit) * 100;
+        return Object.values(calculations.cardDetails || {}).map(card => {
+            const cardInfo = getCardTypeAndLogo(card.name);
+            const usagePercentage = (card.balance / card.limit) * 100;
+            const available = card.limit - card.balance;
             
             return {
                 id: card.id,
                 name: card.name,
-                type: getCardTypeAndLogo(card.name).type,
-                logo: getCardTypeAndLogo(card.name).logo,
-                currentBalance: balance,
-                usedAmount: balance,
+                type: cardInfo.type,
+                logo: cardInfo.logo,
+                color: cardInfo.color,
+                currentBalance: card.balance,
+                usedAmount: card.balance,
                 availableAmount: available,
                 limit: card.limit,
                 usagePercentage: usagePercentage
             };
         });
-    }, [state.cards, state.transactions]);
+    }, [calculations.cardDetails]);
 
     // بيانات الرسم البياني الدائري
     const pieChartData = useMemo(() => {
@@ -98,163 +84,158 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
             });
     }, [calculations.expensesByCategory, categories, language]);
 
+    // ملخص الحسابات البنكية
+    const bankAccountDetails = calculations.bankAccountDetails;
+    const bankAccountsCount = Object.keys(bankAccountDetails).length;
+    const totalBankAccountsBalance = Object.values(bankAccountDetails).reduce((sum, account) => sum + account.balance, 0);
+    
+    // آخر 5 حركات
+    const lastFiveTransactions = useMemo(() => {
+        return state.transactions
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+            .slice(0, 5);
+    }, [state.transactions]);
+
     return (
         <div className="space-y-6">
-            {/* بطاقة النظرة العامة */}
-            <div className="bg-gradient-to-br from-cyan-400/90 to-blue-500/90 backdrop-blur-xl border border-cyan-300/30 rounded-3xl p-8 shadow-2xl">
+            {/* 1. بطاقة الأذكار */}
+            <AzkarCard darkMode={darkMode} />
+
+            {/* 2. آخر خمس حركات */}
+            {lastFiveTransactions.length > 0 && (
+                <div className="bg-gradient-to-br from-slate-800/60 to-blue-900/60 backdrop-blur-xl border border-blue-400/30 rounded-2xl p-6 shadow-xl">
+                    <h3 className="text-xl font-bold text-white mb-4">آخر 5 حركات</h3>
+                    <div className="space-y-2">
+                        {lastFiveTransactions.map((transaction) => {
+                            const category = categories.find(c => c.id === transaction.categoryId);
+                            return (
+                                <div key={transaction.id} className="bg-slate-700/40 backdrop-blur-md rounded-lg p-3 flex items-center justify-between border border-white/10">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-2xl">{category?.icon || '📊'}</span>
+                                        <div>
+                                            <div className="text-white font-semibold">{transaction.description}</div>
+                                            <div className="text-blue-200 text-sm">{new Date(transaction.date).toLocaleDateString('ar-SA')}</div>
+                                        </div>
+                                    </div>
+                                    <div className={`text-lg font-bold ${transaction.type === 'income' ? 'text-green-400' : 'text-red-400'}`}>
+                                        {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {/* 3. بطاقة النظرة العامة */}
+            <div className="bg-gradient-to-br from-cyan-400/90 to-blue-500/90 backdrop-blur-xl border border-cyan-300/30 rounded-2xl p-6 shadow-2xl">
                 <div className="text-center text-white mb-6">
                     <h2 className="text-2xl font-bold mb-2">نظرة عامة</h2>
-                    <div className="text-5xl font-bold mb-4">{formatCurrency(totalBankBalance)}</div>
+                    <div className="text-4xl font-bold mb-4">{formatCurrency(totalBankBalance)}</div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="bg-white/20 backdrop-blur-md rounded-xl p-3 border border-white/30">
-                            <div className="text-2xl font-bold">{formatCurrency(totalIncome)}</div>
-                            <div className="text-white/80">إجمالي الدخل</div>
+                            <div className="text-xl font-bold">{formatCurrency(totalIncome)}</div>
+                            <div className="text-white/80 text-xs">إجمالي الدخل</div>
                         </div>
                         <div className="bg-white/20 backdrop-blur-md rounded-xl p-3 border border-white/30">
-                            <div className="text-2xl font-bold">{formatCurrency(totalExpenses)}</div>
-                            <div className="text-white/80">إجمالي المصاريف</div>
+                            <div className="text-xl font-bold">{formatCurrency(totalExpenses)}</div>
+                            <div className="text-white/80 text-xs">إجمالي المصاريف</div>
                         </div>
                     </div>
                 </div>
+                
+                {/* ملخص الحسابات البنكية */}
+                {bankAccountsCount > 0 && (
+                    <div className="mb-4">
+                        <h3 className="text-lg font-bold text-white mb-3 text-center">ملخص الحسابات البنكية</h3>
+                        <div className="grid grid-cols-3 gap-2">
+                            <div className="bg-white/20 backdrop-blur-md rounded-lg p-2 text-center border border-white/30">
+                                <div className="text-lg font-bold">{bankAccountsCount}</div>
+                                <div className="text-white/80 text-xs">حسابات</div>
+                            </div>
+                            <div className="bg-white/20 backdrop-blur-md rounded-lg p-2 text-center border border-white/30">
+                                <div className="text-lg font-bold">{formatCurrency(totalBankAccountsBalance)}</div>
+                                <div className="text-white/80 text-xs">إجمالي</div>
+                            </div>
+                            <div className="bg-white/20 backdrop-blur-md rounded-lg p-2 text-center border border-white/30">
+                                <div className="text-lg font-bold">{Object.values(bankAccountDetails).filter(a => a.balance >= 0).length}</div>
+                                <div className="text-white/80 text-xs">إيجابية</div>
+                            </div>
+                        </div>
+                    </div>
+                )}
                         
                 {/* ملخص البطاقات الائتمانية */}
                 {creditCardsSummary.length > 0 && (
-                    <div className="mt-6">
-                        <h3 className="text-lg font-bold text-white mb-4 text-center">ملخص البطاقات الائتمانية</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {creditCardsSummary.map((card) => {
-                                const cardInfo = getCardTypeAndLogo(card.name);
-                        
-                                return (
-                                    <div key={card.id} className={`bg-gradient-to-br ${cardInfo.color} rounded-2xl p-5 shadow-xl hover:shadow-2xl transition-all duration-300 text-white backdrop-blur-sm`}>
-                                        {/* Header */}
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="text-left">
-                                                <div className="text-4xl font-bold mb-2">{cardInfo.logo}</div>
-                                                <h3 className="text-lg font-bold">{card.name}</h3>
-                                                <p className="text-white/80 text-sm">{cardInfo.type}</p>
-                                                <p className="text-white/70 text-xs mt-1">**** {card.id.slice(-4)}</p>
+                    <div>
+                        <h3 className="text-lg font-bold text-white mb-3 text-center">ملخص البطاقات الائتمانية</h3>
+                        <div className="grid grid-cols-2 gap-2">
+                            {creditCardsSummary.map((card) => (
+                                <div key={card.id} className={`bg-gradient-to-br ${card.color} rounded-lg p-3 shadow-lg text-white backdrop-blur-sm`}>
+                                    {/* Header */}
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <div className="text-2xl font-bold mb-1">{card.logo}</div>
+                                            <h3 className="text-sm font-bold line-clamp-1">{card.name}</h3>
+                                            <p className="text-white/80 text-xs">{card.type}</p>
+                                        </div>
+                                        <p className="text-white/70 text-xs">**** {card.id.slice(-4)}</p>
+                                    </div>
+                            
+                                    {/* المحتوى */}
+                                    <div className="space-y-2">
+                                        <div className="bg-white/10 backdrop-blur-md rounded-lg p-2">
+                                            <div className="text-white/80 text-xs mb-1">المستخدم</div>
+                                            <div className="text-white font-bold text-sm">{formatCurrency(card.currentBalance)}</div>
+                                            <div className="w-full bg-white/20 rounded-full h-1 mt-1">
+                                                <div 
+                                                    className="bg-white h-1 rounded-full transition-all duration-300"
+                                                    style={{ width: `${Math.min(card.usagePercentage || 0, 100)}%` }}
+                                                ></div>
                                             </div>
                                         </div>
-                                
-                                        {/* Card Content - Layout عمودي */}
-                                        <div className="space-y-3">
-                                            {/* الرصيد المستخدم - كبير وواضح */}
-                                            <div className="bg-white/10 backdrop-blur-md rounded-xl p-4">
-                                                <div className="text-white/80 text-xs mb-1">الرصيد المستخدم</div>
-                                                <div className="text-white font-bold text-2xl mb-2">{formatCurrency(card.currentBalance)}</div>
-                                                <div className="w-full bg-white/20 rounded-full h-2">
-                                                    <div 
-                                                        className="bg-white h-2 rounded-full transition-all duration-300"
-                                                        style={{ width: `${Math.min(card.usagePercentage || 0, 100)}%` }}
-                                                    ></div>
-                                                </div>
-                                                <div className="text-white/60 text-xs mt-1">{(card.usagePercentage || 0).toFixed(1)}% مستخدم</div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div className="bg-white/10 backdrop-blur-md rounded p-1.5 text-xs">
+                                                <div className="text-white/80 text-xs">الحد</div>
+                                                <div className="text-white font-bold">{formatCurrency(card.limit)}</div>
                                             </div>
-                                
-                                            {/* معلومات إضافية - Grid */}
-                                            <div className="grid grid-cols-2 gap-2">
-                                                <div className="bg-white/10 backdrop-blur-md rounded-lg p-3">
-                                                    <div className="text-white/80 text-xs mb-1">الرصيد المتاح</div>
-                                                    <div className="text-white font-bold text-sm">{formatCurrency(card.availableAmount)}</div>
-                                                </div>
-                                                <div className="bg-white/10 backdrop-blur-md rounded-lg p-3">
-                                                    <div className="text-white/80 text-xs mb-1">الحد الائتماني</div>
-                                                    <div className="text-white font-bold text-sm">{formatCurrency(card.limit)}</div>
-                                                </div>
-                                                <div className="bg-white/10 backdrop-blur-md rounded-lg p-3">
-                                                    <div className="text-white/80 text-xs mb-1">المتبقي</div>
-                                                    <div className="text-white font-bold text-sm">{formatCurrency(card.currentBalance)}</div>
-                                                </div>
-                                                <div className="bg-white/10 backdrop-blur-md rounded-lg p-3">
-                                                    <div className="text-white/80 text-xs mb-1">المدفوع</div>
-                                                    <div className="text-white font-bold text-sm">{formatCurrency(card.availableAmount)}</div>
-                                                </div>
+                                            <div className="bg-white/10 backdrop-blur-md rounded p-1.5 text-xs">
+                                                <div className="text-white/80 text-xs">المتاح</div>
+                                                <div className="text-white font-bold">{formatCurrency(card.availableAmount)}</div>
                                             </div>
                                         </div>
                                     </div>
-                                );
-                            })}
+                                </div>
+                            ))}
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* بطاقة الأذكار */}
-            <AzkarCard darkMode={darkMode} />
-
-            {/* الرسم البياني الدائري للفئات */}
+            {/* 4. ملخص الفئات */}
             {pieChartData.length > 0 && (
                 <div className="bg-gradient-to-br from-slate-800/60 to-blue-900/60 backdrop-blur-xl border border-blue-400/30 rounded-2xl p-6 shadow-xl">
-                    <h3 className="text-xl font-bold text-white mb-6 text-center">توزيع المصاريف حسب الفئات</h3>
+                    <h3 className="text-xl font-bold text-white mb-4 text-center">توزيع المصاريف حسب الفئات</h3>
                     
-                    <div className="flex flex-col lg:flex-row items-center gap-8">
-                        {/* الرسم البياني الدائري - أكبر حجماً */}
-                        <div className="flex-shrink-0">
-                            <svg width="300" height="300" viewBox="0 0 200 200" className="transform -rotate-90">
-                                {pieChartData.map((item, index) => {
-                                    let cumulativePercentage = 0;
-                                    for (let i = 0; i < index; i++) {
-                                        cumulativePercentage += pieChartData[i].percentage;
-                                    }
-                                    
-                                    const radius = 80;
-                                    const centerX = 100;
-                                    const centerY = 100;
-                                    
-                                    const startAngle = (cumulativePercentage * 360) / 100;
-                                    const endAngle = ((cumulativePercentage + item.percentage) * 360) / 100;
-                                    
-                                    const startAngleRad = (startAngle * Math.PI) / 180;
-                                    const endAngleRad = (endAngle * Math.PI) / 180;
-                                    
-                                    const x1 = centerX + radius * Math.cos(startAngleRad);
-                                    const y1 = centerY + radius * Math.sin(startAngleRad);
-                                    const x2 = centerX + radius * Math.cos(endAngleRad);
-                                    const y2 = centerY + radius * Math.sin(endAngleRad);
-                                    
-                                    const largeArcFlag = item.percentage > 50 ? 1 : 0;
-                                    
-                                    const pathData = `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
-                        
-                        return (
-                                        <path
-                                            key={item.id}
-                                            d={pathData}
-                                            fill={item.color}
-                                            stroke="rgba(255, 255, 255, 0.1)"
-                                            strokeWidth="1"
-                                            className="hover:opacity-80 transition-opacity duration-300"
-                                        />
-                                    );
-                                })}
-                            </svg>
+                    {/* قائمة الفئات بدون رسم بياني */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {pieChartData.map((item) => (
+                            <div 
+                                key={item.id} 
+                                className="flex items-center gap-3 p-3 bg-white/10 backdrop-blur-md rounded-lg cursor-pointer hover:bg-white/20 transition-colors border border-white/10"
+                                onClick={() => onNavigateToTransactions?.(item.id)}
+                            >
+                                <span className="text-3xl">{item.icon}</span>
+                                <div className="flex-1">
+                                    <div className="text-white font-semibold">{item.name}</div>
+                                    <div className="text-blue-200 text-sm">{(item.percentage || 0).toFixed(1)}% من إجمالي المصاريف</div>
                                 </div>
-                                
-                        {/* مفتاح الألوان - متناسق حول الرسم البياني */}
-                        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {pieChartData.map((item) => (
-                                <div 
-                                    key={item.id} 
-                                    className="flex items-center gap-3 p-3 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
-                                    onClick={() => onNavigateToTransactions?.(item.id)}
-                                >
-                                    <div 
-                                        className="w-4 h-4 rounded-full flex-shrink-0"
-                                        style={{ backgroundColor: item.color }}
-                                    />
-                                    <span className="text-2xl">{item.icon}</span>
-                                    <div className="flex-1">
-                                        <div className="text-white font-semibold">{item.name}</div>
-                                        <div className="text-blue-200 text-sm">{(item.percentage || 0).toFixed(1)}%</div>
-                                    </div>
-                                    <div className="text-white font-bold">
-                                        {item.value.toLocaleString()} ريال
-                </div>
-            </div>
-                            ))}
-                </div>
-            </div>
+                                <div className="text-white font-bold text-lg">
+                                    {item.value.toLocaleString()} ر.س
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
         </div>
