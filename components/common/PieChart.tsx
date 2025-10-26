@@ -15,6 +15,7 @@ interface PieChartProps {
 const PieChart: React.FC<PieChartProps> = ({ data, total, onCategoryClick }) => {
     // حساب النسب المتراكمة مقدماً
     const chartData = React.useMemo(() => {
+        if (!total || total === 0) return [];
         let cumulativePercentage = 0;
         return data.map(item => {
             const percentage = (item.value / total) * 100;
@@ -22,13 +23,18 @@ const PieChart: React.FC<PieChartProps> = ({ data, total, onCategoryClick }) => 
             cumulativePercentage += percentage;
             return {
                 ...item,
-                percentage,
-                startPercentage
+                percentage: isNaN(percentage) || !isFinite(percentage) ? 0 : percentage,
+                startPercentage: isNaN(startPercentage) || !isFinite(startPercentage) ? 0 : startPercentage
             };
         });
     }, [data, total]);
 
     const getPathData = (percentage: number, startPercentage: number) => {
+        // حماية من القيم غير الصالحة
+        if (isNaN(percentage) || isNaN(startPercentage) || !isFinite(percentage) || !isFinite(startPercentage)) {
+            return '';
+        }
+        
         const radius = 80;
         const centerX = 100;
         const centerY = 100;
@@ -45,6 +51,11 @@ const PieChart: React.FC<PieChartProps> = ({ data, total, onCategoryClick }) => 
         const y2 = centerY + radius * Math.sin(endAngleRad);
         
         const largeArcFlag = percentage > 50 ? 1 : 0;
+        
+        // التحقق من النتائج
+        if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) {
+            return '';
+        }
         
         return `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
     };

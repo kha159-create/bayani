@@ -630,8 +630,24 @@ const App: React.FC = () => {
     const handleUpdateProfile = async (data: { displayName: string; email: string; photoURL?: string }) => {
         try {
             setLoading(true, 'جار تحديث الملف الشخصي...');
+            
+            // حفظ الصورة في localStorage إذا كانت موجودة
+            if (data.photoURL && data.photoURL.startsWith('data:')) {
+                localStorage.setItem('profile_photo', data.photoURL);
+            }
+            
             // TODO: إضافة منطق تحديث الملف الشخصي في Firebase
             console.log('تحديث الملف الشخصي:', data);
+            
+            // تحديث state المستخدم المحلي
+            if (currentUser) {
+                setCurrentUser({
+                    ...currentUser,
+                    displayName: data.displayName,
+                    photoURL: data.photoURL || currentUser.photoURL
+                });
+            }
+            
             setModalConfig({
                 title: '✅ تم التحديث',
                 body: '<p>تم تحديث الملف الشخصي بنجاح!</p>',

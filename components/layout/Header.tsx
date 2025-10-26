@@ -79,40 +79,40 @@ const Header: React.FC<HeaderProps> = ({
     }, []);
 
     return (
-        <header className="bg-gradient-to-r from-[#031A2E]/90 to-[#052E4D]/90 backdrop-blur-xl border-b border-blue-400/30 py-4 shadow-2xl relative z-30">
-            <div className="container mx-auto px-4">
-                <div className="flex justify-between items-center">
+        <header className="bg-gradient-to-r from-[#031A2E]/90 to-[#052E4D]/90 backdrop-blur-xl border-b border-blue-400/30 py-2 md:py-4 shadow-2xl relative z-30">
+            <div className="container mx-auto px-2 md:px-4">
+                <div className="flex justify-between items-center gap-2 overflow-x-auto">
                     {/* اليسار: شعار التطبيق واسمه */}
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg bg-gradient-to-br from-cyan-400/20 to-blue-500/20 p-0.5">
+                    <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden shadow-lg bg-gradient-to-br from-cyan-400/20 to-blue-500/20 p-0.5">
                             <img src="./logo.jpg" alt="Bayani Logo" className="w-full h-full object-cover rounded-lg" />
                         </div>
-                        <div className="text-right">
-                            <h1 className="text-xl font-bold text-white tracking-wide bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">بياني</h1>
+                        <div className="text-right hidden sm:block">
+                            <h1 className="text-base md:text-xl font-bold text-white tracking-wide bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">بياني</h1>
                             <p className="text-xs text-blue-200 font-medium">كل شيء عن مالي… في بياني</p>
                         </div>
                     </div>
 
                     {/* الوسط: فلتر التاريخ */}
-                    <div className="flex items-center gap-3 bg-gradient-to-r from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 p-2 rounded-xl shadow-lg">
-                        <select value={selectedYear} onChange={(e) => onYearChange(parseInt(e.target.value))} className="bg-transparent text-white font-bold border-0 focus:ring-0 appearance-none p-2 rounded-lg text-center min-w-[80px]">
+                    <div className="flex items-center gap-2 md:gap-3 bg-gradient-to-r from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 p-1 md:p-2 rounded-xl shadow-lg flex-shrink-0">
+                        <select value={selectedYear} onChange={(e) => onYearChange(parseInt(e.target.value))} className="bg-transparent text-white font-bold text-xs md:text-base border-0 focus:ring-0 appearance-none p-1 md:p-2 rounded-lg text-center min-w-[60px] md:min-w-[80px]">
                             {years.map(y => <option key={y} value={y} className="bg-slate-800 text-white">{y}</option>)}
                         </select>
-                        <div className="w-px h-6 bg-blue-400/30"></div>
-                        <select value={selectedMonth} onChange={(e) => onMonthChange(e.target.value === 'all' ? 'all' : parseInt(e.target.value))} className="bg-transparent text-white font-bold border-0 focus:ring-0 appearance-none p-2 rounded-lg text-center min-w-[120px]">
+                        <div className="w-px h-4 md:h-6 bg-blue-400/30"></div>
+                        <select value={selectedMonth} onChange={(e) => onMonthChange(e.target.value === 'all' ? 'all' : parseInt(e.target.value))} className="bg-transparent text-white font-bold text-xs md:text-base border-0 focus:ring-0 appearance-none p-1 md:p-2 rounded-lg text-center min-w-[80px] md:min-w-[120px]">
                             {months.map(m => <option key={m.value} value={m.value} className="bg-slate-800 text-white">{m.label}</option>)}
                         </select>
                     </div>
 
                     {/* اليمين: صورة المستخدم واسمه */}
-                    <div className="flex items-center gap-4">
-                        <div className="text-right">
-                            <p className="text-white font-semibold text-lg">{greeting}، {getUserDisplayName().split(' ')[0]}</p>
+                    <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+                        <div className="text-right hidden sm:block">
+                            <p className="text-white font-semibold text-sm md:text-lg">{greeting}، {getUserDisplayName().split(' ')[0]}</p>
                         </div>
                         <div className="relative" ref={dropdownRef}>
                             <button
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                className="w-12 h-12 rounded-full overflow-hidden shadow-2xl bg-gradient-to-br from-cyan-400/20 to-blue-500/20 p-1 hover:scale-105 transition-transform duration-300"
+                                className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden shadow-2xl bg-gradient-to-br from-cyan-400/20 to-blue-500/20 p-0.5 md:p-1 hover:scale-105 transition-transform duration-300"
                             >
                                 {currentUser?.photoURL ? (
                                     <img 
