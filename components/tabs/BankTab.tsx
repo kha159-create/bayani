@@ -3,6 +3,7 @@ import { AppState, BankAccountConfig, Transaction, FinancialCalculations, Catego
 import { TrashIcon } from '../common/Icons';
 import { formatCurrency } from '../../utils/formatting';
 import { t } from '../../translations';
+import { getBankLogo } from '../../services/bankLogoService';
 
 interface BankTabProps {
     state: AppState;
@@ -50,12 +51,14 @@ const BankTab: React.FC<BankTabProps> = ({
                     >
                         + إضافة حساب جديد
                     </button>
-                    <button
-                        onClick={openTransferModal}
-                        className="bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg"
-                    >
-                        💸 تحويل بين الحسابات
-                    </button>
+                    {Object.keys(bankAccountDetails).length > 1 && (
+                        <button
+                            onClick={openTransferModal}
+                            className="bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg"
+                        >
+                            💸 تحويل بين الحسابات
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -65,8 +68,16 @@ const BankTab: React.FC<BankTabProps> = ({
                     <div key={account.id} className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300">
                         <div className="flex justify-between items-start mb-4">
                             <div>
-                                <h3 className="text-xl font-bold text-white">{account.name}</h3>
-                                <p className="text-blue-200 text-sm">حساب بنكي</p>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-2xl">{account.logo || getBankLogo(account.bankName || '')}</span>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white">{account.name}</h3>
+                                        {account.bankName && (
+                                            <p className="text-blue-200 text-sm">{account.bankName}</p>
+                                        )}
+                                        <p className="text-blue-200 text-xs">{account.accountType === 'current' ? 'حساب جاري' : account.accountType === 'savings' ? 'حساب توفير' : account.accountType === 'investment' ? 'حساب استثماري' : 'حساب تجاري'}</p>
+                                    </div>
+                                </div>
                             </div>
                             <div className="flex gap-2">
                                 <button

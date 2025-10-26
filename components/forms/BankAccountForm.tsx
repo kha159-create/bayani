@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { BankAccountConfig } from '../../types';
 import { t } from '../../translations';
 import { XMarkIcon } from '../common/Icons';
+import { getBankLogo, getBankInfo } from '../../services/bankLogoService';
 
 interface BankAccountFormProps {
     onClose: () => void;
@@ -34,7 +35,15 @@ const BankAccountForm: React.FC<BankAccountFormProps> = ({ onClose, onSave, init
         if (name === 'smsSamples') {
             setAccount(prev => ({ ...prev, smsSamples: value.split(',').map(k => k.trim()).filter(Boolean) }));
         } else {
-            setAccount(prev => ({ ...prev, [name]: type === 'number' ? parseFloat(value) || 0 : value }));
+            const newAccount = { ...account, [name]: type === 'number' ? parseFloat(value) || 0 : value };
+            
+            // تحديث الشعار تلقائياً عند تغيير اسم البنك
+            if (name === 'bankName' && value) {
+                const logo = getBankLogo(value);
+                newAccount.logo = logo;
+            }
+            
+            setAccount(newAccount);
         }
     };
 

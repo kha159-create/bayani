@@ -19,6 +19,7 @@ const CardForm: React.FC<CardFormProps> = ({ onClose, onSave, initialData, darkM
         dueDay: 15,
         statementDay: 25,
         smsSamples: [],
+        cardType: 'visa', // نوع البطاقة الافتراضي
     });
 
     useEffect(() => {
@@ -53,6 +54,15 @@ const CardForm: React.FC<CardFormProps> = ({ onClose, onSave, initialData, darkM
                          <div>
                             <label htmlFor="name" className="block text-sm font-medium text-blue-200 mb-1">اسم البطاقة</label>
                             <input type="text" name="name" value={card.name} onChange={handleChange} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white placeholder-blue-300 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400" required />
+                        </div>
+                        <div>
+                            <label htmlFor="cardType" className="block text-sm font-medium text-blue-200 mb-1">نوع البطاقة</label>
+                            <select name="cardType" value={card.cardType || 'visa'} onChange={handleChange} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400" required>
+                                <option value="visa" className="bg-slate-800 text-white">💳 Visa</option>
+                                <option value="mastercard" className="bg-slate-800 text-white">💳 Mastercard</option>
+                                <option value="amex" className="bg-slate-800 text-white">💳 American Express</option>
+                                <option value="other" className="bg-slate-800 text-white">💳 أخرى</option>
+                            </select>
                         </div>
                         <div>
                             <label htmlFor="limit" className="block text-sm font-medium text-blue-200 mb-1">الحد الائتماني</label>

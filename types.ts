@@ -51,6 +51,7 @@ export interface CardConfig {
     statementDay: number; // Day of the month the statement is generated
     smsSamples?: string[];
     currency?: string; // Default: 'SAR'
+    cardType?: 'visa' | 'mastercard' | 'amex' | 'other'; // نوع البطاقة
 }
 
 export interface BankAccountConfig {

@@ -4,6 +4,35 @@ import { TrashIcon } from '../common/Icons';
 import { formatCurrency } from '../../utils/formatting';
 import { t } from '../../translations';
 
+// دالة تحديد نوع البطاقة وشعارها
+const getCardTypeAndLogo = (card: any) => {
+    if (card.cardType) {
+        switch (card.cardType) {
+            case 'visa':
+                return { type: 'Visa', logo: '💳', color: 'from-blue-600 to-blue-800' };
+            case 'mastercard':
+                return { type: 'Mastercard', logo: '💳', color: 'from-red-500 to-orange-500' };
+            case 'amex':
+                return { type: 'American Express', logo: '💳', color: 'from-green-600 to-blue-600' };
+            default:
+                return { type: 'Credit Card', logo: '💳', color: 'from-gray-600 to-gray-800' };
+        }
+    }
+    
+    // Fallback للبطاقات القديمة
+    const name = card.name.toLowerCase();
+    if (name.includes('visa') || name.includes('فيزا')) {
+        return { type: 'Visa', logo: '💳', color: 'from-blue-600 to-blue-800' };
+    }
+    if (name.includes('mastercard') || name.includes('ماستر')) {
+        return { type: 'Mastercard', logo: '💳', color: 'from-red-500 to-orange-500' };
+    }
+    if (name.includes('amex') || name.includes('أمريكان')) {
+        return { type: 'American Express', logo: '💳', color: 'from-green-600 to-blue-600' };
+    }
+    return { type: 'Credit Card', logo: '💳', color: 'from-gray-600 to-gray-800' };
+};
+
 interface CardsTabProps {
     state: AppState;
     calculations: FinancialCalculations;
@@ -34,7 +63,7 @@ const CardsTab: React.FC<CardsTabProps> = ({ state, calculations, openCardFormMo
                         + إضافة بطاقة جديدة
                     </button>
                 </div>
-            </div>
+                    </div>
 
             {/* قائمة البطاقات */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -42,22 +71,27 @@ const CardsTab: React.FC<CardsTabProps> = ({ state, calculations, openCardFormMo
                     <div key={card.id} className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300">
                         <div className="flex justify-between items-start mb-4">
                             <div>
-                                <h3 className="text-xl font-bold text-white">{card.name}</h3>
-                                <p className="text-blue-200 text-sm">بطاقة ائتمانية</p>
-                            </div>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => openCardFormModal(card.id)}
-                                    className="bg-blue-500/20 text-blue-300 p-2 rounded-lg hover:bg-blue-500/30 transition-colors"
-                                >
-                                    ✏️
-                                </button>
-                                <button
-                                    onClick={() => deleteCard(card.id)}
-                                    className="bg-red-500/20 text-red-300 p-2 rounded-lg hover:bg-red-500/30 transition-colors"
-                                >
-                                    🗑️
-                                </button>
+                                <div className="flex items-center gap-3 mb-2">
+                                    <span className="text-2xl">{getCardTypeAndLogo(card).logo}</span>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white">{card.name}</h3>
+                                        <p className="text-blue-200 text-sm">{getCardTypeAndLogo(card).type}</p>
+                </div>
+                </div>
+            </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => openCardFormModal(card.id)}
+                                        className="bg-blue-500/20 text-blue-300 p-2 rounded-lg hover:bg-blue-500/30 transition-colors"
+                                    >
+                                        ✏️
+                                    </button>
+                                    <button
+                                        onClick={() => deleteCard(card.id)}
+                                        className="bg-red-500/20 text-red-300 p-2 rounded-lg hover:bg-red-500/30 transition-colors"
+                                    >
+                                        🗑️
+                                    </button>
                         </div>
                     </div>
 
