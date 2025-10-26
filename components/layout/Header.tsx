@@ -35,7 +35,20 @@ const Header: React.FC<HeaderProps> = ({
     onToggleLanguage
 }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [greeting, setGreeting] = useState('');
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // تحديد التحية حسب الوقت
+    useEffect(() => {
+        const hour = new Date().getHours();
+        if (hour >= 5 && hour < 12) {
+            setGreeting('صباح الخير');
+        } else if (hour >= 12 && hour < 17) {
+            setGreeting('مساء الخير');
+        } else {
+            setGreeting('مساء الخير');
+        }
+    }, []);
 
     const years = useMemo(() => {
         const currentYear = new Date().getFullYear();
@@ -89,15 +102,14 @@ const Header: React.FC<HeaderProps> = ({
         <header className="bg-gradient-to-r from-[#031A2E]/90 to-[#052E4D]/90 backdrop-blur-xl border-b border-blue-400/30 py-4 shadow-2xl relative z-30">
             <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center">
-                    {/* اليسار: شعار التطبيق */}
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-cyan-400/20 to-blue-500/20 p-1">
-                            <div className="w-full h-full bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
-                                <span className="text-white font-bold text-xl">B</span>
-                            </div>
+                    {/* اليسار: شعار التطبيق واسمه */}
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg bg-gradient-to-br from-cyan-400/20 to-blue-500/20 p-0.5">
+                            <img src="./logo.jpg" alt="Bayani Logo" className="w-full h-full object-cover rounded-lg" />
                         </div>
-                        <div className="text-center sm:text-right">
-                            <h1 className="text-2xl font-bold text-white tracking-wide bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">بياني</h1>
+                        <div className="text-right">
+                            <h1 className="text-xl font-bold text-white tracking-wide bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">بياني</h1>
+                            <p className="text-xs text-blue-200 font-medium">كل شيء عن مالي… في بياني</p>
                         </div>
                     </div>
 
@@ -115,8 +127,7 @@ const Header: React.FC<HeaderProps> = ({
                     {/* اليمين: صورة المستخدم واسمه */}
                     <div className="flex items-center gap-4">
                         <div className="text-right">
-                            <p className="text-white font-semibold text-lg">مرحباً، {getUserDisplayName()}</p>
-                            <p className="text-blue-200 text-sm">كل شيء عن مالي… في بياني</p>
+                            <p className="text-white font-semibold text-lg">{greeting}، {getUserDisplayName().split(' ')[0]}</p>
                         </div>
                         <div className="relative" ref={dropdownRef}>
                             <button
