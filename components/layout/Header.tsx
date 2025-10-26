@@ -80,9 +80,39 @@ const Header: React.FC<HeaderProps> = ({
 
     return (
         <header className="relative z-30">
-            {/* الهيدر بشكل نصف دائرة */}
-            <div className="bg-gradient-to-r from-[#031A2E]/90 to-[#052E4D]/90 backdrop-blur-xl border-b-2 border-blue-400/30 shadow-2xl py-2 md:py-4">
-                <div className="container mx-auto px-2 md:px-4">
+            {/* الهيدر مع منحنى نصف دائرة */}
+            <div className="bg-gradient-to-r from-[#031A2E]/90 to-[#052E4D]/90 backdrop-blur-xl shadow-2xl pb-8 md:pb-12 relative overflow-hidden">
+                {/* منحنى نصف دائرة */}
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-screen-2xl">
+                    <div className="relative w-full h-16 md:h-24">
+                        {/* نصف دائرة */}
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[120%] h-24 md:h-32 bg-gradient-to-r from-[#031A2E]/90 to-[#052E4D]/90 rounded-t-full"></div>
+                        {/* التاريخ في المنتصف */}
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 transform -translate-y-6 md:-translate-y-8 z-10">
+                            <div className="bg-gradient-to-r from-slate-800/90 to-blue-900/90 backdrop-blur-lg border-2 border-cyan-400/40 rounded-2xl shadow-2xl px-3 py-2 md:px-4 md:py-3">
+                                <div className="flex items-center gap-2 md:gap-3 text-white">
+                                    <select 
+                                        value={selectedYear} 
+                                        onChange={(e) => onYearChange(parseInt(e.target.value))} 
+                                        className="bg-transparent text-cyan-300 font-bold text-xs md:text-base border-0 focus:ring-0 appearance-none cursor-pointer hover:text-white transition-colors min-w-[60px] md:min-w-[80px] text-center"
+                                    >
+                                        {years.map(y => <option key={y} value={y} className="bg-slate-800 text-white">{y}</option>)}
+                                    </select>
+                                    <div className="w-px h-5 md:h-6 bg-cyan-400/30"></div>
+                                    <select 
+                                        value={selectedMonth} 
+                                        onChange={(e) => onMonthChange(e.target.value === 'all' ? 'all' : parseInt(e.target.value))} 
+                                        className="bg-transparent text-cyan-300 font-bold text-xs md:text-base border-0 focus:ring-0 appearance-none cursor-pointer hover:text-white transition-colors min-w-[80px] md:min-w-[120px] text-center"
+                                    >
+                                        {months.map(m => <option key={m.value} value={m.value} className="bg-slate-800 text-white">{m.label}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="container mx-auto px-2 md:px-4 pt-2 md:pt-4">
                     <div className="flex justify-between items-center gap-2 overflow-x-auto">
                         {/* اليسار: شعار التطبيق واسمه */}
                         <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
@@ -93,14 +123,6 @@ const Header: React.FC<HeaderProps> = ({
                                 <h1 className="text-base md:text-xl font-bold text-white tracking-wide bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">بياني</h1>
                                 <p className="text-xs text-blue-200 font-medium">كل شيء عن مالي… في بياني</p>
                             </div>
-                        </div>
-
-                        {/* الوسط: فلتر التاريخ - نص واحد */}
-                        <div className="bg-gradient-to-r from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl shadow-lg flex items-center gap-2 flex-shrink-0">
-                            <span className="text-blue-200 text-xs md:text-sm font-medium hidden sm:inline">التاريخ:</span>
-                            <span className="text-white font-bold text-xs md:text-sm">
-                                {selectedMonth === 'all' ? 'كل الشهور' : months.find(m => m.value === selectedMonth)?.label} {selectedYear}
-                            </span>
                         </div>
 
                         {/* اليمين: صورة المستخدم واسمه */}
@@ -194,10 +216,6 @@ const Header: React.FC<HeaderProps> = ({
                         </div>
                     </div>
                 </div>
-            </div>
-            {/* تأثير نصف الدائرة السفلي */}
-            <div className="absolute bottom-0 left-0 right-0 flex justify-center">
-                <div className="w-24 h-6 md:w-32 md:h-8 bg-gradient-to-r from-[#031A2E] via-[#052E4D] to-[#031A2E] rounded-t-full"></div>
             </div>
         </header>
     );
