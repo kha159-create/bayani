@@ -20,22 +20,19 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
     const totalIncome = calculations.totalIncome;
     const netResult = totalIncome - totalExpenses;
 
-    // تحديد نوع البطاقة
-    const getCardType = (cardName: string) => {
+    // تحديد نوع البطاقة وشعارها
+    const getCardTypeAndLogo = (cardName: string) => {
         const name = cardName.toLowerCase();
-        if (name.includes('visa') || name.includes('فيزا')) return 'Visa';
-        if (name.includes('mastercard') || name.includes('ماستر')) return 'Mastercard';
-        if (name.includes('amex') || name.includes('أمريكان')) return 'American Express';
-        return 'Credit Card';
-    };
-
-    // تحديد شعار البطاقة
-    const getCardLogo = (cardName: string) => {
-        const name = cardName.toLowerCase();
-        if (name.includes('visa') || name.includes('فيزا')) return 'VISA';
-        if (name.includes('mastercard') || name.includes('ماستر')) return '●●';
-        if (name.includes('amex') || name.includes('أمريكان')) return '●●';
-        return '●●';
+        if (name.includes('visa') || name.includes('فيزا')) {
+            return { type: 'Visa', logo: 'VISA', color: 'from-blue-600 to-blue-800' };
+        }
+        if (name.includes('mastercard') || name.includes('ماستر')) {
+            return { type: 'Mastercard', logo: '●●', color: 'from-red-500 to-orange-500' };
+        }
+        if (name.includes('amex') || name.includes('أمريكان')) {
+            return { type: 'American Express', logo: '●●', color: 'from-green-600 to-blue-600' };
+        }
+        return { type: 'Credit Card', logo: '●●', color: 'from-gray-600 to-gray-800' };
     };
 
     // حساب ملخص البطاقات الائتمانية
@@ -120,22 +117,66 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                 {creditCardsSummary.length > 0 && (
                     <div className="mt-6">
                         <h3 className="text-lg font-bold text-white mb-4 text-center">ملخص البطاقات الائتمانية</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {creditCardsSummary.map((card) => (
-                                <div key={card.id} className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-lg font-bold text-white">{card.logo}</span>
-                                            <span className="text-white font-semibold text-sm">{card.type}</span>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {creditCardsSummary.map((card) => {
+                                const cardInfo = getCardTypeAndLogo(card.name);
+                                const usagePercentage = (card.currentBalance / card.limit) * 100;
+                                const available = card.limit - card.currentBalance;
+                                
+                                return (
+                                    <div key={card.id} className={`bg-gradient-to-br ${cardInfo.color} rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 text-white`}>
+                                        {/* Header */}
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-2xl font-bold">{cardInfo.logo}</span>
+                                                <div>
+                                                    <h3 className="text-xl font-bold">{card.name}</h3>
+                                                    <p className="text-white/80 text-sm">{cardInfo.type}</p>
+                                                </div>
+                                            </div>
+                                            <span className="text-white/70 text-xs">**** {card.id.slice(-4)}</span>
                                         </div>
-                                        <span className="text-white/70 text-xs">**** {card.id.slice(-4)}</span>
+
+                                        {/* Card Content */}
+                                        <div className="space-y-4">
+                                            {/* الرصيد المستخدم */}
+                                            <div className="bg-white/10 rounded-xl p-4">
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-white/80 text-sm">الرصيد المستخدم</span>
+                                                    <span className="text-white font-bold text-lg">{formatCurrency(card.currentBalance)}</span>
+                                                </div>
+                                                <div className="w-full bg-white/20 rounded-full h-2">
+                                                    <div 
+                                                        className="bg-white h-2 rounded-full transition-all duration-300"
+                                                        style={{ width: `${Math.min(usagePercentage, 100)}%` }}
+                                                    ></div>
+                                                </div>
+                                                <div className="text-white/60 text-xs mt-1">{usagePercentage.toFixed(1)}% مستخدم</div>
+                                            </div>
+
+                                            {/* معلومات إضافية */}
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="bg-white/10 rounded-lg p-3">
+                                                    <div className="text-white/80 text-xs mb-1">الرصيد المتاح</div>
+                                                    <div className="text-white font-bold">{formatCurrency(available)}</div>
+                                                </div>
+                                                <div className="bg-white/10 rounded-lg p-3">
+                                                    <div className="text-white/80 text-xs mb-1">الحد الائتماني</div>
+                                                    <div className="text-white font-bold">{formatCurrency(card.limit)}</div>
+                                                </div>
+                                                <div className="bg-white/10 rounded-lg p-3">
+                                                    <div className="text-white/80 text-xs mb-1">المتبقي</div>
+                                                    <div className="text-white font-bold">{formatCurrency(card.currentBalance)}</div>
+                                                </div>
+                                                <div className="bg-white/10 rounded-lg p-3">
+                                                    <div className="text-white/80 text-xs mb-1">المدفوع</div>
+                                                    <div className="text-white font-bold">{formatCurrency(available)}</div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="text-center">
-                                        <div className="text-3xl font-bold text-white mb-2">{formatCurrency(card.currentBalance)}</div>
-                                        <div className="text-white/80 text-sm">الرصيد الحالي</div>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 )}

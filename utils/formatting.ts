@@ -30,5 +30,5 @@ export const formatPercentage = (value: number, decimals: number = 1): string =>
  * @returns Formatted date string
  */
 export const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('ar-SA');
+    return new Date(dateString).toLocaleDateString('en-GB');
 };

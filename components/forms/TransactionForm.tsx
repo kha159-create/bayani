@@ -238,68 +238,68 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose, onSave, init
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="amount" className="form-label">المبلغ</label>
-                                <input type="number" name="amount" value={transaction.amount} onChange={handleChange} className="w-full" required step="0.01" />
+                                <label htmlFor="amount" className="block text-sm font-medium text-blue-200 mb-1">المبلغ</label>
+                                <input type="number" name="amount" value={transaction.amount} onChange={handleChange} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white placeholder-blue-300 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400" required step="0.01" />
                             </div>
                             <div>
-                                <label htmlFor="date" className="form-label">التاريخ</label>
-                                <input type="date" name="date" value={transaction.date} onChange={handleChange} className="w-full" required />
+                                <label htmlFor="date" className="block text-sm font-medium text-blue-200 mb-1">التاريخ</label>
+                                <input type="date" name="date" value={transaction.date} onChange={handleChange} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white placeholder-blue-300 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400" required />
                             </div>
                         </div>
                         <div>
-                            <label htmlFor="description" className="form-label">الوصف</label>
-                            <input type="text" name="description" value={transaction.description} onChange={handleChange} className="w-full" required />
+                            <label htmlFor="description" className="block text-sm font-medium text-blue-200 mb-1">الوصف</label>
+                            <input type="text" name="description" value={transaction.description} onChange={handleChange} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white placeholder-blue-300 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400" required />
                         </div>
                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="type" className="form-label">نوع الحركة</label>
-                                <select name="type" value={transaction.type} onChange={handleChange} className="w-full">
-                                    {transactionTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                                <label htmlFor="type" className="block text-sm font-medium text-blue-200 mb-1">نوع الحركة</label>
+                                <select name="type" value={transaction.type} onChange={handleChange} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400">
+                                    {transactionTypes.map(t => <option key={t.value} value={t.value} className="bg-slate-800 text-white">{t.label}</option>)}
                                 </select>
                             </div>
                              <div>
-                                <label htmlFor="paymentMethod" className="form-label">وسيلة الدفع</label>
-                                <select name="paymentMethod" value={transaction.paymentMethod} onChange={handleChange} className="w-full">
-                                    {paymentMethods.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                                <label htmlFor="paymentMethod" className="block text-sm font-medium text-blue-200 mb-1">وسيلة الدفع</label>
+                                <select name="paymentMethod" value={transaction.paymentMethod} onChange={handleChange} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400">
+                                    {paymentMethods.map(m => <option key={m.value} value={m.value} className="bg-slate-800 text-white">{m.label}</option>)}
                                 </select>
                             </div>
                         </div>
                         <div>
-                            <label htmlFor="categoryId" className="form-label">الفئة</label>
-                            <select name="categoryId" value={transaction.categoryId || ''} onChange={handleChange} className="w-full">
-                                <option value="">-- اختر فئة --</option>
-                                {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+                            <label htmlFor="categoryId" className="block text-sm font-medium text-blue-200 mb-1">الفئة</label>
+                            <select name="categoryId" value={transaction.categoryId || ''} onChange={handleChange} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400">
+                                <option value="" className="bg-slate-800 text-white">-- اختر فئة --</option>
+                                {categories.map(c => <option key={c.id} value={c.id} className="bg-slate-800 text-white">{c.icon} {c.name}</option>)}
                             </select>
                         </div>
                         
                         {/* BNPL Fields */}
                         {showBnplFields && (
-                            <div className="bg-blue-50 p-4 rounded-lg space-y-4">
-                                <h3 className="font-semibold text-blue-800">📱 إعدادات التقسيط</h3>
+                            <div className="bg-blue-500/10 p-4 rounded-lg space-y-4 border border-blue-400/20">
+                                <h3 className="font-semibold text-blue-200">📱 إعدادات التقسيط</h3>
                                 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="installmentsCount" className="form-label">عدد الأقساط</label>
+                                        <label htmlFor="installmentsCount" className="block text-sm font-medium text-blue-200 mb-1">عدد الأقساط</label>
                                         <select 
                                             value={installmentsCount} 
                                             onChange={(e) => setInstallmentsCount(parseInt(e.target.value))}
-                                            className="w-full"
+                                            className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                         >
-                                            <option value={2}>قسطين (2)</option>
-                                            <option value={3}>3 أقساط</option>
-                                            <option value={4}>4 أقساط</option>
+                                            <option value={2} className="bg-slate-800 text-white">قسطين (2)</option>
+                                            <option value={3} className="bg-slate-800 text-white">3 أقساط</option>
+                                            <option value={4} className="bg-slate-800 text-white">4 أقساط</option>
                                         </select>
                                     </div>
                                     
                                     <div>
-                                        <label htmlFor="initialPaymentSource" className="form-label">مصدر الدفعة الأولى</label>
+                                        <label htmlFor="initialPaymentSource" className="block text-sm font-medium text-blue-200 mb-1">مصدر الدفعة الأولى</label>
                                         <select 
                                             value={initialPaymentSource} 
                                             onChange={(e) => setInitialPaymentSource(e.target.value)}
-                                            className="w-full"
+                                            className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                         >
                                             {paymentMethods.filter(m => !m.value.includes('bnpl')).map(m => (
-                                                <option key={m.value} value={m.value}>{m.label}</option>
+                                                <option key={m.value} value={m.value} className="bg-slate-800 text-white">{m.label}</option>
                                             ))}
                                         </select>
                                     </div>

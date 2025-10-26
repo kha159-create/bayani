@@ -83,10 +83,20 @@ const TransactionsTab: React.FC<TransactionsTabProps> = ({
 
     return (
         <div className="space-y-6">
-            {/* العنوان */}
+            {/* العنوان وزر الإضافة */}
             <div className="text-center">
                 <h2 className="text-3xl font-bold text-white mb-2">الحركات المالية</h2>
-                <p className="text-blue-200">عرض وإدارة جميع المعاملات المالية</p>
+                <p className="text-blue-200 mb-4">عرض وإدارة جميع المعاملات المالية</p>
+                <button
+                    onClick={() => {
+                        // إضافة منطق فتح نافذة إضافة الحركة
+                        const event = new CustomEvent('openTransactionForm');
+                        window.dispatchEvent(event);
+                    }}
+                    className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-bold py-3 px-8 rounded-xl hover:from-cyan-500 hover:to-blue-600 transition-all duration-300 shadow-lg text-lg"
+                >
+                    + إضافة حركة جديدة
+                </button>
             </div>
 
             {/* الفلاتر */}
@@ -154,7 +164,7 @@ const TransactionsTab: React.FC<TransactionsTabProps> = ({
                                         <h4 className="text-white font-semibold">{transaction.description}</h4>
                                         <p className="text-blue-200 text-sm">{getCategoryName(transaction.categoryId)}</p>
                                         <p className="text-blue-300 text-xs">
-                                            {new Date(transaction.date).toLocaleDateString('ar-SA')}
+                                            {new Date(transaction.date).toLocaleDateString('en-GB')}
                                         </p>
                                     </div>
                                     <div className="text-right">
