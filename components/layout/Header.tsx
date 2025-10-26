@@ -116,12 +116,12 @@ const Header: React.FC<HeaderProps> = ({
                     <div className="flex justify-between items-center gap-2 overflow-x-auto">
                         {/* اليسار: شعار التطبيق واسمه */}
                         <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
-                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden shadow-lg bg-gradient-to-br from-cyan-400/20 to-blue-500/20 p-0.5">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden shadow-lg bg-gradient-to-br from-cyan-400 to-blue-500 p-0.5">
                                 <img src="./logo.jpg" alt="Bayani Logo" className="w-full h-full object-cover rounded-lg" />
                             </div>
                             <div className="text-right hidden sm:block">
-                                <h1 className="text-base md:text-xl font-bold text-white tracking-wide bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">بياني</h1>
-                                <p className="text-xs text-blue-200 font-medium">كل شيء عن مالي… في بياني</p>
+                                <h1 className="text-base md:text-xl font-bold text-white tracking-wide">بياني</h1>
+                                <p className="text-xs text-white font-medium">كل شيء عن مالي… في بياني</p>
                             </div>
                         </div>
 

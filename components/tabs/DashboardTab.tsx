@@ -123,13 +123,19 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                     <div className="space-y-2">
                         {lastFiveTransactions.map((transaction) => {
                             const category = categories.find(c => c.id === transaction.categoryId);
+                            const transactionDate = new Date(transaction.date);
+                            const formattedDate = transactionDate.toLocaleDateString('en-GB', { 
+                                year: 'numeric', 
+                                month: '2-digit', 
+                                day: '2-digit' 
+                            });
                             return (
                                 <div key={transaction.id} className="bg-slate-700/40 backdrop-blur-md rounded-lg p-3 flex items-center justify-between border border-white/10">
                                     <div className="flex items-center gap-3">
                                         <span className="text-2xl">{category?.icon || '📊'}</span>
                                         <div>
                                             <div className="text-white font-semibold">{transaction.description}</div>
-                                            <div className="text-blue-200 text-sm">{new Date(transaction.date).toLocaleDateString('ar-SA')}</div>
+                                            <div className="text-blue-200 text-sm">{formattedDate}</div>
                                         </div>
                                     </div>
                                     <div className={`text-lg font-bold ${transaction.type === 'income' ? 'text-green-400' : 'text-red-400'}`}>
