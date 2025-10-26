@@ -131,7 +131,7 @@ const Header: React.FC<HeaderProps> = ({
                             
                             {/* قائمة المستخدم المنسدلة */}
                             {isDropdownOpen && (
-                                <div className="absolute left-0 mt-2 w-64 bg-gradient-to-br from-slate-800/95 to-blue-900/95 backdrop-blur-lg border border-blue-400/20 rounded-xl shadow-2xl z-50">
+                                <div className="absolute left-0 mt-2 w-72 bg-gradient-to-br from-slate-800/95 to-blue-900/95 backdrop-blur-lg border border-blue-400/20 rounded-xl shadow-2xl z-[100]">
                                     {/* معلومات المستخدم */}
                                     <div className="p-4 border-b border-blue-400/20">
                                         <div className="flex items-center gap-3">
