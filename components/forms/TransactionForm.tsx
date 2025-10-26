@@ -307,9 +307,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onClose, onSave, init
                                 
                                 <div className="bg-blue-100 p-3 rounded-lg">
                                     <p className="text-sm text-blue-700">
-                                        <strong>الدفعة الأولى:</strong> {(transaction.amount / installmentsCount).toFixed(2)} ريال
+                                        <strong>الدفعة الأولى:</strong> {((transaction.amount || 0) / (installmentsCount || 1)).toFixed(2)} ريال
                                         <br />
-                                        <strong>المبلغ المتبقي:</strong> {(transaction.amount * (installmentsCount - 1) / installmentsCount).toFixed(2)} ريال
+                                        <strong>المبلغ المتبقي:</strong> {((transaction.amount || 0) * ((installmentsCount || 1) - 1) / (installmentsCount || 1)).toFixed(2)} ريال
                                     </p>
                                 </div>
                             </div>

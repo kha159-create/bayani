@@ -21,7 +21,7 @@ export const formatCurrency = (value: number): string => {
  * @returns Formatted percentage string
  */
 export const formatPercentage = (value: number, decimals: number = 1): string => {
-    return `${value.toFixed(decimals)}%`;
+    return `${(value || 0).toFixed(decimals)}%`;
 };
 
 /**
