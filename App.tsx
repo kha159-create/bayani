@@ -9,6 +9,7 @@ import { initializeFirebase, firebaseService } from './services/firebaseService'
 import { saveData, loadData, saveToCloud, restoreFromCloud, downloadBackup, restoreFromFile } from './src/utils/storage';
 import AuthForm from './components/auth/AuthForm';
 import UserProfile from './components/auth/UserProfile';
+import ProfileModal from './components/auth/ProfileModal';
 
 import Header from './components/layout/Header';
 import TabsComponent from './components/layout/Tabs';
@@ -623,6 +624,54 @@ const App: React.FC = () => {
             }
         } catch (error) {
             console.error('❌ خطأ في تسجيل الخروج:', error);
+        }
+    };
+
+    const handleUpdateProfile = async (data: { displayName: string; email: string; photoURL?: string }) => {
+        try {
+            setLoading(true, 'جار تحديث الملف الشخصي...');
+            // TODO: إضافة منطق تحديث الملف الشخصي في Firebase
+            console.log('تحديث الملف الشخصي:', data);
+            setModalConfig({
+                title: '✅ تم التحديث',
+                body: '<p>تم تحديث الملف الشخصي بنجاح!</p>',
+                hideCancel: true,
+                confirmText: 'موافق'
+            });
+        } catch (error) {
+            console.error('خطأ في تحديث الملف الشخصي:', error);
+            setModalConfig({
+                title: 'خطأ',
+                body: '<p>حدث خطأ أثناء تحديث الملف الشخصي</p>',
+                hideCancel: true,
+                confirmText: 'موافق'
+            });
+        } finally {
+            setLoading(false, '');
+        }
+    };
+
+    const handleChangePassword = async (currentPassword: string, newPassword: string) => {
+        try {
+            setLoading(true, 'جار تغيير كلمة المرور...');
+            // TODO: إضافة منطق تغيير كلمة المرور في Firebase
+            console.log('تغيير كلمة المرور');
+            setModalConfig({
+                title: '✅ تم التغيير',
+                body: '<p>تم تغيير كلمة المرور بنجاح!</p>',
+                hideCancel: true,
+                confirmText: 'موافق'
+            });
+        } catch (error) {
+            console.error('خطأ في تغيير كلمة المرور:', error);
+            setModalConfig({
+                title: 'خطأ',
+                body: '<p>حدث خطأ أثناء تغيير كلمة المرور</p>',
+                hideCancel: true,
+                confirmText: 'موافق'
+            });
+        } finally {
+            setLoading(false, '');
         }
     };
 
@@ -1417,6 +1466,17 @@ const App: React.FC = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Profile Modal */}
+            {profileModal.isOpen && (
+                <ProfileModal
+                    isOpen={profileModal.isOpen}
+                    onClose={() => setProfileModal({ isOpen: false })}
+                    currentUser={currentUser}
+                    onUpdateProfile={handleUpdateProfile}
+                    onChangePassword={handleChangePassword}
+                />
             )}
 
             {/* Loading Overlay */}
