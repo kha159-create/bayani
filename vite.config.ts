@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
     });
     
     return {
-        base: '/bayani/', // المسار الأساسي للعمل مع GitHub Pages
+        base: './', // المسار الأساسي للعمل مع GitHub Pages
         
         plugins: [
             react(),
@@ -47,13 +47,13 @@ export default defineConfig(({ mode }) => {
                 
                 // ✅ إعدادات manifest محسنة
                 manifest: {
-                    name: 'MASROF - لوحة التحكم المالية',
-                    short_name: 'MASROF',
+                    name: 'Bayani - لوحة التحكم المالية',
+                    short_name: 'Bayani',
                     description: 'تطبيق إدارة المالية الشخصية مع الذكاء الاصطناعي',
-                    start_url: '/bayani/',
-                    scope: '/bayani/',
-                    theme_color: '#3b82f6',
-                    background_color: '#ffffff',
+                    start_url: './',
+                    scope: './',
+                    theme_color: '#0A192F',
+                    background_color: '#031A2E',
                     display: 'standalone',
                     icons: [
                         {
