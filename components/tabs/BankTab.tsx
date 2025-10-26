@@ -33,7 +33,7 @@ const BankTab: React.FC<BankTabProps> = ({
     language = 'ar' 
 }) => {
     const bankAccountDetails = calculations.bankAccountDetails;
-
+    
     return (
         <div className="space-y-6">
             {/* العنوان */}
@@ -65,7 +65,7 @@ const BankTab: React.FC<BankTabProps> = ({
             {/* قائمة الحسابات البنكية */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Object.values(bankAccountDetails).map((account, index) => (
-                    <div key={account.id} className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300">
+                    <div key={account.id} className="bg-gradient-to-br from-slate-800/60 to-blue-900/60 backdrop-blur-xl border border-blue-400/30 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300">
                         {/* Header - أزرار التعديل والحذف */}
                         <div className="flex justify-between items-start mb-6">
                             <div className="flex gap-2">
@@ -99,7 +99,7 @@ const BankTab: React.FC<BankTabProps> = ({
                         {/* المحتوى الرئيسي */}
                         <div className="space-y-4">
                             {/* الرصيد الحالي */}
-                            <div className="bg-slate-700/30 rounded-xl p-4 text-center">
+                            <div className="bg-slate-700/40 backdrop-blur-md rounded-xl p-4 text-center border border-white/10">
                                 <div className="text-blue-200 text-sm mb-1">الرصيد الحالي</div>
                                 <div className={`text-2xl font-bold ${account.balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                                     {formatCurrency(account.balance)}
@@ -107,7 +107,7 @@ const BankTab: React.FC<BankTabProps> = ({
                             </div>
 
                             {/* نوع الحساب */}
-                            <div className="bg-slate-700/30 rounded-xl p-4 text-center">
+                            <div className="bg-slate-700/40 backdrop-blur-md rounded-xl p-4 text-center border border-white/10">
                                 <div className="text-blue-200 text-sm mb-1">نوع الحساب</div>
                                 <div className="text-white font-bold">
                                     {account.accountType === 'current' ? 'حساب جاري' : 
@@ -117,7 +117,7 @@ const BankTab: React.FC<BankTabProps> = ({
                             </div>
 
                             {/* البنك */}
-                            <div className="bg-slate-700/30 rounded-xl p-4 text-center">
+                            <div className="bg-slate-700/40 backdrop-blur-md rounded-xl p-4 text-center border border-white/10">
                                 <div className="text-blue-200 text-sm mb-1">البنك</div>
                                 <div className="text-white font-bold">{account.bankName || 'غير محدد'}</div>
                             </div>
@@ -141,7 +141,7 @@ const BankTab: React.FC<BankTabProps> = ({
                             </div>
                         </div>
                     </div>
-                ))}
+               ))}
             </div>
 
             {/* ملخص الحسابات */}

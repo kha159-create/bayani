@@ -101,16 +101,16 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
     return (
         <div className="space-y-6">
             {/* بطاقة النظرة العامة */}
-            <div className="bg-gradient-to-br from-cyan-400 to-blue-500 rounded-3xl p-8 shadow-2xl">
+            <div className="bg-gradient-to-br from-cyan-400/90 to-blue-500/90 backdrop-blur-xl border border-cyan-300/30 rounded-3xl p-8 shadow-2xl">
                 <div className="text-center text-white mb-6">
                     <h2 className="text-2xl font-bold mb-2">نظرة عامة</h2>
                     <div className="text-5xl font-bold mb-4">{formatCurrency(totalBankBalance)}</div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div className="bg-white/20 rounded-xl p-3">
+                        <div className="bg-white/20 backdrop-blur-md rounded-xl p-3 border border-white/30">
                             <div className="text-2xl font-bold">{formatCurrency(totalIncome)}</div>
                             <div className="text-white/80">إجمالي الدخل</div>
-                </div>
-                        <div className="bg-white/20 rounded-xl p-3">
+                        </div>
+                        <div className="bg-white/20 backdrop-blur-md rounded-xl p-3 border border-white/30">
                             <div className="text-2xl font-bold">{formatCurrency(totalExpenses)}</div>
                             <div className="text-white/80">إجمالي المصاريف</div>
                         </div>
@@ -125,60 +125,58 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                             {creditCardsSummary.map((card) => {
                                 const cardInfo = getCardTypeAndLogo(card.name);
                         
-                        return (
-                                    <div key={card.id} className={`bg-gradient-to-br ${cardInfo.color} rounded-2xl p-4 shadow-xl hover:shadow-2xl transition-all duration-300 text-white`}>
+                                return (
+                                    <div key={card.id} className={`bg-gradient-to-br ${cardInfo.color} rounded-2xl p-5 shadow-xl hover:shadow-2xl transition-all duration-300 text-white backdrop-blur-sm`}>
                                         {/* Header */}
-                                        <div className="flex justify-between items-center mb-4">
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-xl font-bold">{cardInfo.logo}</span>
-                                                <div>
-                                                    <h3 className="text-lg font-bold">{card.name}</h3>
-                                                    <p className="text-white/80 text-sm">{cardInfo.type}</p>
-                                    </div>
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="text-left">
+                                                <div className="text-4xl font-bold mb-2">{cardInfo.logo}</div>
+                                                <h3 className="text-lg font-bold">{card.name}</h3>
+                                                <p className="text-white/80 text-sm">{cardInfo.type}</p>
+                                                <p className="text-white/70 text-xs mt-1">**** {card.id.slice(-4)}</p>
                                             </div>
-                                            <span className="text-white/70 text-xs">**** {card.id.slice(-4)}</span>
-                                </div>
+                                        </div>
                                 
-                                        {/* Card Content - Layout أفقي */}
-                                        <div className="grid grid-cols-2 gap-4">
-                                            {/* الرصيد المستخدم */}
-                                            <div className="bg-white/10 rounded-xl p-3">
+                                        {/* Card Content - Layout عمودي */}
+                                        <div className="space-y-3">
+                                            {/* الرصيد المستخدم - كبير وواضح */}
+                                            <div className="bg-white/10 backdrop-blur-md rounded-xl p-4">
                                                 <div className="text-white/80 text-xs mb-1">الرصيد المستخدم</div>
-                                                <div className="text-white font-bold text-lg">{formatCurrency(card.currentBalance)}</div>
-                                                <div className="w-full bg-white/20 rounded-full h-1.5 mt-2">
+                                                <div className="text-white font-bold text-2xl mb-2">{formatCurrency(card.currentBalance)}</div>
+                                                <div className="w-full bg-white/20 rounded-full h-2">
                                                     <div 
-                                                        className="bg-white h-1.5 rounded-full transition-all duration-300"
-                                                        style={{ width: `${Math.min(card.usagePercentage, 100)}%` }}
+                                                        className="bg-white h-2 rounded-full transition-all duration-300"
+                                                        style={{ width: `${Math.min(card.usagePercentage || 0, 100)}%` }}
                                                     ></div>
                                                 </div>
                                                 <div className="text-white/60 text-xs mt-1">{(card.usagePercentage || 0).toFixed(1)}% مستخدم</div>
-                                </div>
+                                            </div>
                                 
-                                            {/* معلومات إضافية */}
-                                            <div className="space-y-2">
-                                                <div className="bg-white/10 rounded-lg p-2">
-                                                    <div className="text-white/80 text-xs mb-1">الحد الائتماني</div>
-                                                    <div className="text-white font-bold text-sm">{formatCurrency(card.limit)}</div>
-                                                </div>
-                                                <div className="bg-white/10 rounded-lg p-2">
+                                            {/* معلومات إضافية - Grid */}
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <div className="bg-white/10 backdrop-blur-md rounded-lg p-3">
                                                     <div className="text-white/80 text-xs mb-1">الرصيد المتاح</div>
                                                     <div className="text-white font-bold text-sm">{formatCurrency(card.availableAmount)}</div>
                                                 </div>
-                                                <div className="bg-white/10 rounded-lg p-2">
+                                                <div className="bg-white/10 backdrop-blur-md rounded-lg p-3">
+                                                    <div className="text-white/80 text-xs mb-1">الحد الائتماني</div>
+                                                    <div className="text-white font-bold text-sm">{formatCurrency(card.limit)}</div>
+                                                </div>
+                                                <div className="bg-white/10 backdrop-blur-md rounded-lg p-3">
                                                     <div className="text-white/80 text-xs mb-1">المتبقي</div>
                                                     <div className="text-white font-bold text-sm">{formatCurrency(card.currentBalance)}</div>
                                                 </div>
-                                                <div className="bg-white/10 rounded-lg p-2">
+                                                <div className="bg-white/10 backdrop-blur-md rounded-lg p-3">
                                                     <div className="text-white/80 text-xs mb-1">المدفوع</div>
                                                     <div className="text-white font-bold text-sm">{formatCurrency(card.availableAmount)}</div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
+                                );
+                            })}
+                        </div>
+                    </div>
                 )}
             </div>
 
@@ -187,7 +185,7 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
 
             {/* الرسم البياني الدائري للفئات */}
             {pieChartData.length > 0 && (
-                <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl">
+                <div className="bg-gradient-to-br from-slate-800/60 to-blue-900/60 backdrop-blur-xl border border-blue-400/30 rounded-2xl p-6 shadow-xl">
                     <h3 className="text-xl font-bold text-white mb-6 text-center">توزيع المصاريف حسب الفئات</h3>
                     
                     <div className="flex flex-col lg:flex-row items-center gap-8">
