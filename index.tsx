@@ -13,40 +13,6 @@ root.render(
   </React.StrictMode>
 );
 
-// تسجيل Service Worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('./fd/sw.js')
-      .then(reg => {
-        console.log('✅ Service Worker registered successfully:', reg);
-        
-        // التحقق من التحديثات
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // هناك تحديث متاح
-                if (confirm('تحديث جديد متاح. هل تريد إعادة تحميل الصفحة؟')) {
-                  window.location.reload();
-                }
-              }
-            });
-          }
-        });
-      })
-      .catch(err => {
-        console.error('❌ Service Worker registration failed:', err);
-      });
-  });
-  
-  // إدارة التحديثات
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    window.location.reload();
-  });
-}
-
 // تسجيل PWA install prompt
 let deferredPrompt;
 

@@ -35,6 +35,24 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
             });
     }, [calculations.expensesByCategory, categories, language]);
 
+    // تحديد نوع البطاقة
+    const getCardType = (cardName: string) => {
+        const name = cardName.toLowerCase();
+        if (name.includes('visa') || name.includes('فيزا')) return 'Visa';
+        if (name.includes('mastercard') || name.includes('ماستر')) return 'Mastercard';
+        if (name.includes('amex') || name.includes('أمريكان')) return 'American Express';
+        return 'Credit Card';
+    };
+
+    // تحديد شعار البطاقة
+    const getCardLogo = (cardName: string) => {
+        const name = cardName.toLowerCase();
+        if (name.includes('visa') || name.includes('فيزا')) return '💳';
+        if (name.includes('mastercard') || name.includes('ماستر')) return '💳';
+        if (name.includes('amex') || name.includes('أمريكان')) return '💳';
+        return '💳';
+    };
+
     // حساب ملخص البطاقات الائتمانية
     const creditCardsSummary = useMemo(() => {
         return Object.values(state.cards || {}).map(card => {
@@ -65,24 +83,6 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
             };
         });
     }, [state.cards, state.transactions]);
-
-    // تحديد نوع البطاقة
-    const getCardType = (cardName: string) => {
-        const name = cardName.toLowerCase();
-        if (name.includes('visa') || name.includes('فيزا')) return 'Visa';
-        if (name.includes('mastercard') || name.includes('ماستر')) return 'Mastercard';
-        if (name.includes('amex') || name.includes('أمريكان')) return 'American Express';
-        return 'Credit Card';
-    };
-
-    // تحديد شعار البطاقة
-    const getCardLogo = (cardName: string) => {
-        const name = cardName.toLowerCase();
-        if (name.includes('visa') || name.includes('فيزا')) return '💳';
-        if (name.includes('mastercard') || name.includes('ماستر')) return '💳';
-        if (name.includes('amex') || name.includes('أمريكان')) return '💳';
-        return '💳';
-    };
 
     // بيانات الرسم البياني الدائري
     const pieChartData = useMemo(() => {
