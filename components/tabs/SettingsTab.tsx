@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { AppState } from '../../types';
+import { AppState, Category } from '../../types';
 import { firebaseService } from '../../services/firebaseService';
-import { initializeAi } from '../../services/geminiService';
+import { initializeAi, suggestCategoryIcon } from '../../services/geminiService';
 import { t } from '../../translations';
 import BackupSelector from '../backup/BackupSelector';
 
@@ -37,6 +37,8 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
     const [isFirebaseConnected, setIsFirebaseConnected] = useState(false);
     const [isGeminiConnected, setIsGeminiConnected] = useState(false);
     const [showBackupSelector, setShowBackupSelector] = useState(false);
+    const [newCategory, setNewCategory] = useState({ name: '', icon: '' });
+    const [isSuggestingIcon, setIsSuggestingIcon] = useState(false);
 
     // التحقق من حالة الاتصال
     useEffect(() => {
@@ -46,7 +48,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 const user = await firebaseService.getCurrentUser();
                 setIsFirebaseConnected(!!user);
                 console.log('🔥 Firebase connection status:', !!user);
-            } catch (error) {
+                } catch (error) {
                 console.error('❌ Firebase connection error:', error);
                 setIsFirebaseConnected(false);
             }
@@ -56,7 +58,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
                 setIsGeminiConnected(!!geminiApiKey);
                 console.log('🤖 Gemini API key status:', !!geminiApiKey);
-            } catch (error) {
+        } catch (error) {
                 console.error('❌ Gemini connection error:', error);
                 setIsGeminiConnected(false);
             }
@@ -97,6 +99,92 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
         }
     };
 
+    const handleSuggestIcon = async () => {
+        if (!newCategory.name.trim()) {
+            setModal({ 
+                title: 'خطأ', 
+                body: '<p>يرجى إدخال اسم الفئة أولاً</p>', 
+                hideCancel: true, 
+                confirmText: 'موافق' 
+            });
+            return;
+        }
+
+        try {
+            setIsSuggestingIcon(true);
+            await initializeAi();
+            const iconSuggestion = await suggestCategoryIcon(newCategory.name.trim());
+            
+            if (iconSuggestion && iconSuggestion.trim()) {
+                setNewCategory(prev => ({ ...prev, icon: iconSuggestion.trim() }));
+            }
+        } catch (error: any) {
+            console.error('خطأ في اقتراح الأيقونة:', error);
+            setModal({ 
+                title: 'خطأ', 
+                body: `<p>حدث خطأ أثناء اقتراح الأيقونة: ${error.message}</p>`, 
+                hideCancel: true, 
+                confirmText: 'موافق' 
+            });
+        } finally {
+            setIsSuggestingIcon(false);
+        }
+    };
+
+    const handleAddCategory = () => {
+        if (!newCategory.name.trim() || !newCategory.icon.trim()) {
+            setModal({ 
+                title: 'خطأ', 
+                body: '<p>يرجى إدخال الاسم والأيقونة</p>', 
+                hideCancel: true, 
+                confirmText: 'موافق' 
+            });
+            return;
+        }
+
+        const newId = `cat-${Date.now()}`;
+        const category: Category = {
+            id: newId,
+            name: newCategory.name.trim(),
+            icon: newCategory.icon.trim()
+        };
+
+        setState(prev => ({
+            ...prev,
+            categories: [...prev.categories, category]
+        }));
+
+        setNewCategory({ name: '', icon: '' });
+            setModal({ 
+            title: 'تم بنجاح', 
+            body: '<p>تم إضافة الفئة بنجاح!</p>', 
+                hideCancel: true, 
+            confirmText: 'موافق' 
+            });
+    };
+
+    const handleDeleteCategory = (id: string) => {
+        if (state.transactions.some(t => t.categoryId === id)) {
+            setModal({ 
+                title: 'لا يمكن الحذف', 
+                body: '<p>لا يمكن حذف فئة مستخدمة في حركات مالية</p>', 
+                hideCancel: true, 
+                confirmText: 'موافق' 
+            });
+        } else {
+            setState(prev => ({
+                ...prev,
+                categories: prev.categories.filter(c => c.id !== id) 
+            }));
+            setModal({ 
+                title: 'تم بنجاح', 
+                body: '<p>تم حذف الفئة بنجاح!</p>', 
+                hideCancel: true, 
+                confirmText: 'موافق' 
+            });
+        }
+    };
+
     return (
         <div className="space-y-6">
             {/* العنوان */}
@@ -121,7 +209,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                             {isFirebaseConnected ? 'متصل' : 'غير متصل'}
                         </div>
                     </div>
-                </div>
+                            </div>
 
                 {/* Gemini */}
                 <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl">
@@ -182,8 +270,74 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                             className="hidden"
                         />
                     </label>
+                    </div>
                 </div>
+
+            {/* إدارة الفئات */}
+            <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl">
+                <h3 className="text-xl font-bold text-white mb-4">📂 إدارة الفئات</h3>
+                
+                {/* إضافة فئة جديدة */}
+                <div className="mb-6 p-4 bg-slate-700/30 rounded-xl">
+                    <h4 className="font-semibold text-white mb-3">➕ إضافة فئة جديدة</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                        <input
+                            type="text"
+                            placeholder="اسم الفئة"
+                            value={newCategory.name}
+                            onChange={(e) => setNewCategory(prev => ({ ...prev, name: e.target.value }))}
+                            className="px-3 py-2 bg-slate-600/50 border border-blue-400/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-blue-200"
+                        />
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                placeholder="الأيقونة (مثل: 🍔)"
+                                value={newCategory.icon}
+                                onChange={(e) => setNewCategory(prev => ({ ...prev, icon: e.target.value }))}
+                                className="flex-1 px-3 py-2 bg-slate-600/50 border border-blue-400/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-blue-200"
+                            />
+                            <button
+                                type="button"
+                                onClick={handleSuggestIcon}
+                                disabled={!newCategory.name.trim() || isSuggestingIcon}
+                                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                title="اقتراح أيقونة بالذكاء الاصطناعي"
+                            >
+                                {isSuggestingIcon ? (
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                ) : (
+                                    '🤖'
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                    <button
+                        onClick={handleAddCategory}
+                        className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                    >
+                        ➕ إضافة الفئة
+                    </button>
                 </div>
+
+                {/* قائمة الفئات */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {state.categories.map((category) => (
+                        <div key={category.id} className="p-3 bg-slate-700/50 rounded-lg flex items-center justify-between border border-blue-400/20">
+                            <div className="flex items-center gap-2">
+                                <span className="text-lg">{category.icon}</span>
+                                <span className="text-sm font-medium text-white">{category.name}</span>
+                            </div>
+                            <button
+                                onClick={() => handleDeleteCategory(category.id)}
+                                className="text-red-500 hover:text-red-700 text-sm"
+                                title="حذف الفئة"
+                            >
+                                🗑️
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </div>
 
             {/* إعدادات التطبيق */}
             <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl">
