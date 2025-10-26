@@ -18,6 +18,9 @@ const BankAccountForm: React.FC<BankAccountFormProps> = ({ onClose, onSave, init
         balance: 0,
         currency: 'SAR',
         smsSamples: [],
+        accountType: 'current', // نوع الحساب
+        bankName: '', // اسم البنك
+        logo: '', // شعار البنك
     });
 
     useEffect(() => {
@@ -53,6 +56,22 @@ const BankAccountForm: React.FC<BankAccountFormProps> = ({ onClose, onSave, init
                             <label htmlFor="name" className="block text-sm font-medium text-blue-200 mb-1">اسم الحساب</label>
                             <input type="text" name="name" value={account.name} onChange={handleChange} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white placeholder-blue-300 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400" required />
                         </div>
+                        
+                        <div>
+                            <label htmlFor="bankName" className="block text-sm font-medium text-blue-200 mb-1">اسم البنك</label>
+                            <input type="text" name="bankName" value={account.bankName} onChange={handleChange} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white placeholder-blue-300 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400" placeholder="مثال: البنك الأهلي السعودي" required />
+                        </div>
+                        
+                        <div>
+                            <label htmlFor="accountType" className="block text-sm font-medium text-blue-200 mb-1">نوع الحساب</label>
+                            <select name="accountType" value={account.accountType} onChange={handleChange} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400" required>
+                                <option value="current" className="bg-slate-800 text-white">حساب جاري</option>
+                                <option value="savings" className="bg-slate-800 text-white">حساب توفير</option>
+                                <option value="investment" className="bg-slate-800 text-white">حساب استثماري</option>
+                                <option value="business" className="bg-slate-800 text-white">حساب تجاري</option>
+                            </select>
+                        </div>
+                        
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label htmlFor="balance" className="block text-sm font-medium text-blue-200 mb-1">الرصيد الافتتاحي</label>

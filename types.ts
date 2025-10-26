@@ -59,6 +59,9 @@ export interface BankAccountConfig {
     balance: number;
     currency?: string;
     smsSamples?: string[];
+    accountType?: 'current' | 'savings' | 'investment' | 'business';
+    bankName?: string;
+    logo?: string;
 }
 
 export interface CardDetails extends CardConfig {
