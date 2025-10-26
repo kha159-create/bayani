@@ -12,17 +12,13 @@ interface PieChartProps {
 }
 
 const PieChart: React.FC<PieChartProps> = ({ data, total }) => {
-    let cumulativePercentage = 0;
-
-    const getPathData = (percentage: number) => {
+    const getPathData = (percentage: number, startPercentage: number) => {
         const radius = 80;
         const centerX = 100;
         const centerY = 100;
         
-        const startAngle = (cumulativePercentage * 360) / 100;
-        const endAngle = ((cumulativePercentage + percentage) * 360) / 100;
-        
-        cumulativePercentage += percentage;
+        const startAngle = (startPercentage * 360) / 100;
+        const endAngle = ((startPercentage + percentage) * 360) / 100;
         
         const startAngleRad = (startAngle * Math.PI) / 180;
         const endAngleRad = (endAngle * Math.PI) / 180;
@@ -37,6 +33,8 @@ const PieChart: React.FC<PieChartProps> = ({ data, total }) => {
         return `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
     };
 
+    let cumulativePercentage = 0;
+
     return (
         <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl">
             <h3 className="text-xl font-bold text-white mb-6 text-center">توزيع المصاريف حسب الفئات</h3>
@@ -47,10 +45,12 @@ const PieChart: React.FC<PieChartProps> = ({ data, total }) => {
                     <svg width="200" height="200" viewBox="0 0 200 200" className="transform -rotate-90">
                         {data.map((item, index) => {
                             const percentage = (item.value / total) * 100;
+                            const startPercentage = cumulativePercentage;
+                            cumulativePercentage += percentage;
                             return (
                                 <path
                                     key={item.id}
-                                    d={getPathData(percentage)}
+                                    d={getPathData(percentage, startPercentage)}
                                     fill={item.color}
                                     stroke="rgba(255, 255, 255, 0.1)"
                                     strokeWidth="1"
