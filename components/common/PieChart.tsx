@@ -9,9 +9,10 @@ interface PieChartProps {
         icon: string;
     }>;
     total: number;
+    onCategoryClick?: (categoryId: string) => void;
 }
 
-const PieChart: React.FC<PieChartProps> = ({ data, total }) => {
+const PieChart: React.FC<PieChartProps> = ({ data, total, onCategoryClick }) => {
     // حساب النسب المتراكمة مقدماً
     const chartData = React.useMemo(() => {
         let cumulativePercentage = 0;
@@ -72,7 +73,11 @@ const PieChart: React.FC<PieChartProps> = ({ data, total }) => {
                 {/* مفتاح الألوان */}
                 <div className="flex-1 space-y-3">
                     {chartData.map((item) => (
-                        <div key={item.id} className="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
+                        <div 
+                            key={item.id} 
+                            className="flex items-center gap-3 p-3 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                            onClick={() => onCategoryClick?.(item.id)}
+                        >
                             <div 
                                 className="w-4 h-4 rounded-full flex-shrink-0"
                                 style={{ backgroundColor: item.color }}

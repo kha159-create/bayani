@@ -66,6 +66,21 @@ const SAUDI_BANKS: BankInfo[] = [
         name: "البنك السعودي للتنمية",
         englishName: "Saudi Development Bank",
         logo: "🏦"
+    },
+    {
+        name: "بنك الإمارات دبي الوطني",
+        englishName: "Emirates NBD",
+        logo: "🏦"
+    },
+    {
+        name: "بنك أبوظبي الأول",
+        englishName: "First Abu Dhabi Bank",
+        logo: "🏦"
+    },
+    {
+        name: "بنك دبي الإسلامي",
+        englishName: "Dubai Islamic Bank",
+        logo: "🏦"
     }
 ];
 
@@ -106,7 +121,13 @@ export const getBankLogo = (bankName: string): string => {
         { keyword: "هولندي", logo: "🏦" },
         { keyword: "hollandi", logo: "🏦" },
         { keyword: "بريطاني", logo: "🏦" },
-        { keyword: "british", logo: "🏦" }
+        { keyword: "british", logo: "🏦" },
+        { keyword: "إمارات", logo: "🏦" },
+        { keyword: "emirates", logo: "🏦" },
+        { keyword: "أبوظبي", logo: "🏦" },
+        { keyword: "abu dhabi", logo: "🏦" },
+        { keyword: "دبي", logo: "🏦" },
+        { keyword: "dubai", logo: "🏦" }
     ];
     
     for (const { keyword, logo } of keywords) {

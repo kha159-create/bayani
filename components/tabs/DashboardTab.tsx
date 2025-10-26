@@ -20,21 +20,6 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
     const totalIncome = calculations.totalIncome;
     const netResult = totalIncome - totalExpenses;
 
-    const topCategories = useMemo(() => {
-        return Object.entries(calculations.expensesByCategory)
-            .sort(([, a], [, b]) => (b as number) - (a as number))
-            .slice(0, 4)
-            .map(([categoryId, amount]) => {
-                const category = categories.find(c => c.id === categoryId);
-                return {
-                    id: categoryId,
-                    name: category?.name || t('other', language),
-                    icon: category?.icon || '📊',
-                    amount: amount as number
-                };
-            });
-    }, [calculations.expensesByCategory, categories, language]);
-
     // تحديد نوع البطاقة
     const getCardType = (cardName: string) => {
         const name = cardName.toLowerCase();
@@ -47,10 +32,10 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
     // تحديد شعار البطاقة
     const getCardLogo = (cardName: string) => {
         const name = cardName.toLowerCase();
-        if (name.includes('visa') || name.includes('فيزا')) return '💳';
-        if (name.includes('mastercard') || name.includes('ماستر')) return '💳';
-        if (name.includes('amex') || name.includes('أمريكان')) return '💳';
-        return '💳';
+        if (name.includes('visa') || name.includes('فيزا')) return 'VISA';
+        if (name.includes('mastercard') || name.includes('ماستر')) return '●●';
+        if (name.includes('amex') || name.includes('أمريكان')) return '●●';
+        return '●●';
     };
 
     // حساب ملخص البطاقات الائتمانية
@@ -135,31 +120,21 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                 {creditCardsSummary.length > 0 && (
                     <div className="mt-6">
                         <h3 className="text-lg font-bold text-white mb-4 text-center">ملخص البطاقات الائتمانية</h3>
-                        <div className="flex gap-4 overflow-x-auto pb-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {creditCardsSummary.map((card) => (
-                                <div key={card.id} className="flex-shrink-0 w-64 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+                                <div key={card.id} className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-2xl">{card.logo}</span>
+                                            <span className="text-lg font-bold text-white">{card.logo}</span>
                                             <span className="text-white font-semibold text-sm">{card.type}</span>
                                         </div>
-                                        <span className="text-white/70 text-xs">**** 1234</span>
+                                        <span className="text-white/70 text-xs">**** {card.id.slice(-4)}</span>
                                     </div>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-white/80 text-sm">الرصيد الحالي</span>
-                                            <span className="text-white font-bold">{formatCurrency(card.currentBalance)}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-white/80 text-sm">الرصيد المستحق</span>
-                                            <span className="text-orange-300 font-bold">{formatCurrency(card.usedAmount)}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-white/80 text-sm">المتاح</span>
-                                            <span className="text-green-300 font-bold">{formatCurrency(card.availableAmount)}</span>
-                                        </div>
-                        </div>
-                        </div>
+                                    <div className="text-center">
+                                        <div className="text-3xl font-bold text-white mb-2">{formatCurrency(card.currentBalance)}</div>
+                                        <div className="text-white/80 text-sm">الرصيد الحالي</div>
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -173,62 +148,10 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
             {pieChartData.length > 0 && (
                 <PieChart 
                     data={pieChartData} 
-                    total={totalExpenses} 
+                    total={totalExpenses}
+                    onCategoryClick={onNavigateToTransactions}
                 />
             )}
-
-            {/* فئات المصاريف الرئيسية */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {topCategories.map((category, index) => (
-                    <div key={category.id} className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer" onClick={() => onNavigateToTransactions?.(category.id)}>
-                        <div className="text-center text-white">
-                            <div className="text-3xl mb-2">{category.icon}</div>
-                            <div className="text-sm font-semibold mb-1">{category.name}</div>
-                            <div className="text-lg font-bold">{formatCurrency(category.amount)}</div>
-                                    </div>
-                                </div>
-                ))}
-                                </div>
-                                
-            {/* بطاقات إضافية للمعلومات المالية */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-lg">
-                    <div className="text-center text-white">
-                        <div className="text-3xl mb-2">💰</div>
-                        <div className="text-sm font-semibold mb-1">إجمالي الدخل</div>
-                        <div className="text-2xl font-bold text-green-400">{formatCurrency(totalIncome)}</div>
-                                    </div>
-                                </div>
-
-                <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-lg">
-                    <div className="text-center text-white">
-                        <div className="text-3xl mb-2">💸</div>
-                        <div className="text-sm font-semibold mb-1">إجمالي المصاريف</div>
-                        <div className="text-2xl font-bold text-red-400">{formatCurrency(totalExpenses)}</div>
-                            </div>
-                </div>
-            </div>
-
-            {/* بطاقات الرصيد المستحق والمتبقي للبطاقات */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-lg">
-                    <div className="text-center text-white">
-                        <div className="text-3xl mb-2">💳</div>
-                        <div className="text-sm font-semibold mb-1">الرصيد المستحق</div>
-                        <div className="text-2xl font-bold text-orange-400">{formatCurrency(calculations.totalCardDebt || 0)}</div>
-                        <div className="text-xs text-blue-200 mt-1">إجمالي المبالغ المستحقة على البطاقات</div>
-                    </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-lg">
-                    <div className="text-center text-white">
-                        <div className="text-3xl mb-2">💎</div>
-                        <div className="text-sm font-semibold mb-1">الرصيد المتبقي</div>
-                        <div className="text-2xl font-bold text-cyan-400">{formatCurrency(calculations.totalCardBalance || 0)}</div>
-                        <div className="text-xs text-blue-200 mt-1">إجمالي الرصيد المتبقي في البطاقات</div>
-                    </div>
-                </div>
-            </div>
         </div>
     );
 };

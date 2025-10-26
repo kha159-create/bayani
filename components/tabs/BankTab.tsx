@@ -44,7 +44,7 @@ const BankTab: React.FC<BankTabProps> = ({
 
             {/* إضافة حساب جديد */}
             <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl">
-                <div className="flex gap-4 justify-center">
+                <div className="flex justify-center gap-4">
                     <button
                         onClick={() => openBankAccountFormModal()}
                         className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-bold py-3 px-6 rounded-xl hover:from-cyan-500 hover:to-blue-600 transition-all duration-300 shadow-lg"
@@ -66,19 +66,8 @@ const BankTab: React.FC<BankTabProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Object.values(bankAccountDetails).map((account, index) => (
                     <div key={account.id} className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300">
-                        <div className="flex justify-between items-start mb-4">
-                            <div>
-                                <div className="flex items-center gap-3">
-                                    <span className="text-2xl">{account.logo || getBankLogo(account.bankName || '')}</span>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-white">{account.name}</h3>
-                                        {account.bankName && (
-                                            <p className="text-blue-200 text-sm">{account.bankName}</p>
-                                        )}
-                                        <p className="text-blue-200 text-xs">{account.accountType === 'current' ? 'حساب جاري' : account.accountType === 'savings' ? 'حساب توفير' : account.accountType === 'investment' ? 'حساب استثماري' : 'حساب تجاري'}</p>
-                                    </div>
-                                </div>
-                            </div>
+                        {/* Header - أزرار التعديل والحذف */}
+                        <div className="flex justify-between items-start mb-6">
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => openBankAccountFormModal(account.id)}
@@ -93,92 +82,92 @@ const BankTab: React.FC<BankTabProps> = ({
                                     🗑️
                                 </button>
                             </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            {/* الرصيد الحالي */}
-                            <div className="bg-slate-700/30 rounded-xl p-4">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-blue-200 text-sm">الرصيد الحالي</span>
-                                    <span className={`font-bold text-2xl ${account.balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                        {formatCurrency(account.balance)}
-                                    </span>
-            </div>
-        </div>
-
-                            {/* نوع الحساب */}
-                            <div className="bg-slate-700/30 rounded-xl p-4">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-blue-200 text-sm">نوع الحساب</span>
-                                    <span className="text-white font-semibold">{account.type}</span>
-        </div>
-            </div>
-
-                            {/* البنك */}
-                            <div className="bg-slate-700/30 rounded-xl p-4">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-blue-200 text-sm">البنك</span>
-                                    <span className="text-white font-semibold">{account.bankName}</span>
-            </div>
-        </div>
-    </div>
-
-                        {/* ملخص الحساب */}
-                        <div className="mt-4 pt-4 border-t border-blue-400/20">
-                            <div className="grid grid-cols-2 gap-4 text-center">
-                                <div>
-                                    <p className="text-blue-200 text-xs">الرصيد</p>
-                                    <p className={`font-bold ${account.balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                        {formatCurrency(account.balance)}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-blue-200 text-xs">الحالة</p>
-                                    <p className={`font-bold ${account.balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                        {account.balance >= 0 ? 'إيجابي' : 'سلبي'}
-                                    </p>
+                            <div className="text-right">
+                                <div className="flex items-center gap-3">
+                                    <span className="text-2xl">{account.logo || getBankLogo(account.bankName || '')}</span>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white">{account.name}</h3>
+                                        {account.bankName && (
+                                            <p className="text-blue-200 text-sm">{account.bankName}</p>
+                                        )}
+                                        <p className="text-blue-200 text-xs">{account.accountType === 'current' ? 'حساب جاري' : account.accountType === 'savings' ? 'حساب توفير' : account.accountType === 'investment' ? 'حساب استثماري' : 'حساب تجاري'}</p>
+                                    </div>
                                 </div>
                             </div>
-                </div>
-            </div>
-               ))}
-            </div>
+                        </div>
 
-            {/* رسالة عدم وجود حسابات */}
-            {Object.values(bankAccountDetails).length === 0 && (
-                <div className="text-center py-8">
-                    <div className="text-6xl mb-4">🏦</div>
-                    <h3 className="text-xl font-bold text-white mb-2">لا توجد حسابات بنكية</h3>
-                    <p className="text-blue-200">أضف حسابك البنكي الأول للبدء</p>
-                </div>
-            )}
+                        {/* المحتوى الرئيسي */}
+                        <div className="space-y-4">
+                            {/* الرصيد الحالي */}
+                            <div className="bg-slate-700/30 rounded-xl p-4 text-center">
+                                <div className="text-blue-200 text-sm mb-1">الرصيد الحالي</div>
+                                <div className={`text-2xl font-bold ${account.balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                    {formatCurrency(account.balance)}
+                                </div>
+                            </div>
+
+                            {/* نوع الحساب */}
+                            <div className="bg-slate-700/30 rounded-xl p-4 text-center">
+                                <div className="text-blue-200 text-sm mb-1">نوع الحساب</div>
+                                <div className="text-white font-bold">
+                                    {account.accountType === 'current' ? 'حساب جاري' : 
+                                     account.accountType === 'savings' ? 'حساب توفير' : 
+                                     account.accountType === 'investment' ? 'حساب استثماري' : 'حساب تجاري'}
+                                </div>
+                            </div>
+
+                            {/* البنك */}
+                            <div className="bg-slate-700/30 rounded-xl p-4 text-center">
+                                <div className="text-blue-200 text-sm mb-1">البنك</div>
+                                <div className="text-white font-bold">{account.bankName || 'غير محدد'}</div>
+                            </div>
+                        </div>
+
+                        {/* التذييل */}
+                        <div className="mt-4 pt-4 border-t border-blue-400/20">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <div className="text-blue-200 text-xs">الحالة</div>
+                                    <div className={`text-sm font-bold ${account.balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                        {account.balance >= 0 ? 'إيجابي' : 'سلبي'}
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-blue-200 text-xs">الرصيد</div>
+                                    <div className={`text-sm font-bold ${account.balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                        {formatCurrency(account.balance)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
 
             {/* ملخص الحسابات */}
-            {Object.values(bankAccountDetails).length > 0 && (
-                <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl">
-                    <h3 className="text-xl font-bold text-white mb-4">ملخص الحسابات البنكية</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="text-center">
-                            <p className="text-2xl font-bold text-green-400">
-                                {formatCurrency(Object.values(bankAccountDetails).reduce((sum, account) => sum + account.balance, 0))}
-                            </p>
-                            <p className="text-blue-200 text-sm">إجمالي الرصيد</p>
+            <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl">
+                <h3 className="text-xl font-bold text-white mb-4">ملخص الحسابات</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-300 mb-1">
+                            {Object.values(bankAccountDetails).length}
                         </div>
-                        <div className="text-center">
-                            <p className="text-2xl font-bold text-blue-400">
-                                {Object.values(bankAccountDetails).length}
-                            </p>
-                            <p className="text-blue-200 text-sm">عدد الحسابات</p>
+                        <div className="text-blue-200 text-sm">إجمالي الحسابات</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="text-2xl font-bold text-green-300 mb-1">
+                            {formatCurrency(Object.values(bankAccountDetails).reduce((sum, account) => sum + account.balance, 0))}
                         </div>
-                        <div className="text-center">
-                            <p className="text-2xl font-bold text-cyan-400">
-                                {Object.values(bankAccountDetails).filter(account => account.balance >= 0).length}
-                            </p>
-                            <p className="text-blue-200 text-sm">حسابات إيجابية</p>
+                        <div className="text-blue-200 text-sm">إجمالي الرصيد</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="text-2xl font-bold text-cyan-300 mb-1">
+                            {Object.values(bankAccountDetails).filter(account => account.balance >= 0).length}
                         </div>
+                        <div className="text-blue-200 text-sm">حسابات إيجابية</div>
+                    </div>
                 </div>
             </div>
-            )}
         </div>
     );
 };
