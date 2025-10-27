@@ -1244,6 +1244,15 @@ const App: React.FC = () => {
         return 'المستخدم';
     };
 
+    const profilePhotoUrl = useMemo(() => {
+        try {
+            const stored = typeof window !== 'undefined' ? localStorage.getItem('profile_photo') : null;
+            return (currentUser?.photoURL as string) || stored || null;
+        } catch {
+            return (currentUser?.photoURL as string) || null;
+        }
+    }, [currentUser]);
+
     const renderTabContent = () => {
         switch (activeTab) {
             case 'summary': return <DashboardTab calculations={calculations} categories={state.categories} state={state} allTransactionsSorted={allTransactionsSorted} darkMode={false} language={state.settings.language} onNavigateToTransactions={navigateToTransactionsWithFilter} />;
@@ -1291,31 +1300,39 @@ const App: React.FC = () => {
                             </select>
                         </div>
 
-                        {/* الوسط: اللوجو واسم التطبيق */}
-                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center flex items-center gap-2">
-                            <img src="./logo.jpg" alt="بياني Logo" className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover" />
-                            <h1 className="text-lg md:text-xl font-bold text-white">بياني</h1>
+                        {/* الوسط: اللوجو واسم التطبيق مع الشعار */}
+                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center flex items-center gap-3">
+                            <img src="./logo.jpg" alt="بياني Logo" className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover" />
+                            <div className="flex flex-col leading-tight">
+                                <h1 className="text-xl md:text-2xl font-bold text-white">بياني</h1>
+                                <p className="text-[10px] md:text-xs text-blue-200">كل شيئ عن مالي.... في بياني</p>
+                            </div>
                         </div>
 
-                        {/* الجهة اليمنى: صورة المستخدم والترحيب (مع تفعيل الضغط لفتح القائمة) */}
-                        <div 
-                            className="flex items-center gap-2 cursor-pointer z-10"
-                            onClick={() => setProfileModal({ isOpen: true })}
-                        >
-                            <div className="text-right">
-                                <span className="text-white font-semibold text-sm md:text-base">مرحباً, {getUserDisplayName()}</span>
-                                <p className="text-blue-200 text-xs">أهلاً بعودتك!</p>
-                            </div>
-                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border-2 border-blue-400 bg-gradient-to-br from-cyan-400 to-blue-500">
-                                {currentUser?.photoURL ? (
-                                    <img src={currentUser.photoURL} alt="User Avatar" className="w-full h-full object-cover" />
+                        {/* الجهة اليمنى: مساحة فارغة لحفظ التوازن */}
+                        <div className="w-24 md:w-32" />
+                    </div>
+                    {/* صف المستخدم أسفل الهيدر */}
+                        <div className="mt-2 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-3" onClick={() => setProfileModal({ isOpen: true })}>
+                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-blue-400 bg-gradient-to-br from-cyan-400 to-blue-500 cursor-pointer">
+                                {profilePhotoUrl ? (
+                                    <img src={profilePhotoUrl} alt="User Avatar" className="w-full h-full object-cover" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-white font-bold text-lg">
+                                    <div className="w-full h-full flex items-center justify-center text-white font-bold text-xl">
                                         {(currentUser?.displayName || currentUser?.email || 'U').charAt(0).toUpperCase()}
                                     </div>
                                 )}
                             </div>
+                            <div className="text-right">
+                                <span className="text-white font-semibold text-base md:text-lg">{getUserDisplayName()}</span>
+                                <p className="text-blue-200 text-xs">أهلاً بعودتك!</p>
+                            </div>
                         </div>
+                        <button onClick={handleSignOut} className="ml-auto flex items-center gap-2 text-red-300 hover:text-red-400 transition-colors">
+                            <span className="text-2xl">🚪</span>
+                            <span className="text-sm md:text-base">تسجيل الخروج</span>
+                        </button>
                     </div>
                 </div>
                 {/* END: New Header */}

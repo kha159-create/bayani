@@ -22,7 +22,7 @@ const getTabs = (language: 'ar' | 'en' = 'ar'): { id: Tab; label: string; icon?:
     { id: 'settings', label: `⚙️ ${t('tab.settings', language)}` },
 ];
 
-const mainMobileTabs: Tab[] = ['summary', 'transactions'];
+const mainMobileTabs: Tab[] = ['summary', 'transactions', 'cards', 'bank'];
 
 const TabsComponent: React.FC<TabsProps> = ({ activeTab, setActiveTab, language = 'ar' }) => {
     const [isMoreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -59,10 +59,11 @@ const TabsComponent: React.FC<TabsProps> = ({ activeTab, setActiveTab, language 
             <div className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-gradient-to-r from-[#031A2E]/95 to-[#052E4D]/95 backdrop-blur-lg border-t border-blue-400/20 z-40 flex justify-around items-center shadow-lg">
                 {mainTabs.map(tab => {
                     const Icon = tab.icon;
+                    const displayText = tab.id === 'cards' ? 'إدارة' : tab.label.split(' ')[1];
                     return (
                         <button key={tab.id} onClick={() => handleTabClick(tab.id)} className={`flex flex-col items-center justify-center gap-1 transition-colors w-full h-full ${activeTab === tab.id ? 'text-cyan-400' : 'text-blue-200 hover:text-white'}`}>
                             {Icon && <Icon />}
-                            <span className="text-xs">{tab.label.split(' ')[1]}</span>
+                            <span className="text-xs">{displayText}</span>
                         </button>
                     )
                 })}
