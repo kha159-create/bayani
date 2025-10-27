@@ -1244,14 +1244,14 @@ const App: React.FC = () => {
         return 'المستخدم';
     };
 
-    const profilePhotoUrl = useMemo(() => {
+    const profilePhotoUrl = (() => {
         try {
             const stored = typeof window !== 'undefined' ? localStorage.getItem('profile_photo') : null;
             return (currentUser?.photoURL as string) || stored || null;
         } catch {
             return (currentUser?.photoURL as string) || null;
         }
-    }, [currentUser]);
+    })();
 
     const renderTabContent = () => {
         switch (activeTab) {
