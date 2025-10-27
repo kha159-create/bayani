@@ -59,95 +59,93 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSuccess, onClose, hideCloseButton
 
     return (
         <div className={`${hideCloseButton ? '' : 'fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] overflow-hidden'} flex items-center justify-center p-4`} style={hideCloseButton ? {} : { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-md animate-fade-in">
-                <div className="p-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-slate-900">
-                            {isLogin ? '🔐 تسجيل الدخول' : '📝 إنشاء حساب جديد'}
-                        </h2>
-                        {!hideCloseButton && (
-                            <button 
-                                onClick={onClose}
-                                className="text-slate-400 hover:text-slate-600 transition-colors"
-                            >
-                                ✕
-                            </button>
-                        )}
+            <div className="bg-gradient-to-br from-[#031A2E]/85 to-[#052E4D]/85 backdrop-blur-2xl border border-blue-400/20 rounded-3xl shadow-2xl w-full max-w-md animate-fade-in overflow-hidden">
+                {!hideCloseButton && (
+                    <div className="flex justify-end p-3">
+                        <button onClick={onClose} className="text-blue-200 hover:text-white">✕</button>
                     </div>
+                )}
+                <div className="px-6 pb-6 pt-2">
+                    <h2 className="text-center text-2xl font-bold text-white mb-4">
+                        {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
+                    </h2>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {!isLogin && (
                             <div>
-                                <label htmlFor="displayName" className="block text-sm font-medium text-slate-700 mb-1">
-                                    الاسم الكامل
-                                </label>
-                                <input
-                                    type="text"
-                                    id="displayName"
-                                    name="displayName"
-                                    value={formData.displayName}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="أدخل اسمك الكامل"
-                                    required={!isLogin}
-                                />
+                                <label htmlFor="displayName" className="sr-only">الاسم الكامل</label>
+                                <div className="flex items-center gap-3 bg-slate-800/60 border border-blue-400/20 rounded-2xl px-4 py-3">
+                                    <span className="text-blue-300 text-xl">👤</span>
+                                    <input
+                                        type="text"
+                                        id="displayName"
+                                        name="displayName"
+                                        value={formData.displayName}
+                                        onChange={handleChange}
+                                        className="flex-1 bg-transparent outline-none text-white placeholder-blue-300"
+                                        placeholder="الاسم الكامل"
+                                        required={!isLogin}
+                                    />
+                                </div>
                             </div>
                         )}
 
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
-                                البريد الإلكتروني
-                            </label>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="example@email.com"
-                                required
-                            />
+                            <label htmlFor="email" className="sr-only">البريد الإلكتروني أو رقم الجوال</label>
+                            <div className="flex items-center gap-3 bg-slate-800/60 border border-blue-400/20 rounded-2xl px-4 py-3">
+                                <span className="text-blue-300 text-xl">✉️</span>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    className="flex-1 bg-transparent outline-none text-white placeholder-blue-300"
+                                    placeholder="البريد الإلكتروني أو رقم الجوال"
+                                    required
+                                />
+                            </div>
                         </div>
 
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
-                                كلمة المرور
-                            </label>
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="كلمة المرور"
-                                required
-                                minLength={6}
-                            />
+                            <label htmlFor="password" className="sr-only">كلمة المرور</label>
+                            <div className="flex items-center gap-3 bg-slate-800/60 border border-blue-400/20 rounded-2xl px-4 py-3">
+                                <span className="text-blue-300 text-xl">🔒</span>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    className="flex-1 bg-transparent outline-none text-white placeholder-blue-300"
+                                    placeholder="كلمة المرور"
+                                    required
+                                    minLength={6}
+                                />
+                            </div>
                         </div>
 
                         {error && (
-                            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                                <p className="text-red-600 text-sm">{error}</p>
+                            <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-200 text-sm">
+                                {error}
                             </div>
                         )}
 
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-lg transition-colors"
+                            className="w-full py-3 rounded-2xl font-semibold text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 disabled:opacity-60 transition-colors shadow-lg"
                         >
-                            {loading ? '⏳ جاري المعالجة...' : (isLogin ? '🔐 تسجيل الدخول' : '📝 إنشاء حساب')}
+                            {loading ? '⏳ جاري المعالجة...' : (isLogin ? 'تسجيل الدخول' : 'إنشاء حساب')}
                         </button>
                     </form>
 
                     <div className="mt-6 text-center">
                         <button
                             onClick={() => setIsLogin(!isLogin)}
-                            className="text-blue-600 hover:text-blue-700 font-medium"
+                            className="text-blue-300 hover:text-white font-medium"
                         >
-                            {isLogin ? 'ليس لديك حساب؟ إنشاء حساب جديد' : 'لديك حساب بالفعل؟ تسجيل الدخول'}
+                            {isLogin ? 'إنشاء حساب جديد' : 'تسجيل الدخول'}
                         </button>
                     </div>
                 </div>
