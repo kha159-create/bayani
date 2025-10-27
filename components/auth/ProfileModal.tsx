@@ -72,7 +72,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[10000] p-4 overflow-y-auto">
             <div className="bg-gradient-to-br from-slate-800/95 to-blue-900/95 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-4 md:p-6 shadow-2xl w-full max-w-5xl my-auto">
                 <button 
                     onClick={onClose} 
