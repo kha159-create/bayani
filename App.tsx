@@ -11,7 +11,7 @@ import AuthForm from './components/auth/AuthForm';
 import UserProfile from './components/auth/UserProfile';
 import ProfileModal from './components/auth/ProfileModal';
 
-import Header from './components/layout/Header';
+// import Header from './components/layout/Header'; // تم استبداله بهيدر جديد داخل App.tsx
 import TabsComponent from './components/layout/Tabs';
 import SkeletonDashboard from './components/layout/SkeletonDashboard';
 import DashboardTab from './components/tabs/DashboardTab';
@@ -1246,7 +1246,7 @@ const App: React.FC = () => {
 
     const renderTabContent = () => {
         switch (activeTab) {
-            case 'summary': return <DashboardTab calculations={calculations} categories={state.categories} state={state} darkMode={false} language={state.settings.language} onNavigateToTransactions={navigateToTransactionsWithFilter} />;
+            case 'summary': return <DashboardTab calculations={calculations} categories={state.categories} state={state} allTransactionsSorted={allTransactionsSorted} darkMode={false} language={state.settings.language} onNavigateToTransactions={navigateToTransactionsWithFilter} />;
             case 'transactions': return <TransactionsTab transactions={filteredTransactions} allTransactions={allTransactionsSorted} categories={state.categories} deleteTransaction={handleDeleteTransaction} editTransaction={handleEditTransaction} state={state} darkMode={false} language={state.settings.language} initialCategoryFilter={transactionFilters.categoryId} />;
             case 'ai-assistant': return <AIAssistantTab calculations={calculations} filteredTransactions={filteredTransactions} allTransactions={allTransactionsSorted} state={state} darkMode={false} language={state.settings.language} />;
             case 'budget': return <BudgetTab state={state} setLoading={setLoading} setModal={setModalConfig} darkMode={false} language={state.settings.language} />;
@@ -1262,16 +1262,53 @@ const App: React.FC = () => {
 
         return (
             <div className="min-h-screen font-sans bg-gradient-to-br from-[#031A2E] to-[#052E4D] relative">
-            <Header
-                selectedYear={selectedYear}
-                selectedMonth={selectedMonth}
-                onYearChange={setSelectedYear}
-                onMonthChange={val => setSelectedMonth(val)}
-                currentUser={currentUser}
-                onSignOut={handleSignOut}
-                onOpenProfile={() => setProfileModal({ isOpen: true })}
-                getUserDisplayName={getUserDisplayName}
-            />
+                {/* START: New Header */}
+                <div className="container mx-auto px-2 sm:px-4 max-w-7xl mb-6">
+                    <div className="relative flex items-center justify-between w-full p-4 bg-slate-800/50 rounded-lg backdrop-blur-md border border-blue-400/30 min-h-[80px]">
+
+                        {/* الجهة اليسرى: فلتر التاريخ (بشكل دائري) */}
+                        <div className="flex gap-2 z-10">
+                            <select 
+                                value={selectedYear} 
+                                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                className="appearance-none bg-slate-700 text-white p-3 rounded-full border border-blue-400/30 text-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                {[2025, 2024, 2023].map(year => (
+                                    <option key={year} value={year}>{year}</option>
+                                ))}
+                            </select>
+                            <select 
+                                value={selectedMonth} 
+                                onChange={(e) => setSelectedMonth(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                                className="appearance-none bg-slate-700 text-white p-3 rounded-full border border-blue-400/30 text-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="all">كل الشهور</option>
+                                {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                                    <option key={month} value={month}>
+                                        {new Date(selectedYear, month - 1).toLocaleString('ar-SA', { month: 'long' })}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* الوسط: اللوجو واسم التطبيق */}
+                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                            <h1 className="text-2xl font-bold text-white">بياني</h1>
+                        </div>
+
+                        {/* الجهة اليمنى: الترحيب بالمستخدم (مع تفعيل الضغط لفتح القائمة) */}
+                        <div 
+                            className="flex items-center gap-3 cursor-pointer z-10"
+                            onClick={() => setProfileModal({ isOpen: true })}
+                        >
+                            <div className="text-right">
+                                <span className="text-white font-semibold">مرحباً, {getUserDisplayName()}</span>
+                                <p className="text-blue-200 text-sm">أهلاً بعودتك!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {/* END: New Header */}
             
             <main className="container mx-auto px-2 sm:px-4 max-w-7xl mt-8 mb-20">
                 <TabsComponent activeTab={activeTab} setActiveTab={setActiveTab} language={state.settings.language} />

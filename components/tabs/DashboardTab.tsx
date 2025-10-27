@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { FinancialCalculations, Category, CardDetails, BankAccountDetails, AppState, CardConfig } from '../../types';
+import { FinancialCalculations, Category, CardDetails, BankAccountDetails, AppState, CardConfig, Transaction } from '../../types';
 import { formatCurrency } from '../../utils/formatting';
 import { t } from '../../translations';
 import AzkarCard from '../common/AzkarCard';
@@ -8,12 +8,13 @@ interface DashboardTabProps {
     calculations: FinancialCalculations;
     categories: Category[];
     state: AppState;
+    allTransactionsSorted: Transaction[];
     darkMode?: boolean;
     language?: 'ar' | 'en';
     onNavigateToTransactions?: (categoryId?: string) => void;
 }
 
-const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, state, darkMode = false, language = 'ar', onNavigateToTransactions }) => {
+const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, state, allTransactionsSorted, darkMode = false, language = 'ar', onNavigateToTransactions }) => {
     const totalBankBalance = calculations.totalBankBalance;
     const totalExpenses = calculations.totalExpenses;
     const totalIncome = calculations.totalIncome;
@@ -106,10 +107,8 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
     
     // آخر 5 حركات
     const lastFiveTransactions = useMemo(() => {
-        return state.transactions
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-            .slice(0, 5);
-    }, [state.transactions]);
+        return allTransactionsSorted.slice(0, 5);
+    }, [allTransactionsSorted]);
 
     return (
         <div className="space-y-6">
@@ -148,24 +147,10 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                 </div>
             )}
 
-            {/* 3. بطاقة النظرة العامة */}
-            <div className="bg-gradient-to-br from-cyan-400/90 to-blue-500/90 backdrop-blur-xl border border-cyan-300/30 rounded-2xl p-6 shadow-2xl">
-                <div className="text-center text-white mb-6">
-                    <h2 className="text-2xl font-bold mb-2">نظرة عامة</h2>
-                    <div className="text-4xl font-bold mb-4">{formatCurrency(totalBankBalance)}</div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div className="bg-white/20 backdrop-blur-md rounded-xl p-3 border border-white/30">
-                            <div className="text-xl font-bold">{formatCurrency(totalIncome)}</div>
-                            <div className="text-white/80 text-xs">إجمالي الدخل</div>
-                        </div>
-                        <div className="bg-white/20 backdrop-blur-md rounded-xl p-3 border border-white/30">
-                            <div className="text-xl font-bold">{formatCurrency(totalExpenses)}</div>
-                            <div className="text-white/80 text-xs">إجمالي المصاريف</div>
-                        </div>
-                    </div>
-                </div>
-                
-                {/* ملخص الحسابات البنكية */}
+            {/* 3. ملخص الحسابات والبطاقات */}
+            {(bankAccountsCount > 0 || creditCardsSummary.length > 0) && (
+                <div className="bg-gradient-to-br from-slate-800/60 to-blue-900/60 backdrop-blur-xl border border-blue-400/30 rounded-2xl p-6 shadow-xl">
+                    {/* ملخص الحسابات البنكية */}
                 {bankAccountsCount > 0 && (
                     <div className="mb-4">
                         <h3 className="text-lg font-bold text-white mb-3 text-center">ملخص الحسابات البنكية</h3>
@@ -231,7 +216,8 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                         </div>
                     </div>
                 )}
-            </div>
+                </div>
+            )}
 
             {/* 4. ملخص الفئات */}
             {pieChartData.length > 0 && (
