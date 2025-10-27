@@ -1301,7 +1301,7 @@ const App: React.FC = () => {
                         </div>
 
                         {/* الوسط: اللوجو واسم التطبيق مع الشعار */}
-                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center flex items-center gap-3">
+                        <div className="absolute left-1/2 top-1/2 -translate-x-[55%] -translate-y-1/2 text-center flex items-center gap-3 md:-translate-x-1/2">
                             <img src="./logo.jpg" alt="بياني Logo" className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover" />
                             <div className="flex flex-col leading-tight">
                                 <h1 className="text-xl md:text-2xl font-bold text-white">بياني</h1>

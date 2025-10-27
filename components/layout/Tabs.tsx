@@ -15,7 +15,8 @@ const getTabs = (language: 'ar' | 'en' = 'ar'): { id: Tab; label: string; icon?:
     { id: 'budget', label: `✨ ${t('tab.budget', language)}` },
     { id: 'investment', label: `💹 ${t('tab.investment', language)}` },
     { id: 'ai-assistant', label: `🤖 ${t('tab.ai.assistant', language)}` },
-    { id: 'cards', label: `💳 ${t('tab.cards', language)}` },
+    // Rename cards tab label to إدارة with a suitable emoji
+    { id: 'cards', label: `${language === 'ar' ? '🗂️ إدارة' : '🗂️ Manage'}` },
     { id: 'bank', label: `🏦 ${t('tab.bank', language)}` },
     { id: 'installments', label: `📱 ${t('tab.installments', language)}` },
     { id: 'debts-loans', label: `📊 ${t('tab.debts.loans', language)}` },
@@ -59,10 +60,11 @@ const TabsComponent: React.FC<TabsProps> = ({ activeTab, setActiveTab, language 
             <div className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-gradient-to-r from-[#031A2E]/95 to-[#052E4D]/95 backdrop-blur-lg border-t border-blue-400/20 z-40 flex justify-around items-center shadow-lg">
                 {mainTabs.map(tab => {
                     const Icon = tab.icon;
-                    const displayText = tab.id === 'cards' ? 'إدارة' : tab.label.split(' ')[1];
+                    const displayText = tab.id === 'cards' ? (language === 'ar' ? 'إدارة' : 'Manage') : tab.label.split(' ')[1];
+                    const emoji = !Icon ? tab.label.split(' ')[0] : null;
                     return (
                         <button key={tab.id} onClick={() => handleTabClick(tab.id)} className={`flex flex-col items-center justify-center gap-1 transition-colors w-full h-full ${activeTab === tab.id ? 'text-cyan-400' : 'text-blue-200 hover:text-white'}`}>
-                            {Icon && <Icon />}
+                            {Icon ? <Icon /> : <span className="text-lg">{emoji}</span>}
                             <span className="text-xs">{displayText}</span>
                         </button>
                     )

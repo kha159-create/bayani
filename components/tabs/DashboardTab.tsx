@@ -128,7 +128,7 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                                 month: '2-digit', 
                                 day: '2-digit' 
                             });
-                            return (
+                return (
                                 <div key={transaction.id} className="bg-slate-700/40 backdrop-blur-md rounded-lg p-3 flex items-center justify-between border border-white/10">
                                     <div className="flex items-center gap-3">
                                         <span className="text-2xl">{category?.icon || '📊'}</span>
@@ -144,7 +144,7 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                             );
                         })}
                     </div>
-                </div>
+                                </div>
             )}
 
             {/* 3. ملخص الحسابات والبطاقات */}
@@ -198,8 +198,8 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                                                     className="bg-white h-1 rounded-full transition-all duration-300"
                                                     style={{ width: `${Math.min(card.usagePercentage || 0, 100)}%` }}
                                                 ></div>
-                                            </div>
-                                        </div>
+                            </div>
+                    </div>
                                         <div className="grid grid-cols-2 gap-2">
                                             <div className="bg-white/10 backdrop-blur-md rounded p-1.5 text-xs">
                                                 <div className="text-white/80 text-xs">الحد</div>
@@ -208,10 +208,10 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                                             <div className="bg-white/10 backdrop-blur-md rounded p-1.5 text-xs">
                                                 <div className="text-white/80 text-xs">المتاح</div>
                                                 <div className="text-white font-bold">{formatCurrency(card.availableAmount)}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+        </div>
+                </div>
+                        </div>
+                        </div>
                             ))}
                         </div>
                     </div>
@@ -242,7 +242,7 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                                 </div>
                             </div>
                         ))}
-                    </div>
+            </div>
                 </div>
             )}
         </div>
