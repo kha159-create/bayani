@@ -1266,12 +1266,12 @@ const App: React.FC = () => {
                 <div className="container mx-auto px-2 sm:px-4 max-w-7xl mb-6">
                     <div className="relative flex items-center justify-between w-full p-4 bg-slate-800/50 rounded-lg backdrop-blur-md border border-blue-400/30 min-h-[80px]">
 
-                        {/* الجهة اليسرى: فلتر التاريخ (بشكل دائري) */}
-                        <div className="flex gap-2 z-10">
+                        {/* الجهة اليسرى: فلتر التاريخ (بشكل دائري صغير) */}
+                        <div className="flex gap-1 z-10">
                             <select 
                                 value={selectedYear} 
                                 onChange={(e) => setSelectedYear(Number(e.target.value))}
-                                className="appearance-none bg-slate-700 text-white p-3 rounded-full border border-blue-400/30 text-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="appearance-none bg-slate-700 text-white px-2 py-1.5 text-xs rounded-full border border-blue-400/30 text-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                                 {[2025, 2024, 2023].map(year => (
                                     <option key={year} value={year}>{year}</option>
@@ -1280,30 +1280,40 @@ const App: React.FC = () => {
                             <select 
                                 value={selectedMonth} 
                                 onChange={(e) => setSelectedMonth(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                                className="appearance-none bg-slate-700 text-white p-3 rounded-full border border-blue-400/30 text-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="appearance-none bg-slate-700 text-white px-2 py-1.5 text-xs rounded-full border border-blue-400/30 text-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                                 <option value="all">كل الشهور</option>
-                                {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                                {[1,2,3,4,5,6,7,8,9,10,11,12].map(month => (
                                     <option key={month} value={month}>
-                                        {new Date(selectedYear, month - 1).toLocaleString('ar-SA', { month: 'long' })}
+                                        {['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'][month - 1]}
                                     </option>
                                 ))}
                             </select>
                         </div>
 
                         {/* الوسط: اللوجو واسم التطبيق */}
-                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                            <h1 className="text-2xl font-bold text-white">بياني</h1>
+                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center flex items-center gap-2">
+                            <img src="./logo.jpg" alt="بياني Logo" className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover" />
+                            <h1 className="text-lg md:text-xl font-bold text-white">بياني</h1>
                         </div>
 
-                        {/* الجهة اليمنى: الترحيب بالمستخدم (مع تفعيل الضغط لفتح القائمة) */}
+                        {/* الجهة اليمنى: صورة المستخدم والترحيب (مع تفعيل الضغط لفتح القائمة) */}
                         <div 
-                            className="flex items-center gap-3 cursor-pointer z-10"
+                            className="flex items-center gap-2 cursor-pointer z-10"
                             onClick={() => setProfileModal({ isOpen: true })}
                         >
                             <div className="text-right">
-                                <span className="text-white font-semibold">مرحباً, {getUserDisplayName()}</span>
-                                <p className="text-blue-200 text-sm">أهلاً بعودتك!</p>
+                                <span className="text-white font-semibold text-sm md:text-base">مرحباً, {getUserDisplayName()}</span>
+                                <p className="text-blue-200 text-xs">أهلاً بعودتك!</p>
+                            </div>
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border-2 border-blue-400 bg-gradient-to-br from-cyan-400 to-blue-500">
+                                {currentUser?.photoURL ? (
+                                    <img src={currentUser.photoURL} alt="User Avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-white font-bold text-lg">
+                                        {(currentUser?.displayName || currentUser?.email || 'U').charAt(0).toUpperCase()}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

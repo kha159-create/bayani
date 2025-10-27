@@ -156,15 +156,15 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                         <h3 className="text-lg font-bold text-white mb-3 text-center">ملخص الحسابات البنكية</h3>
                         <div className="grid grid-cols-3 gap-2">
                             <div className="bg-white/20 backdrop-blur-md rounded-lg p-2 text-center border border-white/30">
-                                <div className="text-lg font-bold">{bankAccountsCount}</div>
+                                <div className="text-lg font-bold text-white">{bankAccountsCount}</div>
                                 <div className="text-white/80 text-xs">حسابات</div>
                             </div>
                             <div className="bg-white/20 backdrop-blur-md rounded-lg p-2 text-center border border-white/30">
-                                <div className="text-lg font-bold">{formatCurrency(totalBankAccountsBalance)}</div>
+                                <div className="text-lg font-bold text-white">{formatCurrency(totalBankAccountsBalance)}</div>
                                 <div className="text-white/80 text-xs">إجمالي</div>
                             </div>
                             <div className="bg-white/20 backdrop-blur-md rounded-lg p-2 text-center border border-white/30">
-                                <div className="text-lg font-bold">{Object.values(bankAccountDetails).filter(a => a.balance >= 0).length}</div>
+                                <div className="text-lg font-bold text-white">{Object.values(bankAccountDetails).filter(a => a.balance >= 0).length}</div>
                                 <div className="text-white/80 text-xs">إيجابية</div>
                             </div>
                         </div>

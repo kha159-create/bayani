@@ -11,7 +11,6 @@ interface TabsProps {
 
 const getTabs = (language: 'ar' | 'en' = 'ar'): { id: Tab; label: string; icon?: React.FC<{className?: string}> }[] => [
     { id: 'summary', label: `📊 ${t('tab.summary', language)}`, icon: HomeIcon },
-    { id: 'analysis', label: `📈 ${t('tab.analysis', language)}`, icon: ChartBarIcon },
     { id: 'transactions', label: `💳 ${t('tab.transactions', language)}`, icon: ListBulletIcon },
     { id: 'budget', label: `✨ ${t('tab.budget', language)}` },
     { id: 'investment', label: `💹 ${t('tab.investment', language)}` },
@@ -23,7 +22,7 @@ const getTabs = (language: 'ar' | 'en' = 'ar'): { id: Tab; label: string; icon?:
     { id: 'settings', label: `⚙️ ${t('tab.settings', language)}` },
 ];
 
-const mainMobileTabs: Tab[] = ['summary', 'analysis', 'transactions'];
+const mainMobileTabs: Tab[] = ['summary', 'transactions'];
 
 const TabsComponent: React.FC<TabsProps> = ({ activeTab, setActiveTab, language = 'ar' }) => {
     const [isMoreMenuOpen, setMoreMenuOpen] = useState(false);
