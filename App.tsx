@@ -1302,7 +1302,7 @@ const App: React.FC = () => {
 
                         {/* اليمين: اللوجو واسم التطبيق مع الشعار */}
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 text-center flex items-center gap-3">
-                            <img src="./logo.jpg" alt="بياني Logo" className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover" />
+                            <img src="./logo.jpg" alt="بياني Logo" className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover" />
                             <div className="flex flex-col leading-tight">
                                 <h1 className="text-xl md:text-2xl font-bold text-white">بياني</h1>
                                 <p className="text-[10px] md:text-xs text-blue-200">كل شيئ عن مالي.... في بياني</p>
