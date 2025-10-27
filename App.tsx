@@ -1275,8 +1275,8 @@ const App: React.FC = () => {
                 <div className="container mx-auto px-2 sm:px-4 max-w-7xl mb-6">
                     <div className="relative flex items-center justify-between w-full p-4 bg-slate-800/50 rounded-lg backdrop-blur-md border border-blue-400/30 min-h-[80px]">
 
-                        {/* الجهة اليسرى: فلتر التاريخ (بشكل دائري صغير) */}
-                        <div className="flex gap-1 z-10">
+                        {/* اليسار: فلتر التاريخ (بشكل دائري صغير) */}
+                        <div className="flex gap-1 z-10 left-4 absolute">
                             <select 
                                 value={selectedYear} 
                                 onChange={(e) => setSelectedYear(Number(e.target.value))}
@@ -1300,8 +1300,8 @@ const App: React.FC = () => {
                             </select>
                         </div>
 
-                        {/* الوسط: اللوجو واسم التطبيق مع الشعار */}
-                        <div className="absolute left-1/2 top-1/2 -translate-x-[55%] -translate-y-1/2 text-center flex items-center gap-3 md:-translate-x-1/2">
+                        {/* اليمين: اللوجو واسم التطبيق مع الشعار */}
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-center flex items-center gap-3">
                             <img src="./logo.jpg" alt="بياني Logo" className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover" />
                             <div className="flex flex-col leading-tight">
                                 <h1 className="text-xl md:text-2xl font-bold text-white">بياني</h1>
@@ -1309,8 +1309,8 @@ const App: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* الجهة اليمنى: مساحة فارغة لحفظ التوازن */}
-                        <div className="w-24 md:w-32" />
+                        {/* الجهة اليمنى: مساحة فارغة لحفظ التوازن (أُزيلت لا حاجة لها مع المحاذاة الجديدة) */}
+                        <div />
                     </div>
                     {/* صف المستخدم أسفل الهيدر */}
                         <div className="mt-2 flex items-center justify-between gap-2">
