@@ -40,25 +40,24 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
         }
     }, [initialData]);
 
-    // حساب المدة الإجمالية والمتبقية
+    // حساب المدة المتبقية وفق منطق البنك: المتبقي = المبلغ الإجمالي - المبلغ المدفوع مسبقاً (يشمل balloon ضمن المتبقي)
     useEffect(() => {
-        if (loan.totalAmount > 0 && loan.downPayment >= 0 && loan.finalPayment >= 0 && loan.monthlyPayment > 0) {
-            const remainingAmount = loan.totalAmount - loan.downPayment - loan.finalPayment - (loan.prepaidAmount || 0);
-            if (remainingAmount > 0) {
-                const totalMonths = Math.ceil(remainingAmount / loan.monthlyPayment);
-                const startDate = new Date(loan.startDate);
-                const endDate = new Date(startDate);
-                endDate.setMonth(endDate.getMonth() + totalMonths);
-                
-                setLoan(prev => ({
-                    ...prev,
-                    totalMonths,
-                    endDate: endDate.toISOString().split('T')[0],
-                    remainingMonths: totalMonths
-                }));
-            }
+        if (loan.totalAmount > 0 && loan.monthlyPayment > 0) {
+            const outstanding = Math.max(loan.totalAmount - (loan.prepaidAmount || 0), 0);
+            const remainingBase = Math.max(outstanding - loan.finalPayment, 0);
+            const remainingMonths = Math.ceil(remainingBase / loan.monthlyPayment);
+            const startDate = new Date(loan.startDate);
+            const endDate = new Date(startDate);
+            endDate.setMonth(endDate.getMonth() + remainingMonths);
+
+            setLoan(prev => ({
+                ...prev,
+                totalMonths: remainingMonths,
+                remainingMonths,
+                endDate: endDate.toISOString().split('T')[0]
+            }));
         }
-    }, [loan.totalAmount, loan.downPayment, loan.finalPayment, loan.monthlyPayment, loan.startDate, loan.prepaidAmount]);
+    }, [loan.totalAmount, loan.finalPayment, loan.monthlyPayment, loan.startDate, loan.prepaidAmount]);
 
     // حساب الأقساط المدفوعة مسبقاً
     useEffect(() => {
@@ -296,7 +295,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
                                         الأقساط المدفوعة مسبقاً: {loan.prepaidInstallments || 0} قسط
                                     </p>
                                     <p className="text-blue-600 text-sm">
-                                        المبلغ المتبقي: {formatCurrency(loan.totalAmount - loan.downPayment - loan.finalPayment - (loan.prepaidAmount || 0))} ريال
+                                        المبلغ المتبقي (حسب البنك): {formatCurrency(Math.max(loan.totalAmount - (loan.prepaidAmount || 0), 0))} ريال
                                     </p>
                                 </div>
                             )}
