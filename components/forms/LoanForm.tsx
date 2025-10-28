@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Loan, LoanType, BankAccountConfig } from '../../types';
 import { t } from '../../translations';
 import { XMarkIcon } from '../common/Icons';
+import { formatCurrency } from '../../utils/formatting';
 
 interface LoanFormProps {
     onClose: () => void;
