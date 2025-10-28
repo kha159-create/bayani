@@ -290,9 +290,19 @@
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
-    body { padding-top: var(--safe-top); padding-bottom: var(--safe-bottom); }
+    body { 
+      padding-top: var(--safe-top); 
+      padding-bottom: var(--safe-bottom);
+      background: linear-gradient(135deg, #031A2E 0%, #052E4D 100%); /* يضمن نفس الخلفية في safe-area العلوي */
+      background-color: var(--bg-light);
+    }
     #root { min-height: calc(100dvh - var(--safe-top) - var(--safe-bottom)); background: linear-gradient(135deg, #031A2E 0%, #052E4D 100%); }
     .tab-bar { padding-bottom: var(--safe-bottom); }
+    :root { --tab-bar-height: 80px; }
+    @media (max-width: 768px) {
+      body { padding-bottom: calc(var(--safe-bottom) + var(--tab-bar-height)); }
+      #root { min-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - var(--tab-bar-height)); }
+    }
     .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border-light); border-radius: 1rem; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.06); }
     .glass-card:hover { border-color: rgba(59, 130, 246, 0.4); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
     .number-display { font-family: 'SF Mono', 'Courier New', monospace; direction: ltr; text-align: left; }

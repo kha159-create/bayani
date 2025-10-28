@@ -57,7 +57,7 @@ const TabsComponent: React.FC<TabsProps> = ({ activeTab, setActiveTab, language 
             </div>
 
             {/* Bottom Nav for Mobile */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-gradient-to-r from-[#031A2E]/95 to-[#052E4D]/95 backdrop-blur-lg border-t border-blue-400/20 z-40 flex justify-around items-center shadow-lg">
+            <div className="tab-bar md:hidden fixed bottom-0 left-0 right-0 h-20 bg-gradient-to-r from-[#031A2E]/95 to-[#052E4D]/95 backdrop-blur-lg border-t border-blue-400/20 z-40 flex justify-around items-center shadow-lg">
                 {mainTabs.map(tab => {
                     const Icon = tab.icon;
                     const displayText = tab.label.split(' ')[1] || tab.label; // unified naming: summary/transactions/cards/bank
