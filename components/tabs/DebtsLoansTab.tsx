@@ -21,6 +21,7 @@ const DebtsLoansTab: React.FC<DebtsLoansTabProps> = ({ state, setState, setModal
     const [showLoanForm, setShowLoanForm] = useState(false);
     const [showDebtToMeForm, setShowDebtToMeForm] = useState(false);
     const [showDebtFromMeForm, setShowDebtFromMeForm] = useState(false);
+    const [showScheduleModal, setShowScheduleModal] = useState<{loan?: Loan} | null>(null);
 
     const getLoanTypeIcon = (type: string) => {
         switch (type) {
@@ -261,6 +262,13 @@ const DebtsLoansTab: React.FC<DebtsLoansTabProps> = ({ state, setState, setModal
                                             >
                                                 <TrashIcon />
                                             </button>
+                                            <button
+                                                onClick={() => setShowScheduleModal({ loan })}
+                                                className="text-sm bg-emerald-100 hover:bg-emerald-200 px-3 h-8 rounded-full flex items-center justify-center transition-colors"
+                                                aria-label={`جدولة الدفعة الأخيرة ${loan.name}`}
+                                            >
+                                                جدولة الدفعة الأخيرة
+                                            </button>
                                         </div>
                                     </div>
 
@@ -413,6 +421,59 @@ const DebtsLoansTab: React.FC<DebtsLoansTabProps> = ({ state, setState, setModal
                             ))}
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* نافذة جدولة الدفعة الأخيرة */}
+            {showScheduleModal?.loan && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] flex items-center justify-center p-4" onClick={() => setShowScheduleModal(null)}>
+                    <div className="bg-gradient-to-br from-slate-800/95 to-blue-900/95 backdrop-blur-lg rounded-2xl shadow-2xl w-full max-w-md animate-fade-in" onClick={e => e.stopPropagation()}>
+                        <div className="p-6 space-y-4">
+                            <h3 className="text-xl font-bold text-white">جدولة الدفعة الأخيرة</h3>
+                            <p className="text-blue-200 text-sm">قسّم الدفعة الأخيرة إلى أقساط تُسجَّل كقرض جديد.</p>
+                            <div className="grid grid-cols-1 gap-3">
+                                <label className="text-blue-200 text-sm">عدد الأقساط</label>
+                                <input id="schedule-count" type="number" min={2} max={60} defaultValue={6} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white" />
+                                <label className="text-blue-200 text-sm">الحساب البنكي للسداد</label>
+                                <select id="schedule-account" className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white">
+                                    <option value="">اختر حساباً (اختياري)</option>
+                                    {Object.values(state.bankAccounts).map((acc: BankAccountConfig) => (
+                                        <option key={acc.id} value={acc.id}>{acc.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex justify-end gap-2 pt-2">
+                                <button className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg" onClick={() => setShowScheduleModal(null)}>إلغاء</button>
+                                <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg"
+                                    onClick={() => {
+                                        const loan = showScheduleModal.loan!;
+                                        const count = Math.max(2, Math.min(60, parseInt((document.getElementById('schedule-count') as HTMLInputElement).value || '6')));
+                                        const accountId = (document.getElementById('schedule-account') as HTMLSelectElement).value || '';
+                                        const perInstallment = Math.round(((loan.finalPayment || 0) / count) * 100) / 100;
+                                        const newLoanId = `loan-${Date.now()}`;
+                                        const newLoan: Loan = {
+                                            id: newLoanId,
+                                            type: loan.type,
+                                            name: `جدولة ${loan.name}`,
+                                            totalAmount: loan.finalPayment || 0,
+                                            downPayment: 0,
+                                            finalPayment: 0,
+                                            monthlyPayment: perInstallment,
+                                            dueDay: loan.dueDay || 27,
+                                            startDate: new Date().toISOString().split('T')[0],
+                                            lender: loan.lender,
+                                            status: 'active',
+                                            linkedAccount: accountId,
+                                            createdAt: new Date().toISOString()
+                                        } as any;
+                                        setState(prev => ({ ...prev, loans: { ...prev.loans, [newLoanId]: newLoan } }));
+                                        setShowScheduleModal(null);
+                                        setModal({ title: 'تمت الجدولة', body: `<p>تم إنشاء قرض جديد بعدد ${count} أقساط بقيمة ${formatCurrency(perInstallment)} لكل قسط.</p>`, confirmText: 'موافق', hideCancel: true });
+                                    }}
+                                >تأكيد الجدولة</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
 
