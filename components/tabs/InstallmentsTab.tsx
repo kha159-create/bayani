@@ -54,58 +54,44 @@ const InstallmentsTab: React.FC<InstallmentsTabProps> = ({ state, setState, filt
         };
     };
 
-    // حساب موعد القسط التالي
-    const getNextPaymentDate = () => {
+    // احسب مواعيد الدفعات القادمة لكل قسط نشط (آخر دفع + 30 يوم)
+    const computeNextPaymentEntries = () => {
         const activeInstallments = state.installments.filter(i => i.paid < i.total);
-        if (activeInstallments.length === 0) return null;
-
-        // البحث عن آخر عملية دفع قسط
         const installmentTransactions = state.transactions.filter(t => t.isInstallmentPayment);
-        if (installmentTransactions.length === 0) {
-            // إذا لم تكن هناك دفعات سابقة، احسب من تاريخ إنشاء الأقساط
-            const earliestInstallment = activeInstallments.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())[0];
-            const startDate = new Date(earliestInstallment.createdAt);
-            const nextDate = new Date(startDate);
-            nextDate.setDate(nextDate.getDate() + 30);
-            return nextDate.toISOString().split('T')[0];
-        }
-
-        // البحث عن آخر عملية دفع لكل قسط نشط
-        let nextPaymentDate = null;
-        
-        for (const installment of activeInstallments) {
+        return activeInstallments.map(installment => {
             const installmentPayments = installmentTransactions
                 .filter(t => t.installmentId === installment.id)
                 .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-            
+            let baseDate: Date;
             if (installmentPayments.length > 0) {
-                const lastPayment = installmentPayments[0];
-                const lastPaymentDate = new Date(lastPayment.date);
-                const nextDate = new Date(lastPaymentDate);
-                nextDate.setDate(nextDate.getDate() + 30);
-                
-                if (!nextPaymentDate || nextDate < new Date(nextPaymentDate)) {
-                    nextPaymentDate = nextDate.toISOString().split('T')[0];
-                }
+                baseDate = new Date(installmentPayments[0].date);
             } else {
-                // إذا لم تكن هناك دفعات لهذا القسط، احسب من تاريخ إنشائه
-                const startDate = new Date(installment.createdAt);
-                const nextDate = new Date(startDate);
-                nextDate.setDate(nextDate.getDate() + 30);
-                
-                if (!nextPaymentDate || nextDate < new Date(nextPaymentDate)) {
-                    nextPaymentDate = nextDate.toISOString().split('T')[0];
-                }
+                baseDate = new Date(installment.createdAt);
             }
-        }
-        
-        return nextPaymentDate;
+            const nextDate = new Date(baseDate);
+            nextDate.setDate(nextDate.getDate() + 30);
+            return { installment, nextPaymentDate: nextDate };
+        }).sort((a, b) => a.nextPaymentDate.getTime() - b.nextPaymentDate.getTime());
     };
 
-    // حساب مبلغ القسط التالي
-    const getNextPaymentAmount = () => {
-        const activeInstallments = state.installments.filter(i => i.paid < i.total);
-        return activeInstallments.reduce((sum, i) => sum + i.installmentAmount, 0);
+    // حساب القسط الأقرب خلال 7 أيام، وإن لم يوجد فالأقرب بشكل عام
+    const getNextPayment = () => {
+        const entries = computeNextPaymentEntries();
+        if (entries.length === 0) return null;
+        const today = new Date();
+        const sevenDays = new Date();
+        sevenDays.setDate(today.getDate() + 7);
+
+        // التواريخ ضمن 7 أيام القادمة (>= اليوم و<= +7)
+        const within7 = entries.filter(e => e.nextPaymentDate >= new Date(today.toDateString()) && e.nextPaymentDate <= sevenDays);
+        const list = within7.length > 0 ? within7 : entries; // إن لم يوجد، خذ الأقرب بشكل عام
+
+        // اجمع الأقساط على نفس التاريخ الأقرب
+        const targetDate = list[0].nextPaymentDate;
+        const sameDay = list.filter(e => e.nextPaymentDate.toDateString() === targetDate.toDateString());
+        const amount = sameDay.reduce((sum, e) => sum + e.installment.installmentAmount, 0);
+
+        return { date: targetDate.toISOString().split('T')[0], amount };
     };
 
     // حساب جميع مواعيد الأقساط التالية
@@ -197,8 +183,7 @@ const InstallmentsTab: React.FC<InstallmentsTabProps> = ({ state, setState, filt
     const installmentTransactions = state.transactions.filter(t => t.isInstallmentPayment);
 
     const summary = getInstallmentSummary();
-    const nextPaymentDate = getNextPaymentDate();
-    const nextPaymentAmount = getNextPaymentAmount();
+    const nextPayment = getNextPayment();
 
     return (
         <div className="space-y-6">
@@ -242,7 +227,7 @@ const InstallmentsTab: React.FC<InstallmentsTabProps> = ({ state, setState, filt
                 </div>
 
                 {/* القسط التالي */}
-                {nextPaymentDate && (
+                {nextPayment && (
                     <div className="bg-slate-700/40 backdrop-blur-md rounded-lg p-4 border border-blue-400/20">
                         <div className="flex items-center gap-2 mb-3">
                             <span className="text-2xl">⏰</span>
@@ -250,11 +235,11 @@ const InstallmentsTab: React.FC<InstallmentsTabProps> = ({ state, setState, filt
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <p className="text-2xl font-bold text-cyan-400">{formatCurrency(nextPaymentAmount)}</p>
+                                <p className="text-2xl font-bold text-cyan-400">{formatCurrency(nextPayment.amount)}</p>
                                 <p className="text-sm text-blue-200">المبلغ</p>
                             </div>
                             <div>
-                                <p className="text-2xl font-bold text-yellow-400">{new Date(nextPaymentDate).toLocaleDateString('en-GB')}</p>
+                                <p className="text-2xl font-bold text-yellow-400">{new Date(nextPayment.date).toLocaleDateString('en-GB')}</p>
                                 <p className="text-sm text-blue-200">التاريخ</p>
                             </div>
                         </div>
