@@ -121,11 +121,35 @@ const BudgetTab: React.FC<BudgetTabProps> = ({ state, setLoading, setModal, dark
         setModal({ title: 'تم', body: '<p>ضبط تلقائي: تفعيل المقترحات للفئات الصفرية وتصغير غير المستخدمة إلى 0.</p>', confirmText: 'موافق', hideCancel: true });
     };
 
+    const normalizeAmount = (val: string): number => {
+        if (!val) return NaN;
+        const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+        let s = val.trim();
+        s = s.replace(/[\u066B\u066C]/g, '.'); // Arabic decimal/grouping
+        s = s.replace(/[،٬\s,_]/g, ''); // common group separators
+        s = s.replace(/[\u0660-\u0669]/g, (d) => String(arabicDigits.indexOf(d))); // arabic-indic to ascii
+        // if multiple dots, keep first
+        const parts = s.split('.');
+        if (parts.length > 2) s = parts.shift() + '.' + parts.join('');
+        return parseFloat(s);
+    };
+
     const handleGenerateBudget = async () => {
-        const totalBudget = parseFloat(budgetInput);
-        if (isNaN(totalBudget) || totalBudget <= 0) {
-            setModal({ title: t('error', language), body: `<p>${t('invalid.amount', language)}</p>`, confirmText: t('confirm', language), hideCancel: true });
-            return;
+        // اسمح بترك الحقل فارغاً: سنعتمد إجمالي الميزانيات أو متوسط الدخل
+        let targetBudget = normalizeAmount(budgetInput);
+        if (isNaN(targetBudget) || targetBudget <= 0) {
+            const threeMonthsAgo = new Date();
+            threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+            const incomeSum = state.transactions
+                .filter(t => t.type === 'income' && new Date(t.date) >= threeMonthsAgo)
+                .reduce((s, t) => s + t.amount, 0);
+            const expectedMonthlyIncome = incomeSum > 0 ? incomeSum / 3 : 0;
+
+            targetBudget = totalBudget > 0 ? totalBudget : expectedMonthlyIncome;
+            if (!targetBudget || targetBudget <= 0) {
+                setModal({ title: t('error', language), body: `<p>الرجاء إدخال مبلغ الميزانية الإجمالي أولاً (مثال: 5000 أو ٥٠٠٠).</p>`, confirmText: t('confirm', language), hideCancel: true });
+                return;
+            }
         }
 
         setLoading(true, t('loading', language));
@@ -139,7 +163,7 @@ const BudgetTab: React.FC<BudgetTabProps> = ({ state, setLoading, setModal, dark
                 throw new Error("لا توجد بيانات كافية عن إنفاقك لإنشاء خطة دقيقة. يرجى إضافة 5 معاملات على الأقل.");
             }
 
-            const planMarkdown = await generateBudgetPlan(totalBudget, state.categories, recentTransactions);
+            const planMarkdown = await generateBudgetPlan(targetBudget, state.categories, recentTransactions);
             setBudgetPlan(planMarkdown);
 
         } catch (error) {
@@ -179,10 +203,16 @@ const BudgetTab: React.FC<BudgetTabProps> = ({ state, setLoading, setModal, dark
 
             {/* أدوات التوزيع */}
             <div className="bg-gradient-to-br from-slate-800/60 to-blue-900/60 backdrop-blur-xl border border-blue-400/30 rounded-2xl p-4 shadow-xl">
-                <div className="flex flex-wrap gap-2 justify-center">
+                <div className="flex flex-col sm:flex-row items-center gap-3 justify-center">
+                    <div className="flex items-end gap-2">
+                        <div>
+                            <label htmlFor="ai-total-budget" className="block text-xs text-blue-200 mb-1">إجمالي الميزانية</label>
+                            <input id="ai-total-budget" type="number" className="w-36 text-right bg-white/10 text-white placeholder-blue-200 border border-white/20 rounded px-2 py-1 text-sm" placeholder="مثلاً 5000" value={budgetInput} onChange={e => setBudgetInput(e.target.value)} />
+                        </div>
+                        <button onClick={handleGenerateBudget} className="px-3 py-2 rounded-lg text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700">✨ إنشاء خطة بالذكاء</button>
+                    </div>
                     <button onClick={applyAutoDistribute} className="px-4 py-2 rounded-lg text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700">توزيع تلقائي (آخر 3 أشهر)</button>
                     <button onClick={applyAutoTune} className="px-4 py-2 rounded-lg text-white bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700">ضبط تلقائي</button>
-                    <button onClick={handleGenerateBudget} className="px-4 py-2 rounded-lg text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700">✨ إنشاء خطة بالذكاء الاصطناعي</button>
                 </div>
             </div>
 
