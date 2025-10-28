@@ -151,6 +151,7 @@ export interface Loan {
     downPayment: number;
     finalPayment: number;
     monthlyPayment: number;
+    dueDay?: number; // يوم السداد الشهري (1-31)
     startDate: string;
     endDate?: string;
     remainingMonths?: number;

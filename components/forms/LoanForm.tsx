@@ -22,6 +22,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
         finalPayment: 0,
         monthlyPayment: 0,
         startDate: new Date().toISOString().split('T')[0],
+        dueDay: 27,
         endDate: '',
         remainingMonths: 0,
         totalMonths: 0,
@@ -302,7 +303,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
                         </div>
 
                         {/* التواريخ */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label htmlFor="startDate" className="block text-sm font-medium text-blue-200 mb-2">تاريخ بداية القرض</label>
                                 <input
@@ -327,6 +328,22 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
                                     className="w-full p-3 border border-blue-400/20 rounded-lg bg-gray-50"
                                     disabled
                                 />
+                            </div>
+
+                            <div>
+                                <label htmlFor="dueDay" className="block text-sm font-medium text-blue-200 mb-2">تاريخ السداد الشهري</label>
+                                <input
+                                    type="number"
+                                    id="dueDay"
+                                    name="dueDay"
+                                    min={1}
+                                    max={31}
+                                    value={loan.dueDay || 27}
+                                    onChange={handleChange}
+                                    className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                                    placeholder="27"
+                                />
+                                <p className="text-xs text-blue-300 mt-1">إذا تركته فارغاً سيتم استخدام اليوم 27 تلقائياً</p>
                             </div>
                         </div>
 

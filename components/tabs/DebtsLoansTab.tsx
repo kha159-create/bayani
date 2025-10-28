@@ -312,7 +312,7 @@ const DebtsLoansTab: React.FC<DebtsLoansTabProps> = ({ state, setState, setModal
                                         <div className="bg-white/10 p-3 rounded-lg border border-white/10">
                                             <p className="text-blue-200 font-semibold text-sm mb-1">القسط التالي</p>
                                             <p className="font-bold text-lg">
-                                                {new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toLocaleDateString('en-GB')}
+                                                {new Date(new Date().getFullYear(), new Date().getMonth(), (loan.dueDay || 27)).toLocaleDateString('en-GB')}
                                             </p>
                                         </div>
 
