@@ -291,18 +291,7 @@ const InvestmentTab: React.FC<InvestmentTabProps> = ({ state, setState, calculat
                 </div>
             </div>
 
-            {/* زر الاستشارة السريعة العائم */}
-            <button
-                onClick={() => {
-                    // إرسال حدث للانتقال إلى تبويب المستشار الذكي
-                    const event = new CustomEvent('navigateToTab', { detail: 'ai-assistant' });
-                    window.dispatchEvent(event);
-                }}
-                className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-cyan-400 to-blue-500 text-white rounded-full shadow-2xl hover:from-cyan-500 hover:to-blue-600 transition-all duration-300 flex items-center justify-center text-2xl z-50"
-                title="ابدأ استشارة سريعة"
-            >
-                💡
-            </button>
+            {/* زر الاستشارة السريعة العائم - تمت إزالته بناء على الطلب */}
         </div>
     );
 };

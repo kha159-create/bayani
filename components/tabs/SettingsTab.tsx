@@ -127,8 +127,8 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 body: `<p>حدث خطأ أثناء اقتراح الأيقونة: ${error.message}</p>`, 
                 hideCancel: true, 
                 confirmText: 'موافق' 
-            });
-        } finally {
+                    });
+                } finally {
             setIsSuggestingIcon(false);
         }
     };
@@ -194,7 +194,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 hideCancel: true, 
                 confirmText: 'موافق' 
             });
-        } else {
+            } else {
             setState(prev => ({
                 ...prev,
                 categories: prev.categories.filter(c => c.id !== id) 
@@ -428,8 +428,8 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                         </div>
                     </div>
                     <button onClick={handleAddPaymentMethod} className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold">إضافة وسيلة دفع</button>
-                </div>
-
+                    </div>
+                    
                 {/* القوائم */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-4">
@@ -439,8 +439,8 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                                 <div key={pm.id} className="flex justify-between items-center bg-slate-700/40 rounded-lg p-2">
                                     <span className="text-white text-sm">{pm.icon} {pm.name}</span>
                                     <button className="text-red-400 text-sm" onClick={() => handleDeletePaymentMethod(pm.id)}>حذف</button>
-                                </div>
-                            ))}
+                            </div>
+                        ))}
                         </div>
                     </div>
                     <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-4">
@@ -450,33 +450,14 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                                 <div key={tt.id} className="flex justify-between items-center bg-slate-700/40 rounded-lg p-2">
                                     <span className="text-white text-sm">{tt.icon} {tt.name}</span>
                                     <button className="text-red-400 text-sm" onClick={() => handleDeleteTxnType(tt.id)}>حذف</button>
-                                </div>
+                            </div>
                             ))}
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* إعدادات التطبيق */}
-            <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl">
-                <h3 className="text-xl font-bold text-white mb-4">إعدادات التطبيق</h3>
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <span className="text-blue-200">اللغة</span>
-                        <select
-                            value={state.settings.language}
-                            onChange={(e) => setState(prev => ({ 
-                                ...prev, 
-                                settings: { ...prev.settings, language: e.target.value as 'ar' | 'en' } 
-                            }))}
-                            className="bg-slate-700/50 border border-blue-400/30 rounded-xl text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="ar">العربية</option>
-                            <option value="en">English</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+            {/* إعدادات التطبيق - أزيلت حسب الطلب */}
 
             {/* بطاقة "حول التطبيق" */}
             <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl text-center">
@@ -484,8 +465,14 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                     <img src="/bayani/logo.jpg" alt="Bayani Logo" className="w-full h-full object-cover" />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2">بياني</h3>
-                <p className="text-blue-200 mb-4">Developed by K.A Team</p>
-                <p className="text-blue-300 text-sm">Powered by AI — Bayani v1.0.0</p>
+                <div className="text-blue-200 mb-3 leading-6">
+                    <p className="font-semibold">Developed by Bayani Team</p>
+                    <p>Vision & Management: Khaleel Alsani</p>
+                    <p>Code Engineering : Cursor</p>
+                    <p>Design Engineering: Gemini</p>
+                    <p>Quality Assurance : ChatGPT</p>
+                </div>
+                <p className="text-blue-300 text-sm">Bayani v3.4</p>
             </div>
 
             {/* مكون اختيار النسخة الاحتياطية */}
