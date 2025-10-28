@@ -140,7 +140,7 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                     items.push({ id, name: cat?.name || 'فئة', icon: cat?.icon || '📊', budget, spent, pct });
                 }
             });
-            return items.sort((a, b) => b.pct - a.pct).slice(0, 3);
+            return items.sort((a, b) => b.pct - a.pct).slice(0, 6);
         } catch {
             return [] as Array<{ id: string; name: string; icon: string; budget: number; spent: number; pct: number }>;
         }
@@ -260,25 +260,21 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                 <div className="bg-gradient-to-br from-slate-800/60 to-blue-900/60 backdrop-blur-xl border border-blue-400/30 rounded-2xl p-6 shadow-xl">
                     <h3 className="text-xl font-bold text-white mb-4 text-center">توزيع المصاريف حسب الفئات</h3>
                     
-                    {/* بطاقة تنبيهات الميزانية */}
+                    {/* بطاقة تنبيهات الميزانية - تخطيط شبكي مضغوط للجوال */}
                     {budgetAlerts.length > 0 && (
                         <div className="mb-4 bg-yellow-400/10 border border-yellow-300/30 rounded-xl p-3">
-                            <h4 className="text-yellow-300 font-bold mb-2 text-center">تنبيهات الميزانية</h4>
-                            <div className="space-y-2">
+                            <h4 className="text-yellow-300 font-bold mb-3 text-center">تنبيهات الميزانية</h4>
+                            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
                                 {budgetAlerts.map(a => (
-                                    <div key={a.id} className="flex items-center justify-between bg-white/5 rounded-lg p-2">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xl">{a.icon}</span>
-                                            <span className="text-white text-sm font-semibold">{a.name}</span>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className={`text-sm font-bold ${a.pct >= 100 ? 'text-red-400' : 'text-yellow-300'}`}>{a.pct.toFixed(0)}%</div>
-                                            <div className="text-blue-200 text-xs">{formatCurrency(a.spent)} / {formatCurrency(a.budget)}</div>
-                                        </div>
+                                    <div key={a.id} className="bg-white/5 rounded-lg p-2 flex flex-col items-center text-center">
+                                        <span className="text-xl mb-1">{a.icon}</span>
+                                        <span className="text-white text-xs font-semibold line-clamp-1 mb-1">{a.name}</span>
+                                        <div className={`text-sm font-bold ${a.pct >= 100 ? 'text-red-400' : 'text-yellow-300'}`}>{a.pct.toFixed(0)}%</div>
+                                        <div className="text-blue-200 text-[10px] mt-0.5">{formatCurrency(a.spent)} / {formatCurrency(a.budget)}</div>
                                     </div>
                                 ))}
-                            </div>
-                        </div>
+                                    </div>
+                                </div>
                     )}
 
                     {/* قائمة الفئات بدون رسم بياني */}
