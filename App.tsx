@@ -1337,7 +1337,7 @@ const App: React.FC = () => {
                 </div>
                 {/* END: New Header */}
             
-            <main className="container mx-auto px-2 sm:px-4 max-w-7xl mt-8 mb-20">
+            <main className="container mx-auto px-2 sm:px-4 max-w-7xl mt-8 mb-20 content-safe-bottom">
                 <TabsComponent activeTab={activeTab} setActiveTab={setActiveTab} language={state.settings.language} />
                 {renderTabContent()}
             </main>

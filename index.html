@@ -303,6 +303,9 @@
       /* دع #root يعوض ارتفاع الشريط، ولا نضيف حشوة إضافية للجسم حتى لا يظهر فراغ تحت الشريط */
       #root { min-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - var(--tab-bar-height)); }
     }
+
+    /* حاوية محتوى آمنة أسفل التابات */
+    .content-safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + var(--tab-bar-height)); }
     .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border-light); border-radius: 1rem; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.06); }
     .glass-card:hover { border-color: rgba(59, 130, 246, 0.4); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
     .number-display { font-family: 'SF Mono', 'Courier New', monospace; direction: ltr; text-align: left; }
