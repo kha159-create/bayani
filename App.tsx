@@ -1108,58 +1108,13 @@ const App: React.FC = () => {
             }
         }));
 
-        // إنشاء الحركات التلقائية للقرض
-        if (!loanData.id.includes('edit')) { // فقط للقروض الجديدة
-            const transactions = [];
-
-            // 1. حركة الدفعة الأولى (مصروف)
-            if (loanData.downPayment > 0) {
-                transactions.push({
-                    id: `trans-${Date.now()}-down-payment`,
-                    amount: loanData.downPayment,
-                    date: loanData.startDate,
-                    description: `دفعة أولى - ${loanData.name}`,
-                    paymentMethod: loanData.linkedAccount || 'cash',
-                    type: 'expense' as const,
-                    categoryId: null
-                });
-            }
-
-            // 2. حركة إيداع القرض (دخل) - المبلغ الإجمالي
-            transactions.push({
-                id: `trans-${Date.now()}-loan-deposit`,
-                amount: loanData.totalAmount,
-                date: loanData.startDate,
-                description: `إيداع قرض - ${loanData.name} من ${loanData.lender}`,
-                paymentMethod: loanData.linkedAccount || 'cash',
-                type: 'income' as const,
-                categoryId: null
-            });
-
-            // 3. حركة الدفعة الأخيرة (مصروف) - بتاريخ انتهاء القرض
-            if (loanData.finalPayment > 0 && loanData.endDate) {
-                transactions.push({
-                    id: `trans-${Date.now()}-final-payment`,
-                    amount: loanData.finalPayment,
-                    date: loanData.endDate,
-                    description: `دفعة أخيرة - ${loanData.name}`,
-                    paymentMethod: loanData.linkedAccount || 'cash',
-                    type: 'expense' as const,
-                    categoryId: null
-                });
-            }
-
-            // إضافة الحركات للدولة
-            setState(prev => ({
-                ...prev,
-                transactions: [...prev.transactions, ...transactions]
-            }));
-        }
+        // لا نُنشئ أي حركات تلقائياً عند إضافة القرض
+        // ستُسجّل الدفعات عند حدوثها فعلياً (سداد قسط/دفعة أولى/دفعة أخيرة)
 
         setLoanForm({ isOpen: false });
         setModalConfig({ 
             title: 'تم إضافة القرض بنجاح', 
-            body: '<p>تم إضافة القرض والحركات المرتبطة به بنجاح!</p>', 
+            body: '<p>تم حفظ بيانات القرض. لن يتم إنشاء أي حركة بنكية تلقائياً. قم بتسجيل الدفعات عند سدادها.</p>', 
             hideCancel: true, 
             confirmText: 'موافق' 
         });
