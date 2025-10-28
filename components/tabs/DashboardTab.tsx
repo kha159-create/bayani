@@ -85,6 +85,8 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
             '#EF4444'  // Red
         ];
 
+        const total = calculations.totalExpenses || Object.values(calculations.expensesByCategory || {}).reduce((s: number, v: any) => s + (v as number), 0);
+
         return Object.entries(calculations.expensesByCategory)
             .sort(([, a], [, b]) => (b as number) - (a as number))
             .slice(0, 8) // أخذ أعلى 8 فئات
@@ -94,11 +96,12 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                     id: categoryId,
                     name: category?.name || t('other', language),
                     value: amount as number,
+                    percentage: total > 0 ? ((amount as number) / total) * 100 : 0,
                     color: colors[index % colors.length],
                     icon: category?.icon || '📊'
                 };
             });
-    }, [calculations.expensesByCategory, categories, language]);
+    }, [calculations.expensesByCategory, calculations.totalExpenses, categories, language]);
 
     // ملخص الحسابات البنكية
     const bankAccountDetails = calculations.bankAccountDetails;
