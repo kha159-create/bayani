@@ -69,9 +69,42 @@ const BudgetTab: React.FC<BudgetTabProps> = ({ state, setLoading, setModal, dark
     };
 
     const applyAutoDistribute = () => {
+        // اجمع الدخل المتوقع من متوسط آخر 3 أشهر دخل
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+        const incomeSum = state.transactions
+            .filter(t => t.type === 'income' && new Date(t.date) >= threeMonthsAgo)
+            .reduce((s, t) => s + t.amount, 0);
+        const expectedMonthlyIncome = incomeSum > 0 ? incomeSum / 3 : 0;
+
+        // مصروفات 90 يوم لتحديد نسب التوزيع بين الفئات
+        const ninetyDaysAgo = new Date();
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+        const catSums: { [id: string]: number } = {};
+        let totalExpenses90 = 0;
+        state.transactions.forEach(t => {
+            const d = new Date(t.date);
+            if ((t.type === 'expense' || t.type === 'bnpl-payment' || t.type === 'investment-deposit') && t.categoryId && d >= ninetyDaysAgo) {
+                catSums[t.categoryId] = (catSums[t.categoryId] || 0) + t.amount;
+                totalExpenses90 += t.amount;
+            }
+        });
+
+        // إذا لم يوجد دخل، استخدم مجموع المقترحات (متوسط 3 أشهر) كميزانية كلية مؤقتة
         const suggestions = buildSuggestedBudgets();
-        setCategoryBudgets(prev => ({ ...prev, ...suggestions }));
-        setModal({ title: 'تم', body: '<p>تم اقتراح الميزانيات بناءً على آخر 3 أشهر.</p>', confirmText: 'موافق', hideCancel: true });
+        const totalSuggested = Object.values(suggestions).reduce((s, v) => s + v, 0);
+        const budgetPool = expectedMonthlyIncome > 0 ? expectedMonthlyIncome : totalSuggested;
+
+        // وزّع الميزانية حسب نسب الإنفاق التاريخية مع حد أدنى صغير للفئات النادرة
+        const next: { [id: string]: number } = {};
+        state.categories.forEach(c => {
+            const ratio = totalExpenses90 > 0 ? (catSums[c.id] || 0) / totalExpenses90 : 0;
+            let proposed = budgetPool * ratio;
+            if (proposed === 0 && (suggestions[c.id] || 0) > 0) proposed = suggestions[c.id];
+            next[c.id] = Math.round(proposed * 100) / 100;
+        });
+        setCategoryBudgets(next);
+        setModal({ title: 'تم', body: '<p>توزيع ذكي حسب الدخل والإنفاق لـ 90 يوماً.</p>', confirmText: 'موافق', hideCancel: true });
     };
 
     const applyAutoTune = () => {

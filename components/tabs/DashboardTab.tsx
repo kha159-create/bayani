@@ -113,6 +113,39 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
         return allTransactionsSorted.slice(0, 5);
     }, [allTransactionsSorted]);
 
+    // تنبيهات الميزانية (تستخدم ميزانيات محلية محفوظة)
+    const budgetAlerts = useMemo(() => {
+        try {
+            const saved = localStorage.getItem('bayani_category_budgets');
+            if (!saved) return [] as Array<{ id: string; name: string; icon: string; budget: number; spent: number; pct: number }>;
+            const budgets = JSON.parse(saved) as { [id: string]: number };
+            // مصروفات الشهر الحالي فقط للتنبيه الشهري
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const spentMap: { [id: string]: number } = {};
+            state.transactions.forEach(t => {
+                const d = new Date(t.date);
+                if (d.getFullYear() === year && d.getMonth() === month && (t.type === 'expense' || t.type === 'bnpl-payment' || t.type === 'investment-deposit') && t.categoryId) {
+                    spentMap[t.categoryId] = (spentMap[t.categoryId] || 0) + t.amount;
+                }
+            });
+            const items: Array<{ id: string; name: string; icon: string; budget: number; spent: number; pct: number }> = [];
+            Object.entries(budgets).forEach(([id, budget]) => {
+                if (!budget || budget <= 0) return;
+                const spent = spentMap[id] || 0;
+                const pct = Math.min(100, (spent / budget) * 100);
+                if (pct >= 80) {
+                    const cat = categories.find(c => c.id === id);
+                    items.push({ id, name: cat?.name || 'فئة', icon: cat?.icon || '📊', budget, spent, pct });
+                }
+            });
+            return items.sort((a, b) => b.pct - a.pct).slice(0, 3);
+        } catch {
+            return [] as Array<{ id: string; name: string; icon: string; budget: number; spent: number; pct: number }>;
+        }
+    }, [state.transactions, categories]);
+
     return (
         <div className="space-y-6">
             {/* 1. بطاقة الأذكار */}
@@ -227,6 +260,27 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                 <div className="bg-gradient-to-br from-slate-800/60 to-blue-900/60 backdrop-blur-xl border border-blue-400/30 rounded-2xl p-6 shadow-xl">
                     <h3 className="text-xl font-bold text-white mb-4 text-center">توزيع المصاريف حسب الفئات</h3>
                     
+                    {/* بطاقة تنبيهات الميزانية */}
+                    {budgetAlerts.length > 0 && (
+                        <div className="mb-4 bg-yellow-400/10 border border-yellow-300/30 rounded-xl p-3">
+                            <h4 className="text-yellow-300 font-bold mb-2 text-center">تنبيهات الميزانية</h4>
+                            <div className="space-y-2">
+                                {budgetAlerts.map(a => (
+                                    <div key={a.id} className="flex items-center justify-between bg-white/5 rounded-lg p-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xl">{a.icon}</span>
+                                            <span className="text-white text-sm font-semibold">{a.name}</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className={`text-sm font-bold ${a.pct >= 100 ? 'text-red-400' : 'text-yellow-300'}`}>{a.pct.toFixed(0)}%</div>
+                                            <div className="text-blue-200 text-xs">{formatCurrency(a.spent)} / {formatCurrency(a.budget)}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* قائمة الفئات بدون رسم بياني */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {pieChartData.map((item) => (
