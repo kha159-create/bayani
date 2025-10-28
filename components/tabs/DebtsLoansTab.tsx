@@ -68,6 +68,29 @@ const DebtsLoansTab: React.FC<DebtsLoansTabProps> = ({ state, setState, setModal
         }
     };
 
+    // حساب تاريخ القسط التالي (يرحله للشهر القادم إذا مر يوم السداد)
+    const getNextDueDate = (loan: Loan) => {
+        const today = new Date();
+        const dueDay = loan.dueDay || 27;
+        const thisMonthDue = new Date(today.getFullYear(), today.getMonth(), dueDay);
+        return (today > thisMonthDue) ? new Date(today.getFullYear(), today.getMonth() + 1, dueDay) : thisMonthDue;
+    };
+
+    const hasPaymentForCurrentPeriod = (loan: Loan) => {
+        const today = new Date();
+        const dueDay = loan.dueDay || 27;
+        const periodStart = (today.getDate() >= dueDay)
+            ? new Date(today.getFullYear(), today.getMonth(), dueDay)
+            : new Date(today.getFullYear(), today.getMonth() - 1, dueDay);
+        const periodEnd = getNextDueDate(loan);
+        const keywords = ['سداد', 'قسط', 'تأجير', 'تموي', loan.name].filter(Boolean);
+        return state.transactions.some(t => {
+            const d = new Date(t.date);
+            const desc = (t.description || '').toString();
+            return d >= periodStart && d < periodEnd && t.type === 'expense' && keywords.some(k => desc.includes(k));
+        });
+    };
+
     const handleDeleteLoan = (loanId: string) => {
         setState(prev => ({
             ...prev,
@@ -312,8 +335,11 @@ const DebtsLoansTab: React.FC<DebtsLoansTabProps> = ({ state, setState, setModal
                                         <div className="bg-white/10 p-3 rounded-lg border border-white/10">
                                             <p className="text-blue-200 font-semibold text-sm mb-1">القسط التالي</p>
                                             <p className="font-bold text-lg">
-                                                {new Date(new Date().getFullYear(), new Date().getMonth(), (loan.dueDay || 27)).toLocaleDateString('en-GB')}
+                                                {getNextDueDate(loan).toLocaleDateString('en-GB')}
                                             </p>
+                                            {!hasPaymentForCurrentPeriod(loan) && (
+                                                <p className="text-red-300 text-xs mt-1">تنبيه: لم يتم تسجيل سداد لهذا الشهر</p>
+                                            )}
                                         </div>
 
                                         <div className="flex justify-between items-center">
