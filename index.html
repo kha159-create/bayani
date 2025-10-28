@@ -300,7 +300,7 @@
     .tab-bar { padding-bottom: var(--safe-bottom); }
     :root { --tab-bar-height: 80px; }
     @media (max-width: 768px) {
-      body { padding-bottom: calc(var(--safe-bottom) + var(--tab-bar-height)); }
+      /* دع #root يعوض ارتفاع الشريط، ولا نضيف حشوة إضافية للجسم حتى لا يظهر فراغ تحت الشريط */
       #root { min-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - var(--tab-bar-height)); }
     }
     .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border-light); border-radius: 1rem; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.06); }
