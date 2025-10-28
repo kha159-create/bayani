@@ -38,6 +38,8 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
     const [isGeminiConnected, setIsGeminiConnected] = useState(false);
     const [showBackupSelector, setShowBackupSelector] = useState(false);
     const [newCategory, setNewCategory] = useState({ name: '', icon: '' });
+    const [newTxnType, setNewTxnType] = useState({ name: '', icon: '' });
+    const [newPaymentMethod, setNewPaymentMethod] = useState({ name: '', icon: '' });
     const [isSuggestingIcon, setIsSuggestingIcon] = useState(false);
 
     // التحقق من حالة الاتصال
@@ -131,6 +133,27 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
         }
     };
 
+    const suggestFor = async (label: 'txn' | 'pm') => {
+        const target = label === 'txn' ? newTxnType : newPaymentMethod;
+        if (!target.name.trim()) {
+            setModal({ title: 'خطأ', body: '<p>يرجى إدخال الاسم أولاً</p>', hideCancel: true, confirmText: 'موافق' });
+            return;
+        }
+        try {
+            setIsSuggestingIcon(true);
+            await initializeAi();
+            const icon = await suggestCategoryIcon(target.name.trim());
+            if (icon && icon.trim()) {
+                if (label === 'txn') setNewTxnType(prev => ({ ...prev, icon: icon.trim() }));
+                else setNewPaymentMethod(prev => ({ ...prev, icon: icon.trim() }));
+            }
+        } catch (e: any) {
+            setModal({ title: 'خطأ', body: `<p>تعذر اقتراح الأيقونة: ${e.message}</p>`, hideCancel: true, confirmText: 'موافق' });
+        } finally {
+            setIsSuggestingIcon(false);
+        }
+    };
+
     const handleAddCategory = () => {
         if (!newCategory.name.trim() || !newCategory.icon.trim()) {
             setModal({ 
@@ -183,6 +206,40 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 confirmText: 'موافق' 
             });
         }
+    };
+
+    // إدارة أنواع الحركات المخصصة
+    const handleAddTxnType = () => {
+        if (!newTxnType.name.trim() || !newTxnType.icon.trim()) {
+            setModal({ title: 'خطأ', body: '<p>يرجى إدخال الاسم والأيقونة</p>', hideCancel: true, confirmText: 'موافق' });
+            return;
+        }
+        const newId = `tt-${Date.now()}`;
+        const item = { id: newId, name: newTxnType.name.trim(), icon: newTxnType.icon.trim(), isCustom: true };
+        setState(prev => ({ ...prev, customTransactionTypes: [...(prev.customTransactionTypes || []), item] }));
+        setNewTxnType({ name: '', icon: '' });
+        setModal({ title: 'تم', body: '<p>تم إضافة نوع الحركة.</p>', hideCancel: true, confirmText: 'موافق' });
+    };
+
+    const handleDeleteTxnType = (id: string) => {
+        setState(prev => ({ ...prev, customTransactionTypes: (prev.customTransactionTypes || []).filter(i => i.id !== id) }));
+    };
+
+    // إدارة وسائل الدفع المخصصة
+    const handleAddPaymentMethod = () => {
+        if (!newPaymentMethod.name.trim() || !newPaymentMethod.icon.trim()) {
+            setModal({ title: 'خطأ', body: '<p>يرجى إدخال الاسم والأيقونة</p>', hideCancel: true, confirmText: 'موافق' });
+            return;
+        }
+        const newId = `pm-${Date.now()}`;
+        const item = { id: newId, name: newPaymentMethod.name.trim(), icon: newPaymentMethod.icon.trim(), isCustom: true };
+        setState(prev => ({ ...prev, customPaymentMethods: [...(prev.customPaymentMethods || []), item] }));
+        setNewPaymentMethod({ name: '', icon: '' });
+        setModal({ title: 'تم', body: '<p>تم إضافة وسيلة الدفع.</p>', hideCancel: true, confirmText: 'موافق' });
+    };
+
+    const handleDeletePaymentMethod = (id: string) => {
+        setState(prev => ({ ...prev, customPaymentMethods: (prev.customPaymentMethods || []).filter(i => i.id !== id) }));
     };
 
     return (
@@ -336,6 +393,67 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                             </button>
                         </div>
                     ))}
+                </div>
+            </div>
+
+            {/* إدارة أنواع الحركات ووسائل الدفع (مشابه للنظام القديم) */}
+            <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl">
+                <h3 className="text-xl font-bold text-white mb-4">⚙️ إدارة أنواع الحركات ووسائل الدفع</h3>
+
+                {/* سطر إضافة نوع حركة */}
+                <div className="mb-6 p-4 bg-slate-700/30 rounded-xl">
+                    <h4 className="font-semibold text-white mb-3">➕ إضافة نوع حركة</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                        <input type="text" placeholder="اسم نوع الحركة (مثل: دخل إضافي)" value={newTxnType.name} onChange={e => setNewTxnType(prev => ({ ...prev, name: e.target.value }))} className="px-3 py-2 bg-slate-600/50 border border-blue-400/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-blue-200" />
+                        <div className="flex gap-2">
+                            <input type="text" placeholder="الأيقونة (مثل: 💰)" value={newTxnType.icon} onChange={e => setNewTxnType(prev => ({ ...prev, icon: e.target.value }))} className="flex-1 px-3 py-2 bg-slate-600/50 border border-blue-400/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-blue-200" />
+                            <button onClick={() => suggestFor('txn')} disabled={!newTxnType.name.trim() || isSuggestingIcon} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50" title="اقتراح أيقونة">
+                                {isSuggestingIcon ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> : '🤖'}
+                            </button>
+                        </div>
+                    </div>
+                    <button onClick={handleAddTxnType} className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold">إضافة نوع حركة</button>
+                </div>
+
+                {/* سطر إضافة وسيلة دفع */}
+                <div className="mb-6 p-4 bg-slate-700/30 rounded-xl">
+                    <h4 className="font-semibold text-white mb-3">➕ إضافة وسيلة دفع</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                        <input type="text" placeholder="اسم وسيلة الدفع (مثل: PayPal)" value={newPaymentMethod.name} onChange={e => setNewPaymentMethod(prev => ({ ...prev, name: e.target.value }))} className="px-3 py-2 bg-slate-600/50 border border-blue-400/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-blue-200" />
+                        <div className="flex gap-2">
+                            <input type="text" placeholder="الأيقونة (مثل: 💳)" value={newPaymentMethod.icon} onChange={e => setNewPaymentMethod(prev => ({ ...prev, icon: e.target.value }))} className="flex-1 px-3 py-2 bg-slate-600/50 border border-blue-400/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-blue-200" />
+                            <button onClick={() => suggestFor('pm')} disabled={!newPaymentMethod.name.trim() || isSuggestingIcon} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50" title="اقتراح أيقونة">
+                                {isSuggestingIcon ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> : '🤖'}
+                            </button>
+                        </div>
+                    </div>
+                    <button onClick={handleAddPaymentMethod} className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold">إضافة وسيلة دفع</button>
+                </div>
+
+                {/* القوائم */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-4">
+                        <h5 className="text-green-300 font-bold mb-2">وسائل الدفع المخصصة</h5>
+                        <div className="space-y-2">
+                            {(state.customPaymentMethods || []).map(pm => (
+                                <div key={pm.id} className="flex justify-between items-center bg-slate-700/40 rounded-lg p-2">
+                                    <span className="text-white text-sm">{pm.icon} {pm.name}</span>
+                                    <button className="text-red-400 text-sm" onClick={() => handleDeletePaymentMethod(pm.id)}>حذف</button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-4">
+                        <h5 className="text-blue-300 font-bold mb-2">أنواع الحركات المخصصة</h5>
+                        <div className="space-y-2">
+                            {(state.customTransactionTypes || []).map(tt => (
+                                <div key={tt.id} className="flex justify-between items-center bg-slate-700/40 rounded-lg p-2">
+                                    <span className="text-white text-sm">{tt.icon} {tt.name}</span>
+                                    <button className="text-red-400 text-sm" onClick={() => handleDeleteTxnType(tt.id)}>حذف</button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
 
