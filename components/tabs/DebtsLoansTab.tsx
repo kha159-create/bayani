@@ -212,15 +212,15 @@ const DebtsLoansTab: React.FC<DebtsLoansTabProps> = ({ state, setState, setModal
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {Object.values(state.loans).map((loan) => (
-                                <div key={loan.id} className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                                <div key={loan.id} className="bg-gradient-to-br from-slate-800/60 to-blue-900/60 backdrop-blur-xl border border-blue-400/30 p-6 rounded-2xl shadow-xl text-white">
                                     <div className="flex justify-between items-start mb-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                                <span className="text-blue-600 text-xl">{getLoanTypeIcon(loan.type)}</span>
+                                            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                                                <span className="text-white text-xl">{getLoanTypeIcon(loan.type)}</span>
                                             </div>
                                             <div>
-                                                <h4 className="text-lg font-bold text-slate-900 dark:text-slate-100">{loan.name}</h4>
-                                                <p className="text-sm text-slate-500">{getLoanTypeName(loan.type)} - {loan.lender}</p>
+                                                <h4 className="text-lg font-bold">{loan.name}</h4>
+                                                <p className="text-sm text-blue-200">{getLoanTypeName(loan.type)} - {loan.lender}</p>
                                             </div>
                                         </div>
                                         <div className="flex gap-2 flex-shrink-0">
@@ -242,61 +242,76 @@ const DebtsLoansTab: React.FC<DebtsLoansTabProps> = ({ state, setState, setModal
                                     </div>
 
                                     <div className="space-y-3">
-                                        <div className="bg-blue-50 p-3 rounded-lg">
-                                            <p className="text-blue-700 font-semibold text-sm mb-1">المبلغ الإجمالي</p>
-                                            <p className="text-xl font-bold text-blue-900">{formatCurrency(loan.totalAmount)}</p>
+                                        <div className="bg-white/10 p-3 rounded-lg border border-white/20">
+                                            <p className="text-blue-200 font-semibold text-sm mb-1">المبلغ الإجمالي</p>
+                                            <p className="text-xl font-bold">{formatCurrency(loan.totalAmount)}</p>
                                         </div>
 
                                         {/* خط الإنجاز */}
                                         {(loan.prepaidAmount || 0) > 0 && (
-                                            <div className="bg-slate-50 p-3 rounded-lg">
+                                            <div className="bg-white/10 p-3 rounded-lg border border-white/10">
                                                 <div className="flex justify-between text-sm mb-2">
-                                                    <span className="font-medium text-slate-700">التقدم</span>
-                                                    <span className="font-medium text-slate-700">
+                                                    <span className="font-medium text-blue-200">التقدم</span>
+                                                    <span className="font-medium text-blue-200">
                                                         {Math.round(((loan.prepaidAmount || 0) / loan.totalAmount) * 100)}%
                                                     </span>
                                                 </div>
-                                                <div className="w-full bg-slate-200 rounded-full h-3 mb-2">
+                                                <div className="w-full bg-white/20 rounded-full h-2 mb-2">
                                                     <div 
-                                                        className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500" 
+                                                        className="bg-gradient-to-r from-cyan-400 to-blue-500 h-2 rounded-full transition-all duration-500" 
                                                         style={{width: `${((loan.prepaidAmount || 0) / loan.totalAmount) * 100}%`}}
                                                     ></div>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-2 text-center">
-                                                    <div className="bg-green-50 p-2 rounded">
-                                                        <p className="text-green-700 font-bold text-sm">{Math.floor((loan.prepaidAmount || 0) / loan.monthlyPayment)}</p>
-                                                        <p className="text-green-600 text-xs">مدفوع</p>
+                                                    <div className="bg-white/10 p-2 rounded">
+                                                        <p className="text-green-300 font-bold text-sm">{Math.floor((loan.prepaidAmount || 0) / loan.monthlyPayment)}</p>
+                                                        <p className="text-green-200 text-xs">مدفوع</p>
                                                     </div>
-                                                    <div className="bg-blue-50 p-2 rounded">
-                                                        <p className="text-blue-700 font-bold text-sm">{loan.totalMonths - Math.floor((loan.prepaidAmount || 0) / loan.monthlyPayment)}</p>
-                                                        <p className="text-blue-600 text-xs">متبقي</p>
+                                                    <div className="bg-white/10 p-2 rounded">
+                                                        <p className="text-cyan-300 font-bold text-sm">{loan.remainingMonths || 0}</p>
+                                                        <p className="text-blue-200 text-xs">متبقي (شهر)</p>
                                                     </div>
                                                 </div>
                                             </div>
                                         )}
 
                                         <div className="grid grid-cols-2 gap-3">
-                                            <div className="bg-slate-50 p-3 rounded-lg">
-                                                <p className="text-slate-600 text-xs mb-1">القسط الشهري</p>
-                                                <p className="font-semibold text-slate-800">{formatCurrency(loan.monthlyPayment)}</p>
+                                            <div className="bg-white/10 p-3 rounded-lg border border-white/10">
+                                                <p className="text-blue-200 text-xs mb-1">القسط الشهري</p>
+                                                <p className="font-semibold">{formatCurrency(loan.monthlyPayment)}</p>
                                             </div>
-                                            <div className="bg-slate-50 p-3 rounded-lg">
-                                                <p className="text-slate-600 text-xs mb-1">المدة المتبقية</p>
-                                                <p className="font-semibold text-slate-800">{loan.remainingMonths || 0} شهر</p>
+                                            <div className="bg-white/10 p-3 rounded-lg border border-white/10">
+                                                <p className="text-blue-200 text-xs mb-1">المدة المتبقية</p>
+                                                <p className="font-semibold">{loan.remainingMonths || 0} شهر</p>
                                             </div>
                                         </div>
 
                                         {(loan.prepaidAmount || 0) > 0 && (
-                                            <div className="bg-orange-50 p-3 rounded-lg">
-                                                <p className="text-orange-700 font-semibold text-sm mb-1">مدفوع مسبقاً</p>
-                                                <p className="text-orange-900 font-bold text-lg">{formatCurrency(loan.prepaidAmount || 0)}</p>
+                                            <div className="bg-white/10 p-3 rounded-lg border border-white/10">
+                                                <p className="text-orange-300 font-semibold text-sm mb-1">مدفوع مسبقاً</p>
+                                                <p className="text-orange-200 font-bold text-lg">{formatCurrency(loan.prepaidAmount || 0)}</p>
                                             </div>
                                         )}
 
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <div className="bg-white/10 p-3 rounded-lg border border-white/10">
+                                                <p className="text-blue-200 text-xs mb-1">المبلغ المتبقي</p>
+                                                <p className="font-semibold">{formatCurrency(Math.max(loan.totalAmount - (loan.prepaidAmount || 0), 0))}</p>
+                                            </div>
+                                            <div className="bg-white/10 p-3 rounded-lg border border-white/10">
+                                                <p className="text-blue-200 text-xs mb-1">الدفعة الأولى</p>
+                                                <p className="font-semibold">{formatCurrency(loan.downPayment || 0)}</p>
+                                            </div>
+                                            <div className="bg-white/10 p-3 rounded-lg border border-white/10">
+                                                <p className="text-blue-200 text-xs mb-1">الدفعة الأخيرة</p>
+                                                <p className="font-semibold">{formatCurrency(loan.finalPayment || 0)}</p>
+                                            </div>
+                                        </div>
+
                                         {/* موعد القسط التالي */}
-                                        <div className="bg-yellow-50 p-3 rounded-lg">
-                                            <p className="text-yellow-700 font-semibold text-sm mb-1">القسط التالي</p>
-                                            <p className="text-yellow-900 font-bold text-lg">
+                                        <div className="bg-white/10 p-3 rounded-lg border border-white/10">
+                                            <p className="text-blue-200 font-semibold text-sm mb-1">القسط التالي</p>
+                                            <p className="font-bold text-lg">
                                                 {new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toLocaleDateString('en-GB')}
                                             </p>
                                         </div>
@@ -305,7 +320,7 @@ const DebtsLoansTab: React.FC<DebtsLoansTabProps> = ({ state, setState, setModal
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(loan.status)}`}>
                                                 {getStatusName(loan.status)}
                                             </span>
-                                            <span className="text-xs text-slate-500">
+                                            <span className="text-xs text-blue-200">
                                                 بدأ في: {new Date(loan.startDate).toLocaleDateString('en-GB')}
                                             </span>
                                         </div>

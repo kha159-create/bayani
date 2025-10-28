@@ -129,8 +129,8 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
             newErrors.startDate = 'تاريخ بداية القرض مطلوب';
         }
 
-        // التحقق من أن مجموع الدفعات لا يتجاوز المبلغ الإجمالي
-        if (loan.downPayment + loan.finalPayment >= loan.totalAmount) {
+        // التحقق من أن مجموع الدفعات لا يتجاوز المبلغ الإجمالي (فقط إذا كانت القيم مدخلة)
+        if ((loan.downPayment || 0) + (loan.finalPayment || 0) >= loan.totalAmount) {
             newErrors.downPayment = 'مجموع الدفعة الأولى والأخيرة يجب أن يكون أقل من المبلغ الإجمالي';
         }
 
@@ -234,7 +234,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
                                     className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                     step="0.01"
                                     min="0"
-                                    required
+                                    
                                 />
                                 {errors.downPayment && <p className="text-red-500 text-sm mt-1">{errors.downPayment}</p>}
                             </div>
@@ -252,7 +252,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onClose, onSave, initialData, bankA
                                     className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                                     step="0.01"
                                     min="0"
-                                    required
+                                    
                                 />
                                 {errors.finalPayment && <p className="text-red-500 text-sm mt-1">{errors.finalPayment}</p>}
                             </div>
