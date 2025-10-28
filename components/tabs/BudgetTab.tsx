@@ -163,7 +163,20 @@ const BudgetTab: React.FC<BudgetTabProps> = ({ state, setLoading, setModal, dark
                 throw new Error("لا توجد بيانات كافية عن إنفاقك لإنشاء خطة دقيقة. يرجى إضافة 5 معاملات على الأقل.");
             }
 
-            const planMarkdown = await generateBudgetPlan(targetBudget, state.categories, recentTransactions);
+            const oneOffCandidates = state.transactions
+                .filter(t => t.type !== 'income')
+                .filter(t => t.amount >= targetBudget * 0.3);
+
+            const fixedMinimums: { [id: string]: number } = {};
+            const rentCat = state.categories.find(c => /إيجار|ايجار|سكن/i.test(c.name));
+            if (rentCat) fixedMinimums[rentCat.id] = Math.max(2000, (categoryBudgets[rentCat.id] || 0));
+
+            const planMarkdown = await generateBudgetPlan(
+                targetBudget,
+                state.categories,
+                recentTransactions,
+                { oneOffTransactions: oneOffCandidates, fixedMinimums, notes: 'راعي الثوابت الشهرية وتجاهل تسويات البداية.' }
+            );
             setBudgetPlan(planMarkdown);
 
         } catch (error) {
@@ -254,17 +267,13 @@ const BudgetTab: React.FC<BudgetTabProps> = ({ state, setLoading, setModal, dark
                 </div>
             </div>
 
-            {/* مخرجات الذكاء الاصطناعي */}
-            <div className="bg-gradient-to-br from-slate-800/60 to-blue-900/60 backdrop-blur-xl border border-blue-400/30 rounded-2xl p-4 shadow-xl">
-                <h3 className="text-lg font-bold text-white mb-3">اقتراح الخطة</h3>
-                <div className="prose max-w-none">
-                    {budgetPlan ? (
-                        <div className={darkMode ? 'text-slate-200' : 'text-slate-900'} dangerouslySetInnerHTML={{ __html: budgetPlan.replace(/### (.*)/g, `<h4 class=\"text-lg font-bold ${darkMode ? 'text-slate-200' : 'text-slate-900'} mt-3 mb-2\">$1</h4>`).replace(/\n/g, '<br />') }}></div>
-                    ) : (
-                        <p className="text-center text-blue-200">لا توجد خطة حالياً</p>
-                    )}
+            {/* مخرجات الذكاء الاصطناعي (عرض منسق ضمن هوية التطبيق) */}
+            {budgetPlan && (
+                <div className="bg-gradient-to-br from-slate-800/60 to-blue-900/60 backdrop-blur-xl border border-blue-400/30 rounded-2xl p-4 shadow-xl">
+                    <h3 className="text-lg font-bold text-white mb-3">اقتراح الخطة</h3>
+                    <div className="bg-slate-700/40 border border-blue-400/20 rounded-lg p-4 text-blue-100 leading-7 whitespace-pre-wrap">{budgetPlan}</div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };

@@ -235,9 +235,24 @@ const generateSmartSummary = (calculations: FinancialCalculations) => {
     return callGemini(prompts.SMART_SUMMARY_GENERATOR, `Financial Data: ${JSON.stringify(calculations)}`);
 };
 
-const generateBudgetPlan = (totalBudget: number, categories: Category[], recentTransactions: Transaction[]) => {
+const generateBudgetPlan = (
+    totalBudget: number,
+    categories: Category[],
+    recentTransactions: Transaction[],
+    options?: { oneOffTransactions?: Transaction[]; fixedMinimums?: Record<string, number>; notes?: string }
+) => {
     const prompts = createGeminiPrompts();
-    return callGemini(prompts.BUDGET_PLANNER, `Total monthly budget is: ${totalBudget} SAR. My spending categories are: ${JSON.stringify(categories)}. My transactions from the last 60 days are: ${JSON.stringify(recentTransactions)}`);
+    const context: any = {
+        totalBudget,
+        categories,
+        recentTransactions,
+        oneOffTransactions: options?.oneOffTransactions || [],
+        fixedMinimums: options?.fixedMinimums || {},
+        notes: options?.notes || ''
+    };
+    // تعزيز الدور الاحترافي والقيود وتنسيق الإخراج
+    const system = `${prompts.BUDGET_PLANNER}\n\n- أنت مدير مالي محترف بخبرة 10+ سنوات.\n- تجاهل الحركات ذات الطبيعة "مرة واحدة" المذكورة في oneOffTransactions عند تقدير المتوسط الشهري.\n- خصّص على الأقل القيم الواردة في fixedMinimums للفئات المناظرة (لا تُخفضها).\n- إذا كانت الميزانية غير كافية بعد الثوابت، اقترح خفضاً من الفئات المرنة أولاً.\n- إخراجك يكون Markdown عربي بسيط بدون HTML إضافي.`;
+    return callGemini(system, `Budget Planning Context: ${JSON.stringify(context)}`);
 };
 
 const getExchangeRate = async (fromCurrency: string, toCurrency: string): Promise<{rate: number, fromCurrency: string, toCurrency: string, lastUpdated: string}> => {
