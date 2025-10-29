@@ -153,6 +153,24 @@ const App: React.FC = () => {
 
     const loadUserData = async (userId: string) => {
         try {
+            // 1) جرّب منطق "آخر نسخة" مثل النظام القديم
+            const latest = await firebaseService.getLatestBackup(/* يمكن تمرير userId إذا كان محفوظاً */);
+            if (latest.success && latest.data) {
+                const backup = latest.data as any;
+                const initialState = getInitialState();
+                const mergedFromBackup = {
+                    ...initialState,
+                    ...backup,
+                    cards: { ...initialState.cards, ...(backup.cards || {}) },
+                    bankAccounts: { ...initialState.bankAccounts, ...(backup.bankAccounts || {}) },
+                    investments: { ...initialState.investments, ...(backup.investments || {}) },
+                };
+                setState(mergedFromBackup);
+                console.log('✅ تم تحميل أحدث نسخة احتياطية من السحابة');
+                return;
+            }
+
+            // 2) fallback: مستند المستخدم التقليدي
             const result = await firebaseService.getData('users', userId);
             if (result.success && result.data) {
                 const initialState = getInitialState();

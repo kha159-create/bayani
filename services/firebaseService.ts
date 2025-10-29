@@ -304,6 +304,32 @@ export const firebaseService = {
       console.error('خطأ في جلب النسخة الاحتياطية:', error);
       return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
     }
+  },
+
+  // جلب أحدث نسخة احتياطية (مثل النظام القديم)
+  async getLatestBackup(userId?: string) {
+    if (!db) {
+      return { success: false, error: 'Firebase غير مهيأ' };
+    }
+    try {
+      const { collection: col, getDocs, query, orderBy, limit, where } = await import('firebase/firestore');
+      let q: any;
+      if (userId) {
+        // إذا كنا ندعم تخزين userId داخل النسخة
+        q = query(col(db, 'backups'), where('userId', '==', userId), orderBy('backupTimestamp', 'desc'), limit(1));
+      } else {
+        q = query(col(db, 'backups'), orderBy('backupTimestamp', 'desc'), limit(1));
+      }
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        const docItem = snapshot.docs[0];
+        return { success: true, data: { id: docItem.id, ...docItem.data() } };
+      }
+      return { success: false, error: 'لا توجد نسخ احتياطية' };
+    } catch (error) {
+      console.error('خطأ في جلب أحدث نسخة احتياطية:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'خطأ غير معروف' };
+    }
   }
 };
 
