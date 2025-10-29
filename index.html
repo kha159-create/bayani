@@ -313,7 +313,14 @@
     .tab-btn { color: var(--text-dark); background-color: transparent; transition: all 0.3s ease; }
     .tab-btn:hover { background-color: rgba(229, 231, 235, 0.7); }
     .tab-btn.active { color: #ffffff; background: var(--accent-blue); box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25); }
-    input, select, textarea { background-color: #f9fafb !important; color: var(--text-dark) !important; border: 1px solid #d1d5db !important; border-radius: 0.5rem; }
+    /* اجعل حقول الإدخال مقروءة في الوضع الافتراضي (غير الداكن): نص داكن على خلفية فاتحة */
+    input, select, textarea { 
+      background-color: #f9fafb !important; 
+      color: #0f172a !important; /* نص داكن ليتباين مع الخلفية الفاتحة */
+      caret-color: #0f172a;
+      border: 1px solid #d1d5db !important; 
+      border-radius: 0.5rem; 
+    }
     input::placeholder, textarea::placeholder { color: #9ca3af; }
     .animate-fade-in { animation: fadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(15px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
