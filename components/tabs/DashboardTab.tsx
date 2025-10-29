@@ -189,19 +189,31 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                     {/* ملخص الحسابات البنكية */}
                 {bankAccountsCount > 0 && (
                     <div className="mb-4">
-                        <h3 className="text-lg font-bold text-white mb-3 text-center">ملخص الحسابات البنكية</h3>
-                        <div className="grid grid-cols-3 gap-2">
-                            <div className="bg-white/20 backdrop-blur-md rounded-lg p-2 text-center border border-white/30">
-                                <div className="text-lg font-bold text-white">{bankAccountsCount}</div>
-                                <div className="text-white/80 text-xs">حسابات</div>
+                        {/* بطاقة واحدة احترافية لملخص الحسابات البنكية (نفس تصميم تبويب البنك) */}
+                        <div className="bg-gradient-to-br from-[#0b2036]/80 to-[#0a3154]/80 backdrop-blur-2xl border border-blue-400/30 rounded-2xl p-6 shadow-2xl">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold text-white">ملخص الحسابات البنكية</h3>
+                                <div className="text-xs text-blue-200">الفترة الحالية</div>
                             </div>
-                            <div className="bg-white/20 backdrop-blur-md rounded-lg p-2 text-center border border-white/30">
-                                <div className="text-lg font-bold text-white">{formatCurrency(totalBankAccountsBalance)}</div>
-                                <div className="text-white/80 text-xs">إجمالي</div>
+                            <div className="text-center mb-4">
+                                <div className="text-blue-200 text-sm mb-1">إجمالي الرصيد</div>
+                                <div className="text-3xl md:text-4xl font-extrabold text-white tracking-wide">
+                                    {formatCurrency(Object.values(bankAccountDetails).reduce((sum: number, a: any) => sum + (a.balance || 0), 0))}
+                                </div>
                             </div>
-                            <div className="bg-white/20 backdrop-blur-md rounded-lg p-2 text-center border border-white/30">
-                                <div className="text-lg font-bold text-white">{Object.values(bankAccountDetails).filter(a => a.balance >= 0).length}</div>
-                                <div className="text-white/80 text-xs">إيجابية</div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-right">
+                                    <div className="text-emerald-300 text-xs mb-1">الإيداعات</div>
+                                    <div className="text-emerald-400 text-lg font-bold">
+                                        {formatCurrency(Object.values(bankAccountDetails).reduce((sum: number, a: any) => sum + (a.deposits || 0), 0))}
+                                    </div>
+                                </div>
+                                <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-left">
+                                    <div className="text-red-300 text-xs mb-1">السحوبات</div>
+                                    <div className="text-red-400 text-lg font-bold">
+                                        {formatCurrency(Object.values(bankAccountDetails).reduce((sum: number, a: any) => sum + (a.withdrawals || 0), 0))}
+                            </div>
+                        </div>
                             </div>
                         </div>
                     </div>
@@ -271,7 +283,7 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ calculations, categories, s
                                         <span className="text-white text-xs font-semibold line-clamp-1 mb-1">{a.name}</span>
                                         <div className={`text-sm font-bold ${a.pct >= 100 ? 'text-red-400' : 'text-yellow-300'}`}>{a.pct.toFixed(0)}%</div>
                                         <div className="text-blue-200 text-[10px] mt-0.5">{formatCurrency(a.spent)} / {formatCurrency(a.budget)}</div>
-                                    </div>
+            </div>
                                 ))}
                                     </div>
                                 </div>
