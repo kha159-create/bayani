@@ -153,24 +153,7 @@ const App: React.FC = () => {
 
     const loadUserData = async (userId: string) => {
         try {
-            // 1) جرّب منطق "آخر نسخة" مثل النظام القديم
-            const latest = await firebaseService.getLatestBackup(/* يمكن تمرير userId إذا كان محفوظاً */);
-            if (latest.success && latest.data) {
-                const backup = latest.data as any;
-                const initialState = getInitialState();
-                const mergedFromBackup = {
-                    ...initialState,
-                    ...backup,
-                    cards: { ...initialState.cards, ...(backup.cards || {}) },
-                    bankAccounts: { ...initialState.bankAccounts, ...(backup.bankAccounts || {}) },
-                    investments: { ...initialState.investments, ...(backup.investments || {}) },
-                };
-                setState(mergedFromBackup);
-                console.log('✅ تم تحميل أحدث نسخة احتياطية من السحابة');
-                return;
-            }
-
-            // 2) fallback: مستند المستخدم التقليدي
+            // تحميل بيانات المستخدم الطبيعية المخزنة (بدون جلب آخر نسخة تلقائياً)
             const result = await firebaseService.getData('users', userId);
             if (result.success && result.data) {
                 const initialState = getInitialState();
@@ -934,7 +917,7 @@ const App: React.FC = () => {
     // دوال النسخ الاحتياطي الجديدة
     const handleSaveToCloud = async () => {
         try {
-            const success = await saveToCloud(state);
+            const success = await saveToCloud(state, currentUser?.uid);
             if (success) {
                 setModalConfig({
                     title: '✅ تم بنجاح',
@@ -956,18 +939,10 @@ const App: React.FC = () => {
     const handleRestoreFromCloud = async () => {
         try {
             setLoading(true, 'جار استعادة البيانات من السحابة...');
-            const result = await restoreFromCloud();
+            const result = await restoreFromCloud(currentUser?.uid);
             
             if (result.success) {
-                // إعادة تحميل البيانات من IndexedDB
-                const restoredData = await loadData('financial_dashboard_state');
-                if (restoredData) {
-                    setState(restoredData);
-                    console.log('✅ تم استعادة البيانات من السحابة بنجاح');
-                } else {
-                    // محاولة إعادة تحميل من Firebase
-                    await loadUserData(currentUser.uid);
-                }
+                // إذا أردنا، يمكننا تطبيق البيانات مباشرة، ولكن حالياً نستعيد كما هو موجود في util
                 
                 setModalConfig({
                     title: '✅ تم بنجاح',

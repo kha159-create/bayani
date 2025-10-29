@@ -87,13 +87,14 @@ export const loadData = async (key) => {
 };
 
 // حفظ جميع البيانات في السحابة
-export const saveToCloud = async (data) => {
+export const saveToCloud = async (data, userId) => {
   try {
     const timestamp = new Date().toISOString();
     const backupData = {
       ...data,
       backupTimestamp: timestamp,
-      version: '1.0'
+      version: '1.0',
+      userId: userId || null
     };
     
     await setDoc(doc(db, "backups", `backup_${Date.now()}`), backupData);
@@ -106,11 +107,11 @@ export const saveToCloud = async (data) => {
 };
 
 // استعادة البيانات من السحابة
-export const restoreFromCloud = async () => {
+export const restoreFromCloud = async (userId) => {
   try {
     console.log('🔄 بدء استعادة البيانات من السحابة...');
     
-    // الحصول على آخر نسخة احتياطية
+    // الحصول على آخر نسخة احتياطية لِلـ userId المحدد إن توفر
     const backupsRef = collection(db, "backups");
     const snapshot = await getDocs(backupsRef);
     
@@ -124,6 +125,9 @@ export const restoreFromCloud = async () => {
     
     snapshot.forEach(doc => {
       const data = doc.data();
+      if (userId && data.userId && data.userId !== userId) {
+        return; // تخطي نسخ مستخدمين آخرين
+      }
       if (data.backupTimestamp > latestTimestamp) {
         latestTimestamp = data.backupTimestamp;
         latestBackup = data;
