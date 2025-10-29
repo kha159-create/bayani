@@ -144,27 +144,34 @@ const BankTab: React.FC<BankTabProps> = ({
                ))}
             </div>
 
-            {/* ملخص الحسابات */}
-            <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl">
-                <h3 className="text-xl font-bold text-white mb-4">ملخص الحسابات</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-300 mb-1">
-                            {Object.values(bankAccountDetails).length}
-                        </div>
-                        <div className="text-blue-200 text-sm">إجمالي الحسابات</div>
+            {/* بطاقة ملخص الحسابات البنكية - بطاقة واحدة احترافية */}
+            <div className="bg-gradient-to-br from-[#0b2036]/80 to-[#0a3154]/80 backdrop-blur-2xl border border-blue-400/30 rounded-2xl p-6 shadow-2xl">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-white">ملخص الحسابات البنكية</h3>
+                    <div className="text-xs text-blue-200">الفترة الحالية</div>
+                </div>
+
+                {/* الإجمالي */}
+                <div className="text-center mb-4">
+                    <div className="text-blue-200 text-sm mb-1">إجمالي الرصيد</div>
+                    <div className="text-3xl md:text-4xl font-extrabold text-white tracking-wide">
+                        {formatCurrency(Object.values(bankAccountDetails).reduce((sum, a) => sum + (a.balance || 0), 0))}
                     </div>
-                    <div className="text-center">
-                        <div className="text-2xl font-bold text-green-300 mb-1">
-                            {formatCurrency(Object.values(bankAccountDetails).reduce((sum, account) => sum + account.balance, 0))}
+                </div>
+
+                {/* الإيداعات والسحوبات */}
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-right">
+                        <div className="text-emerald-300 text-xs mb-1">الإيداعات</div>
+                        <div className="text-emerald-400 text-lg font-bold">
+                            {formatCurrency(Object.values(bankAccountDetails).reduce((sum, a) => sum + (a.deposits || 0), 0))}
                         </div>
-                        <div className="text-blue-200 text-sm">إجمالي الرصيد</div>
                     </div>
-                    <div className="text-center">
-                        <div className="text-2xl font-bold text-cyan-300 mb-1">
-                            {Object.values(bankAccountDetails).filter(account => account.balance >= 0).length}
+                    <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-left">
+                        <div className="text-red-300 text-xs mb-1">السحوبات</div>
+                        <div className="text-red-400 text-lg font-bold">
+                            {formatCurrency(Object.values(bankAccountDetails).reduce((sum, a) => sum + (a.withdrawals || 0), 0))}
                         </div>
-                        <div className="text-blue-200 text-sm">حسابات إيجابية</div>
                     </div>
                 </div>
             </div>
