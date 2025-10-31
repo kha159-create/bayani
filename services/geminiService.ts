@@ -331,3 +331,22 @@ export {
     generateSmartSummary,
     getExchangeRate
 };
+
+// --- أدوات مساعدة للاستثمار (تطبيع الأكواد وتقدير الأسعار) ---
+export const normalizeTicker = async (nameOrCode: string): Promise<{ name?: string; code?: string }> => {
+    try {
+        const instruction = `You normalize Saudi and GCC stock names and tickers. Respond ONLY JSON {"name":"...","code":"..."}. If unsure, echo input.`;
+        const text = await callGemini(instruction, `Normalize this asset identifier: ${nameOrCode}`, true);
+        try { return JSON.parse(text); } catch { return { name: nameOrCode, code: nameOrCode }; }
+    } catch {
+        return { name: nameOrCode, code: nameOrCode };
+    }
+};
+
+export const estimateMarketPrice = async (codeOrName: string): Promise<number> => {
+    try {
+        const instruction = `You guess a plausible recent market price for the given Saudi/GCC ticker or company. Respond ONLY JSON {"price":number}. If unknown, repeat 0.`;
+        const text = await callGemini(instruction, `Estimate latest price for: ${codeOrName}`, true);
+        try { const j = JSON.parse(text); return Number(j.price) || 0; } catch { return 0; }
+    } catch { return 0; }
+};

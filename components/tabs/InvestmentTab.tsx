@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AppState, FinancialCalculations, Message, Transaction, TransactionType, BankAccountConfig } from '../../types';
-import { advancedInvestmentAdvice, analyzeMarketAndPortfolio } from '../../services/geminiService';
+import { advancedInvestmentAdvice, analyzeMarketAndPortfolio, normalizeTicker, estimateMarketPrice } from '../../services/geminiService';
 import { detectUserLocation, LocationInfo } from '../../services/geolocationService';
 import { SendIcon } from '../common/Icons';
 import { formatCurrency } from '../../utils/formatting';
@@ -301,48 +301,66 @@ export default InvestmentTab;
 
 // مكون داخلي لتتبع الأصول (إضافة/عرض)
 const AssetTracker: React.FC<{ state: AppState; setState: React.Dispatch<React.SetStateAction<AppState>>; setMessages: React.Dispatch<React.SetStateAction<Message[]>>; }> = ({ state, setState, setMessages }) => {
-    const [asset, setAsset] = useState({ name: '', buyPrice: '', quantity: '', aiMonitoring: true });
+    const [asset, setAsset] = useState({ name: '', code: '', buyPrice: '', quantity: '', aiMonitoring: true });
 
     const assets = state.investments?.assets || [];
 
-    const addAsset = () => {
+    const recalcPortfolio = (assetsArr: any[]) => {
+        const total = assetsArr.reduce((sum, a) => sum + (a.marketValue || (a.currentPrice || a.buyPrice) * a.quantity), 0);
+        setState(prev => ({ ...prev, investments: { ...prev.investments, assets: assetsArr, currentValue: total } }));
+    };
+
+    const addAsset = async () => {
         const name = asset.name.trim();
+        const codeInput = asset.code.trim();
         const buyPrice = parseFloat(asset.buyPrice);
         const quantity = parseFloat(asset.quantity);
         if (!name || isNaN(buyPrice) || buyPrice <= 0 || isNaN(quantity) || quantity <= 0) {
             return;
         }
+        // تطبيع الكود/الاسم بالذكاء لتقليل أخطاء الإدخال
+        let normalized = { name, code: codeInput } as any;
+        try { normalized = await normalizeTicker(codeInput || name); } catch {}
+
+        // تقدير سعر السوق كبداية (يمكن تحديثه لاحقاً)
+        let currentPrice = buyPrice;
+        try { const est = await estimateMarketPrice(normalized.code || normalized.name || name); if (est > 0) currentPrice = est; } catch {}
+
         const newAsset = {
             id: `asset-${Date.now()}`,
-            name,
+            name: normalized.name || name,
+            code: normalized.code || codeInput || undefined,
             buyPrice,
             quantity,
+            currentPrice,
+            marketValue: currentPrice * quantity,
+            profitAmount: (currentPrice - buyPrice) * quantity,
+            profitPercentage: buyPrice > 0 ? ((currentPrice - buyPrice) / buyPrice) * 100 : 0,
             aiMonitoring: !!asset.aiMonitoring,
             createdAt: new Date().toISOString()
         };
-        setState(prev => ({
-            ...prev,
-            investments: {
-                ...prev.investments,
-                assets: [...(prev.investments.assets || []), newAsset]
-            }
-        }));
+        const updated = [...(state.investments.assets || []), newAsset];
+        recalcPortfolio(updated);
 
         // رسالة في المحادثة لإعلام المستخدم ببدء المتابعة
         setMessages(prev => ([
             ...prev,
-            { id: `${Date.now()}-ai-note`, text: `تمت إضافة أصل ${name} (${quantity} @ ${buyPrice}). سيتم متابعة حركته وإشعارك عند ارتفاع/انخفاض ملحوظ.`, isUser: false, timestamp: new Date() } as any
+            { id: `${Date.now()}-ai-note`, text: `تمت إضافة أصل ${normalized.name || name}${normalized.code ? ` (${normalized.code})` : ''} — كمية ${quantity} بسعر ${buyPrice}. سيتم متابعة السعر وإشعارك عند تغير ملحوظ.`, isUser: false, timestamp: new Date() } as any
         ]));
 
-        setAsset({ name: '', buyPrice: '', quantity: '', aiMonitoring: true });
+        setAsset({ name: '', code: '', buyPrice: '', quantity: '', aiMonitoring: true });
     };
 
     return (
         <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
                 <div>
                     <label className="block text-sm font-medium text-blue-200 mb-1">اسم الأصل/السهم</label>
                     <input value={asset.name} onChange={e => setAsset(a => ({ ...a, name: e.target.value }))} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white placeholder-blue-300 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400" placeholder="مثال: أرامكو" />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-blue-200 mb-1">كود السهم</label>
+                    <input value={asset.code} onChange={e => setAsset(a => ({ ...a, code: e.target.value }))} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white placeholder-blue-300 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400" placeholder="مثال: 2222" />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-blue-200 mb-1">قيمة الشراء</label>
@@ -358,16 +376,35 @@ const AssetTracker: React.FC<{ state: AppState; setState: React.Dispatch<React.S
             </div>
 
             {assets.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {assets.map(a => (
-                        <div key={a.id} className="bg-white/5 rounded-xl p-4 border border-white/10 flex items-center justify-between">
-                            <div>
-                                <div className="text-white font-bold">{a.name}</div>
-                                <div className="text-blue-200 text-sm">شراء: {a.buyPrice} | كمية: {a.quantity}</div>
-                            </div>
-                            <div className="text-xs text-blue-300">متابعة {a.aiMonitoring ? 'مفعلة' : 'متوقفة'}</div>
-                        </div>
-                    ))}
+                <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm">
+                        <thead>
+                            <tr className="text-blue-200">
+                                <th className="text-right p-2">السهم</th>
+                                <th className="text-right p-2">الكمية</th>
+                                <th className="text-right p-2">قيمة التكلفة</th>
+                                <th className="text-right p-2">سعر السوق</th>
+                                <th className="text-right p-2">الربح/الخسارة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {assets.map(a => {
+                                const cost = a.buyPrice * a.quantity;
+                                const market = (a.currentPrice || a.buyPrice) * a.quantity;
+                                const profit = market - cost;
+                                const pct = cost > 0 ? (profit / cost) * 100 : 0;
+                                return (
+                                    <tr key={a.id} className="border-t border-white/10">
+                                        <td className="p-2 text-white font-semibold">{a.name}{a.code ? ` (${a.code})` : ''}</td>
+                                        <td className="p-2 text-white">{a.quantity}</td>
+                                        <td className="p-2 text-white">{formatCurrency(cost)}</td>
+                                        <td className="p-2 text-white">{formatCurrency(a.currentPrice || a.buyPrice)}</td>
+                                        <td className={`p-2 font-bold ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(profit)} ({pct.toFixed(2)}%)</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
                 </div>
             )}
         </div>

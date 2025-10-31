@@ -86,8 +86,13 @@ export interface AppState {
         assets?: Array<{
             id: string;
             name: string;
+            code?: string;
             buyPrice: number;
             quantity: number;
+            currentPrice?: number;
+            marketValue?: number;
+            profitAmount?: number;
+            profitPercentage?: number;
             createdAt: string;
             aiMonitoring?: boolean;
         }>;
