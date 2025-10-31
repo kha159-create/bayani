@@ -110,7 +110,8 @@ const InvestmentTab: React.FC<InvestmentTabProps> = ({ state, setState, calculat
             date: new Date().toISOString().split('T')[0],
             description: `استثمار ${newInvestment.type}`,
             paymentMethod: newInvestment.account,
-            type: 'investment' as TransactionType,
+            // تسجيلها كإيداع استثماري ليسحب من رصيد البنك
+            type: 'investment-deposit' as TransactionType,
             categoryId: 'investment'
         };
 
@@ -152,7 +153,7 @@ const InvestmentTab: React.FC<InvestmentTabProps> = ({ state, setState, calculat
             const portfolioData = {
                 currentValue: currentValue,
                 investments: state.investments,
-                transactions: state.transactions.filter(t => t.type === 'investment')
+                transactions: state.transactions.filter(t => t.type === 'investment-deposit' || t.type === 'investment-withdrawal')
             };
 
             const marketContext = {
