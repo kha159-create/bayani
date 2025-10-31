@@ -26,37 +26,26 @@ const BackupSelector: React.FC<BackupSelectorProps> = ({ isOpen, onClose, onSele
         if (isOpen) {
             loadBackups();
         }
-    }, [isOpen]);
+    }, [isOpen, currentUser]);
 
     const loadBackups = async () => {
         setLoading(true);
         try {
-            // جلب قائمة النسخ الاحتياطية من Firebase
-            const res = await firebaseService.listBackups();
-            if (res.success && Array.isArray(res.data)) {
-                const formattedBackups = res.data.map((backup: any, index: number) => {
-                    const date = new Date(backup.timestamp || backup.date || Date.now());
-                    return {
-                        id: backup.id || `backup-${index}`,
-                        timestamp: backup.backupTimestamp || backup.timestamp || backup.date || Date.now().toString(),
-                        date: date.toLocaleDateString('ar-SA', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                        }),
-                        time: date.toLocaleTimeString('ar-SA', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        }),
-                        size: formatBackupSize(backup.size || 0),
-                        description: backup.description || `نسخة احتياطية ${index + 1}`
-                    };
-                }).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
-                setBackups(formattedBackups);
+            // جلب أحدث نسخة احتياطية فقط للمستخدم الحالي
+            const userId = currentUser?.uid;
+            const res = await firebaseService.getLatestBackup(userId);
+            if (res.success && res.data) {
+                // استعادة مباشرة دون عرض قائمة خيارات
+                onSelectBackup(res.data);
+                onClose();
+                return;
             }
+
+            // في حال عدم وجود نسخ احتياطية
+            setBackups([]);
         } catch (error) {
             console.error('خطأ في جلب النسخ الاحتياطية:', error);
+            setBackups([]);
         } finally {
             setLoading(false);
         }
