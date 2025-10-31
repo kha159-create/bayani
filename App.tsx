@@ -939,7 +939,8 @@ const App: React.FC = () => {
     const handleRestoreFromCloud = async () => {
         try {
             setLoading(true, 'جار استعادة البيانات من السحابة...');
-            const result = await restoreFromCloud(currentUser?.uid);
+            // مثل النظام القديم: لا نمرر userId ليتم اختيار أحدث نسخة عامة
+            const result = await restoreFromCloud(undefined);
             
             if (result.success) {
                 // إذا أردنا، يمكننا تطبيق البيانات مباشرة، ولكن حالياً نستعيد كما هو موجود في util

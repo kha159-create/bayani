@@ -89,16 +89,8 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
     };
 
     const handleRestoreFromCloud = () => {
-        if (currentUser) {
-            setShowBackupSelector(true);
-            } else {
-            setModal({ 
-                title: 'خطأ',
-                body: '<p>يجب تسجيل الدخول أولاً لاستخدام النسخ السحابية.</p>',
-                hideCancel: true, 
-                confirmText: 'موافق'
-            });
-        }
+        // استعادة مباشرة مثل النظام القديم (بدون قائمة وبدون ربط بالمستخدم)
+        if (onRestoreFromCloud) onRestoreFromCloud();
     };
 
     const handleSuggestIcon = async () => {
