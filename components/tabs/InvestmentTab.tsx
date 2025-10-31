@@ -91,8 +91,7 @@ const InvestmentTab: React.FC<InvestmentTabProps> = ({ state, setState, calculat
     }, [locationDetected]);
 
     const currentValue = state.investments?.currentValue || 0;
-    const profitLoss = currentValue - 1000; // مثال: القيمة الأولية 1000
-    const profitPercentage = ((profitLoss / 1000) * 100).toFixed(1);
+    // أزلنا إظهار نسبة الربح/الخسارة حسب الطلب
 
     const handleAddInvestment = () => {
         if (!newInvestment.amount || !newInvestment.type || !newInvestment.account) {
@@ -120,7 +119,7 @@ const InvestmentTab: React.FC<InvestmentTabProps> = ({ state, setState, calculat
             transactions: [...prev.transactions, investment],
             investments: {
                 ...prev.investments,
-                currentValue: prev.investments?.currentValue || 0 + parseFloat(newInvestment.amount)
+                currentValue: (prev.investments?.currentValue || 0) + parseFloat(newInvestment.amount)
             }
         }));
 
@@ -152,8 +151,6 @@ const InvestmentTab: React.FC<InvestmentTabProps> = ({ state, setState, calculat
             // استخدام المستشار المالي المتقدم
             const portfolioData = {
                 currentValue: currentValue,
-                profitLoss: profitLoss,
-                profitPercentage: profitPercentage,
                 investments: state.investments,
                 transactions: state.transactions.filter(t => t.type === 'investment')
             };
@@ -195,9 +192,7 @@ const InvestmentTab: React.FC<InvestmentTabProps> = ({ state, setState, calculat
                 <div className="text-center text-white">
                     <h2 className="text-2xl font-bold mb-2">القيمة الحالية للمحفظة</h2>
                     <div className="text-5xl font-bold mb-4">{formatCurrency(currentValue)}</div>
-                    <div className={`text-2xl font-bold ${profitLoss >= 0 ? 'text-green-200' : 'text-red-200'}`}>
-                        {profitLoss >= 0 ? '+' : ''}{formatCurrency(profitLoss)} ({profitPercentage}%)
-                    </div>
+                    {/* أزلنا نسبة/قيمة الربح والخسارة حسب الطلب */}
                 </div>
             </div>
 
@@ -291,9 +286,90 @@ const InvestmentTab: React.FC<InvestmentTabProps> = ({ state, setState, calculat
                 </div>
             </div>
 
+            {/* تتبع الأصول - أسفل المحادثة */}
+            <div className="bg-gradient-to-br from-slate-800/50 to-blue-900/50 backdrop-blur-lg border border-blue-400/20 rounded-2xl p-6 shadow-xl">
+                <h3 className="text-xl font-bold text-white mb-4">📈 تتبع الأصول</h3>
+                <AssetTracker state={state} setState={setState} setMessages={setMessages} />
+            </div>
+
             {/* زر الاستشارة السريعة العائم - تمت إزالته بناء على الطلب */}
         </div>
     );
 };
 
 export default InvestmentTab;
+
+// مكون داخلي لتتبع الأصول (إضافة/عرض)
+const AssetTracker: React.FC<{ state: AppState; setState: React.Dispatch<React.SetStateAction<AppState>>; setMessages: React.Dispatch<React.SetStateAction<Message[]>>; }> = ({ state, setState, setMessages }) => {
+    const [asset, setAsset] = useState({ name: '', buyPrice: '', quantity: '', aiMonitoring: true });
+
+    const assets = state.investments?.assets || [];
+
+    const addAsset = () => {
+        const name = asset.name.trim();
+        const buyPrice = parseFloat(asset.buyPrice);
+        const quantity = parseFloat(asset.quantity);
+        if (!name || isNaN(buyPrice) || buyPrice <= 0 || isNaN(quantity) || quantity <= 0) {
+            return;
+        }
+        const newAsset = {
+            id: `asset-${Date.now()}`,
+            name,
+            buyPrice,
+            quantity,
+            aiMonitoring: !!asset.aiMonitoring,
+            createdAt: new Date().toISOString()
+        };
+        setState(prev => ({
+            ...prev,
+            investments: {
+                ...prev.investments,
+                assets: [...(prev.investments.assets || []), newAsset]
+            }
+        }));
+
+        // رسالة في المحادثة لإعلام المستخدم ببدء المتابعة
+        setMessages(prev => ([
+            ...prev,
+            { id: `${Date.now()}-ai-note`, text: `تمت إضافة أصل ${name} (${quantity} @ ${buyPrice}). سيتم متابعة حركته وإشعارك عند ارتفاع/انخفاض ملحوظ.`, isUser: false, timestamp: new Date() } as any
+        ]));
+
+        setAsset({ name: '', buyPrice: '', quantity: '', aiMonitoring: true });
+    };
+
+    return (
+        <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div>
+                    <label className="block text-sm font-medium text-blue-200 mb-1">اسم الأصل/السهم</label>
+                    <input value={asset.name} onChange={e => setAsset(a => ({ ...a, name: e.target.value }))} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white placeholder-blue-300 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400" placeholder="مثال: أرامكو" />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-blue-200 mb-1">قيمة الشراء</label>
+                    <input type="number" step="0.01" value={asset.buyPrice} onChange={e => setAsset(a => ({ ...a, buyPrice: e.target.value }))} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white placeholder-blue-300 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400" placeholder="0.00" />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-blue-200 mb-1">الكمية</label>
+                    <input type="number" step="0.01" value={asset.quantity} onChange={e => setAsset(a => ({ ...a, quantity: e.target.value }))} className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white placeholder-blue-300 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400" placeholder="0" />
+                </div>
+                <div className="flex items-end">
+                    <button onClick={addAsset} className="w-full py-3 bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold rounded-lg hover:from-cyan-500 hover:to-blue-600 transition-all duration-300 shadow-lg">إضافة الأصل</button>
+                </div>
+            </div>
+
+            {assets.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {assets.map(a => (
+                        <div key={a.id} className="bg-white/5 rounded-xl p-4 border border-white/10 flex items-center justify-between">
+                            <div>
+                                <div className="text-white font-bold">{a.name}</div>
+                                <div className="text-blue-200 text-sm">شراء: {a.buyPrice} | كمية: {a.quantity}</div>
+                            </div>
+                            <div className="text-xs text-blue-300">متابعة {a.aiMonitoring ? 'مفعلة' : 'متوقفة'}</div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};

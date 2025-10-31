@@ -83,6 +83,14 @@ export interface AppState {
     installments: InstallmentPlan[];
     investments: {
         currentValue: number;
+        assets?: Array<{
+            id: string;
+            name: string;
+            buyPrice: number;
+            quantity: number;
+            createdAt: string;
+            aiMonitoring?: boolean;
+        }>;
     };
     cards: {
         [key: string]: CardConfig;
