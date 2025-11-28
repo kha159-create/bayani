@@ -22,6 +22,9 @@ const DebtsLoansTab: React.FC<DebtsLoansTabProps> = ({ state, setState, setModal
     const [showDebtToMeForm, setShowDebtToMeForm] = useState(false);
     const [showDebtFromMeForm, setShowDebtFromMeForm] = useState(false);
     const [showScheduleModal, setShowScheduleModal] = useState<{loan?: Loan} | null>(null);
+    const [showPayInstallmentModal, setShowPayInstallmentModal] = useState<{ loan: Loan } | null>(null);
+    const [selectedPayAccountId, setSelectedPayAccountId] = useState<string>('');
+    const [payAmount, setPayAmount] = useState<string>('');
 
     const getLoanTypeIcon = (type: string) => {
         switch (type) {
@@ -32,6 +35,80 @@ const DebtsLoansTab: React.FC<DebtsLoansTabProps> = ({ state, setState, setModal
             case 'education': return '🎓';
             default: return '💰';
         }
+    };
+
+    const openPayInstallment = (loan: Loan) => {
+        const defaultAccount = loan.linkedAccount || Object.values(state.bankAccounts)[0]?.id || '';
+        setSelectedPayAccountId(defaultAccount);
+        setPayAmount(String(loan.monthlyPayment || 0));
+        setShowPayInstallmentModal({ loan });
+    };
+
+    const confirmPayInstallment = () => {
+        const loan = showPayInstallmentModal?.loan;
+        if (!loan) return;
+        const amountNum = Math.max(0, parseFloat(payAmount || '0'));
+        const accountId = selectedPayAccountId;
+        if (!accountId || amountNum <= 0) {
+            setModal({ title: 'خطأ', body: '<p>يرجى اختيار الحساب وإدخال مبلغ صحيح.</p>', confirmText: 'موافق', hideCancel: true });
+            return;
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+
+        // تحديد المبلغ الفعلي بحيث لا يتجاوز المتبقي
+        const prepaidSoFar = loan.prepaidAmount || 0;
+        const remainingAmountAbs = Math.max((loan.totalAmount || 0) - prepaidSoFar, 0);
+        const effectiveAmount = Math.min(amountNum, remainingAmountAbs);
+
+        // عدد الأقساط التي يغطيها هذا السداد (يدعم دفع أكثر من قسط)
+        const oneInstallment = Math.max(loan.monthlyPayment || 0, 1);
+        const installmentsCovered = Math.max(1, Math.floor(effectiveAmount / oneInstallment)) || 1;
+
+        setState(prev => {
+            // إنشاء حركة في سجل الحركات (expense) تؤثر على رصيد الحساب البنكي
+            const paymentTransaction = {
+                id: `trans-${Date.now()}-loan-${loan.id}`,
+                amount: effectiveAmount,
+                date: today,
+                description: `قسط شهري - ${loan.name}`,
+                paymentMethod: accountId,
+                type: 'expense' as const,
+                categoryId: null
+            };
+
+            // تحديث بيانات القرض
+            const currentLoan = prev.loans[loan.id];
+            const currentRemainingMonths = Math.max(currentLoan.remainingMonths || 0, 0);
+            const newPrepaidAmount = (currentLoan.prepaidAmount || 0) + effectiveAmount;
+            const decMonths = Math.min(installmentsCovered, currentRemainingMonths || installmentsCovered);
+            const newRemainingMonths = Math.max((currentLoan.remainingMonths || 0) - decMonths, 0);
+            const newPrepaidInstallments = (currentLoan.prepaidInstallments || 0) + decMonths;
+            const newStatus = (newRemainingMonths === 0 || newPrepaidAmount >= (currentLoan.totalAmount || 0)) ? 'completed' : currentLoan.status;
+
+            return {
+                ...prev,
+                transactions: [...prev.transactions, paymentTransaction],
+                loans: {
+                    ...prev.loans,
+                    [loan.id]: {
+                        ...currentLoan,
+                        prepaidAmount: newPrepaidAmount,
+                        prepaidInstallments: newPrepaidInstallments,
+                        remainingMonths: newRemainingMonths,
+                        status: newStatus
+                    }
+                }
+            };
+        });
+
+        setShowPayInstallmentModal(null);
+        setModal({
+            title: 'تم سداد القسط',
+            body: `<p>تم تسجيل سداد بقيمة ${formatCurrency(effectiveAmount)} من الحساب المحدد، وتحديث بيانات القرض.</p>`,
+            confirmText: 'موافق',
+            hideCancel: true
+        });
     };
 
     const getLoanTypeName = (type: string) => {
@@ -261,6 +338,13 @@ const DebtsLoansTab: React.FC<DebtsLoansTabProps> = ({ state, setState, setModal
                                                 aria-label={`حذف قرض ${loan.name}`}
                                             >
                                                 <TrashIcon />
+                                            </button>
+                                            <button
+                                                onClick={() => openPayInstallment(loan)}
+                                                className="text-sm bg-cyan-100 hover:bg-cyan-200 px-3 h-8 rounded-full flex items-center justify-center transition-colors"
+                                                aria-label={`سداد قسط ${loan.name}`}
+                                            >
+                                                سداد قسط
                                             </button>
                                             <button
                                                 onClick={() => setShowScheduleModal({ loan })}
@@ -550,6 +634,43 @@ const DebtsLoansTab: React.FC<DebtsLoansTabProps> = ({ state, setState, setModal
                     onSave={handleSaveDebtFromMe}
                     type="fromMe"
                 />
+            )}
+
+            {/* نافذة سداد القسط */}
+            {showPayInstallmentModal?.loan && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] flex items-center justify-center p-4" onClick={() => setShowPayInstallmentModal(null)}>
+                    <div className="bg-gradient-to-br from-slate-800/95 to-blue-900/95 backdrop-blur-lg rounded-2xl shadow-2xl w-full max-w-md animate-fade-in" onClick={e => e.stopPropagation()}>
+                        <div className="p-6 space-y-4">
+                            <h3 className="text-xl font-bold text-white">سداد قسط - {showPayInstallmentModal.loan.name}</h3>
+                            <div className="grid grid-cols-1 gap-3">
+                                <label className="text-blue-200 text-sm">الحساب للسداد</label>
+                                <select
+                                    value={selectedPayAccountId}
+                                    onChange={(e) => setSelectedPayAccountId(e.target.value)}
+                                    className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white"
+                                >
+                                    <option value="">اختر حساباً</option>
+                                    {Object.values(state.bankAccounts).map((acc: BankAccountConfig) => (
+                                        <option key={acc.id} value={acc.id}>{acc.name}</option>
+                                    ))}
+                                </select>
+                                <label className="text-blue-200 text-sm">مبلغ السداد</label>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    step="0.01"
+                                    value={payAmount}
+                                    onChange={(e) => setPayAmount(e.target.value)}
+                                    className="w-full p-3 bg-slate-700/50 border border-blue-400/20 rounded-lg text-white"
+                                />
+                            </div>
+                            <div className="flex justify-end gap-2 pt-2">
+                                <button className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg" onClick={() => setShowPayInstallmentModal(null)}>إلغاء</button>
+                                <button className="px-4 py-2 bg-cyan-600 text-white rounded-lg" onClick={confirmPayInstallment}>تأكيد السداد</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
