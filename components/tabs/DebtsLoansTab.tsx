@@ -324,7 +324,7 @@ const DebtsLoansTab: React.FC<DebtsLoansTabProps> = ({ state, setState, setModal
                                                 <p className="text-sm text-blue-200">{getLoanTypeName(loan.type)} - {loan.lender}</p>
                                             </div>
                                         </div>
-                                        <div className="flex gap-2 flex-shrink-0">
+                                        <div className="hidden md:flex gap-2 flex-shrink-0">
                                             <button
                                                 onClick={() => openLoanFormModal(loan.id)}
                                                 className="text-sm bg-blue-100 hover:bg-blue-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors"
@@ -354,6 +354,24 @@ const DebtsLoansTab: React.FC<DebtsLoansTabProps> = ({ state, setState, setModal
                                                 جدولة الدفعة الأخيرة
                                             </button>
                                         </div>
+                                    </div>
+
+                                    {/* أزرار الجوال: تحت العنوان وبشكل مرتب وواضح */}
+                                    <div className="md:hidden grid grid-cols-1 gap-2 mb-4">
+                                        <button
+                                            onClick={() => openPayInstallment(loan)}
+                                            className="w-full px-4 py-2.5 rounded-lg bg-cyan-500/20 border border-cyan-400/40 text-white font-semibold text-sm text-center"
+                                            aria-label={`سداد قسط ${loan.name}`}
+                                        >
+                                            سداد قسط
+                                        </button>
+                                        <button
+                                            onClick={() => setShowScheduleModal({ loan })}
+                                            className="w-full px-4 py-2.5 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-white font-semibold text-sm text-center"
+                                            aria-label={`جدولة الدفعة الأخيرة ${loan.name}`}
+                                        >
+                                            جدولة الدفعة الأخيرة
+                                        </button>
                                     </div>
 
                                     <div className="space-y-3">
