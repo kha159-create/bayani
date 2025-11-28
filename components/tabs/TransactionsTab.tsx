@@ -228,8 +228,7 @@ const TransactionsTab: React.FC<TransactionsTabProps> = ({
                                 <th className="text-right py-3 px-4 font-semibold text-blue-200">الوسيلة</th>
                                 <th className="text-right py-3 px-4 font-semibold text-blue-200">النوع</th>
                                 <th className="text-right py-3 px-4 font-semibold text-blue-200">المبلغ</th>
-                                <th className="text-right py-3 px-4 font-semibold text-blue-200">الفئة</th>
-                                <th className="text-right py-3 px-4 font-semibold text-blue-200 hidden sm:table-cell">الوصف</th>
+                                <th className="text-right py-3 px-4 font-semibold text-blue-200">الفئة / الوصف</th>
                                 <th className="text-center py-3 px-4 font-semibold text-blue-200"></th>
                             </tr>
                         </thead>
@@ -245,8 +244,10 @@ const TransactionsTab: React.FC<TransactionsTabProps> = ({
                                     <td className={`p-3 font-semibold ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
                                         {isPositive ? '+' : '-'} {formatCurrency(t.amount)}
                                     </td>
-                                    <td className="p-3 text-white">{category ? `${category.icon} ${category.name}` : 'غير محدد'}</td>
-                                    <td className="p-3 text-blue-200 hidden sm:table-cell">{t.description || '-'}</td>
+                                    <td className="p-3">
+                                        <div className="text-white">{category ? `${category.icon} ${category.name}` : 'غير محدد'}</div>
+                                        <div className="text-blue-300 text-xs mt-1 break-words">{t.description || '-'}</div>
+                                    </td>
                                     <td className="p-3 text-center">
                                         <div className="flex gap-2 justify-center">
                                             <button 
