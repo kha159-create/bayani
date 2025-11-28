@@ -322,6 +322,23 @@ const DebtsLoansTab: React.FC<DebtsLoansTabProps> = ({ state, setState, setModal
                                             <div>
                                                 <h4 className="text-lg font-bold">{loan.name}</h4>
                                                 <p className="text-sm text-blue-200">{getLoanTypeName(loan.type)} - {loan.lender}</p>
+                                                {/* أدوات الجوال: تعديل/حذف بمحاذاة الاسم */}
+                                                <div className="flex gap-2 mt-2 md:hidden">
+                                                    <button
+                                                        onClick={() => openLoanFormModal(loan.id)}
+                                                        className="text-xs px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/40 text-white"
+                                                        aria-label={`تعديل قرض ${loan.name}`}
+                                                    >
+                                                        تعديل
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteLoan(loan.id)}
+                                                        className="text-xs px-3 py-1 rounded-full bg-red-500/20 border border-red-400/40 text-white"
+                                                        aria-label={`حذف قرض ${loan.name}`}
+                                                    >
+                                                        حذف
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="hidden md:flex gap-2 flex-shrink-0">
