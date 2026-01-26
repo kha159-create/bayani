@@ -1218,6 +1218,16 @@ const App: React.FC = () => {
         }
     };
 
+    // Generate years dynamically (from current year + 1 down to 2020)
+    const years = useMemo(() => {
+        const currentYear = new Date().getFullYear();
+        const yearsList = [];
+        for (let y = currentYear + 1; y >= 2020; y--) {
+            yearsList.push(y);
+        }
+        return yearsList;
+    }, []);
+
         return (
             <div className="min-h-screen font-sans bg-gradient-to-br from-[#031A2E] to-[#052E4D] relative">
                 {/* START: New Header */}
@@ -1231,7 +1241,7 @@ const App: React.FC = () => {
                                 onChange={(e) => setSelectedYear(Number(e.target.value))}
                                 className="appearance-none bg-slate-700 text-white px-2 py-1.5 text-xs rounded-full border border-blue-400/30 text-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
-                                {[2025, 2024, 2023].map(year => (
+                                {years.map(year => (
                                     <option key={year} value={year}>{year}</option>
                                 ))}
                             </select>
