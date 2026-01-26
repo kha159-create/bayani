@@ -495,6 +495,16 @@ const App: React.FC = () => {
         return { totalIncome, totalExpenses, cardDetails, cardPayments, bankAccountDetails, totalDebt, totalAvailable, totalLimits, totalBankBalance, totalInvestmentDeposits, totalInvestmentWithdrawals, expensesByCategory };
     }, [filteredTransactions, state.transactions, state.cards, state.bankAccounts]);
 
+    // Generate years dynamically (from current year + 1 down to 2020)
+    const years = useMemo(() => {
+        const currentYear = new Date().getFullYear();
+        const yearsList = [];
+        for (let y = currentYear + 1; y >= 2020; y--) {
+            yearsList.push(y);
+        }
+        return yearsList;
+    }, []);
+
     const handleSaveTransaction = (transaction: Omit<Transaction, 'id'>, id?: string) => {
         setState(prev => {
             if (id) {
@@ -1217,16 +1227,6 @@ const App: React.FC = () => {
             default: return <div>Tab not found</div>;
         }
     };
-
-    // Generate years dynamically (from current year + 1 down to 2020)
-    const years = useMemo(() => {
-        const currentYear = new Date().getFullYear();
-        const yearsList = [];
-        for (let y = currentYear + 1; y >= 2020; y--) {
-            yearsList.push(y);
-        }
-        return yearsList;
-    }, []);
 
         return (
             <div className="min-h-screen font-sans bg-gradient-to-br from-[#031A2E] to-[#052E4D] relative">
