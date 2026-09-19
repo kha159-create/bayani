@@ -174,36 +174,74 @@ export const restoreFromCloud = async (userId) => {
 };
 
 // تحميل ملف النسخة الاحتياطية
+// مهم: المصدر الأساسي هو الحالة الحالية التي يعرضها التطبيق والمحفوظة في localStorage.
+// كان الإصدار السابق يقرأ IndexedDB فقط، لذلك كان يمكن أن يُصدر بيانات قديمة رغم أن التطبيق يعرض بيانات أحدث.
 export const downloadBackup = async () => {
   try {
-    const allData = {};
-    const keys = [
-      'transactions', 'categories', 'cards', 'bankAccounts', 
-      'installments', 'loans', 'investments', 'settings'
-    ];
-    
-    for (const key of keys) {
-      const data = await localforage.getItem(key);
-      if (data) {
-        allData[key] = data;
+    let allData = null;
+
+    // 1) خذ نفس الحالة الحالية التي يعتمد عليها التطبيق.
+    if (typeof window !== 'undefined') {
+      const currentStateKeys = [
+        'financial_dashboard_state',
+        'financial_dashboard_backup_1',
+        'financial_dashboard_backup_2'
+      ];
+
+      for (const key of currentStateKeys) {
+        const raw = window.localStorage.getItem(key);
+        if (!raw) continue;
+
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object' && Array.isArray(parsed.transactions)) {
+            allData = parsed;
+            console.log('💾 تم تجهيز النسخة من الحالة الحالية للتطبيق:', key);
+            break;
+          }
+        } catch (parseError) {
+          console.warn('⚠️ تعذر قراءة نسخة localStorage:', key, parseError);
+        }
       }
     }
-    
+
+    // 2) توافق رجعي فقط: لو لم نجد الحالة الحالية، ارجع إلى IndexedDB القديم.
+    if (!allData) {
+      allData = {};
+      const keys = [
+        'transactions', 'categories', 'cards', 'bankAccounts',
+        'installments', 'loans', 'investments', 'settings',
+        'debtsToMe', 'debtsFromMe', 'customTransactionTypes', 'customPaymentMethods'
+      ];
+
+      for (const key of keys) {
+        const data = await localforage.getItem(key);
+        if (data !== null && data !== undefined) {
+          allData[key] = data;
+        }
+      }
+
+      console.warn('⚠️ لم تُوجد حالة localStorage الحالية؛ تم استخدام IndexedDB كخيار احتياطي.');
+    }
+
     const backupData = {
       ...allData,
       backupTimestamp: new Date().toISOString(),
-      version: '1.0'
+      version: '1.1',
+      backupSource: 'current-app-state'
     };
-    
+
     const dataStr = JSON.stringify(backupData, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    
+
     const link = document.createElement('a');
     link.href = URL.createObjectURL(dataBlob);
     link.download = `masrof-backup-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
-    
-    console.log('💾 تم تحميل ملف النسخة الاحتياطية');
+
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+
+    console.log('💾 تم تحميل ملف النسخة الاحتياطية من البيانات الحالية');
     return true;
   } catch (error) {
     console.error('❌ خطأ في تحميل النسخة الاحتياطية:', error);
