@@ -2,6 +2,7 @@
 import localforage from 'localforage';
 import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { config } from '../../config';
 
 // إعداد Firebase عبر متغيرات البيئة
@@ -174,61 +175,133 @@ export const restoreFromCloud = async (userId) => {
 };
 
 // تحميل ملف النسخة الاحتياطية
-// مهم: المصدر الأساسي هو الحالة الحالية التي يعرضها التطبيق والمحفوظة في localStorage.
-// كان الإصدار السابق يقرأ IndexedDB فقط، لذلك كان يمكن أن يُصدر بيانات قديمة رغم أن التطبيق يعرض بيانات أحدث.
+// Recovery-first export: يجمع البيانات من كل المصادر المتاحة بدون الكتابة فوق أي مصدر.
+// السبب: الإصدارات القديمة من بياني استخدمت localStorage وIndexedDB وFirebase في أوقات مختلفة.
 export const downloadBackup = async () => {
   try {
-    let allData = null;
+    const candidates = [];
 
-    // 1) خذ نفس الحالة الحالية التي يعتمد عليها التطبيق.
+    const asState = (value) => {
+      if (!value || typeof value !== 'object') return null;
+      // بعض النسخ القديمة خزّنت الحالة داخل financialData
+      if (value.financialData && typeof value.financialData === 'object') {
+        return value.financialData;
+      }
+      return value;
+    };
+
+    const addCandidate = (source, raw) => {
+      const state = asState(raw);
+      if (!state || !Array.isArray(state.transactions)) return;
+
+      const dates = state.transactions
+        .map(t => t && t.date)
+        .filter(Boolean)
+        .sort();
+
+      candidates.push({
+        source,
+        state,
+        count: state.transactions.length,
+        minDate: dates[0] || null,
+        maxDate: dates[dates.length - 1] || null,
+        lastUpdated: raw?.lastUpdated || raw?.backupTimestamp || state?.lastUpdated || null
+      });
+    };
+
+    // 1) كل نسخ localStorage القديمة والجديدة، وليس أول مفتاح فقط.
     if (typeof window !== 'undefined') {
-      const currentStateKeys = [
-        'financial_dashboard_state',
-        'financial_dashboard_backup_1',
-        'financial_dashboard_backup_2'
-      ];
-
-      for (const key of currentStateKeys) {
+      for (let i = 0; i < window.localStorage.length; i++) {
+        const key = window.localStorage.key(i);
+        if (!key || !key.startsWith('financial_dashboard_')) continue;
         const raw = window.localStorage.getItem(key);
         if (!raw) continue;
-
         try {
-          const parsed = JSON.parse(raw);
-          if (parsed && typeof parsed === 'object' && Array.isArray(parsed.transactions)) {
-            allData = parsed;
-            console.log('💾 تم تجهيز النسخة من الحالة الحالية للتطبيق:', key);
-            break;
+          addCandidate(`localStorage:${key}`, JSON.parse(raw));
+        } catch (e) {
+          console.warn('⚠️ تعذر قراءة نسخة localStorage:', key, e);
+        }
+      }
+    }
+
+    // 2) IndexedDB / localforage legacy snapshot.
+    const legacyKeys = [
+      'transactions', 'categories', 'cards', 'bankAccounts',
+      'installments', 'loans', 'investments', 'settings',
+      'debtsToMe', 'debtsFromMe', 'customTransactionTypes', 'customPaymentMethods'
+    ];
+    const legacyState = {};
+    for (const key of legacyKeys) {
+      const value = await localforage.getItem(key);
+      if (value !== null && value !== undefined) legacyState[key] = value;
+    }
+    addCandidate('indexedDB:legacy', legacyState);
+
+    // 3) Firebase user document + cloud backups for the currently signed-in user.
+    try {
+      const auth = getAuth(app);
+      const user = auth.currentUser;
+      if (user) {
+        const userSnap = await getDoc(doc(db, 'users', user.uid));
+        if (userSnap.exists()) {
+          addCandidate('firebase:users/current', userSnap.data());
+        }
+
+        const backupsSnap = await getDocs(collection(db, 'backups'));
+        backupsSnap.forEach(item => {
+          const backup = item.data();
+          if (backup?.userId === user.uid) {
+            addCandidate(`firebase:backup:${item.id}`, backup);
           }
-        } catch (parseError) {
-          console.warn('⚠️ تعذر قراءة نسخة localStorage:', key, parseError);
+        });
+      }
+    } catch (cloudError) {
+      // النسخ المحلي يجب أن ينجح حتى لو Firebase غير متاح.
+      console.warn('⚠️ تعذر فحص مصادر Firebase أثناء النسخ الاحتياطي:', cloudError);
+    }
+
+    if (candidates.length === 0) {
+      throw new Error('لم يتم العثور على أي مصدر بيانات صالح');
+    }
+
+    // استخدم أغنى snapshot كقاعدة للإعدادات/الحسابات.
+    candidates.sort((a, b) => {
+      if (b.count !== a.count) return b.count - a.count;
+      return String(b.maxDate || '').localeCompare(String(a.maxDate || ''));
+    });
+    const baseState = { ...candidates[0].state };
+
+    // اجمع كل الحركات الفريدة من جميع المصادر حتى لا تضيع فترة موجودة في مصدر آخر.
+    const byId = new Map();
+    for (const candidate of candidates) {
+      for (const tx of candidate.state.transactions || []) {
+        if (!tx || !tx.id) continue;
+        const existing = byId.get(tx.id);
+        if (!existing || Object.keys(tx).length > Object.keys(existing).length) {
+          byId.set(tx.id, tx);
         }
       }
     }
 
-    // 2) توافق رجعي فقط: لو لم نجد الحالة الحالية، ارجع إلى IndexedDB القديم.
-    if (!allData) {
-      allData = {};
-      const keys = [
-        'transactions', 'categories', 'cards', 'bankAccounts',
-        'installments', 'loans', 'investments', 'settings',
-        'debtsToMe', 'debtsFromMe', 'customTransactionTypes', 'customPaymentMethods'
-      ];
-
-      for (const key of keys) {
-        const data = await localforage.getItem(key);
-        if (data !== null && data !== undefined) {
-          allData[key] = data;
-        }
-      }
-
-      console.warn('⚠️ لم تُوجد حالة localStorage الحالية؛ تم استخدام IndexedDB كخيار احتياطي.');
-    }
+    const mergedTransactions = Array.from(byId.values()).sort((a, b) => {
+      const dateCmp = String(b.date || '').localeCompare(String(a.date || ''));
+      if (dateCmp !== 0) return dateCmp;
+      return String(b.id || '').localeCompare(String(a.id || ''));
+    });
 
     const backupData = {
-      ...allData,
+      ...baseState,
+      transactions: mergedTransactions,
       backupTimestamp: new Date().toISOString(),
-      version: '1.1',
-      backupSource: 'current-app-state'
+      version: '1.2',
+      backupSource: 'multi-source-recovery',
+      recoverySources: candidates.map(c => ({
+        source: c.source,
+        transactions: c.count,
+        minDate: c.minDate,
+        maxDate: c.maxDate,
+        lastUpdated: c.lastUpdated
+      }))
     };
 
     const dataStr = JSON.stringify(backupData, null, 2);
@@ -238,10 +311,11 @@ export const downloadBackup = async () => {
     link.href = URL.createObjectURL(dataBlob);
     link.download = `masrof-backup-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
-
     setTimeout(() => URL.revokeObjectURL(link.href), 1000);
 
-    console.log('💾 تم تحميل ملف النسخة الاحتياطية من البيانات الحالية');
+    console.log(
+      `💾 تم إنشاء نسخة استرداد: ${mergedTransactions.length} حركة من ${candidates.length} مصادر`
+    );
     return true;
   } catch (error) {
     console.error('❌ خطأ في تحميل النسخة الاحتياطية:', error);
